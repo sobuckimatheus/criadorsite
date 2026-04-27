@@ -130,7 +130,7 @@ Todos os links de WhatsApp devem usar exatamente: ${whatsappLink}`
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 8192,
+    max_tokens: 16000,
     system: [
       {
         type: 'text',
@@ -143,6 +143,10 @@ Todos os links de WhatsApp devem usar exatamente: ${whatsappLink}`
 
   const content = message.content[0]
   if (content.type !== 'text') throw new Error('Resposta inesperada da IA')
+
+  if (message.stop_reason === 'max_tokens') {
+    console.warn('HTML gerado foi cortado pelo limite de tokens')
+  }
 
   return content.text
     .replace(/^```html\s*/i, '')
