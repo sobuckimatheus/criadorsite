@@ -10,7 +10,7 @@ type FilterStatus = 'ALL' | 'DRAFT' | 'GENERATING' | 'PREVIEW' | 'PUBLISHED' | '
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { status?: string }
+  searchParams: Promise<{ status?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -19,7 +19,8 @@ export default async function AdminPage({
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
   if (dbUser?.role !== 'ADMIN') redirect('/dashboard')
 
-  const filterStatus = (searchParams.status as FilterStatus) || 'ALL'
+  const { status } = await searchParams
+  const filterStatus = (status as FilterStatus) || 'ALL'
 
   const sites = await prisma.site.findMany({
     where: filterStatus !== 'ALL' ? { status: filterStatus as any } : undefined,

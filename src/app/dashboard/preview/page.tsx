@@ -8,7 +8,7 @@ import { PreviewContent } from '@/components/PreviewContent'
 export default async function PreviewPage({
   searchParams,
 }: {
-  searchParams: { siteId?: string }
+  searchParams: Promise<{ siteId?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -17,9 +17,11 @@ export default async function PreviewPage({
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
   const isAdmin = dbUser?.role === 'ADMIN'
 
+  const { siteId } = await searchParams
+
   // Admin can preview any site via ?siteId=
-  const site = isAdmin && searchParams.siteId
-    ? await prisma.site.findUnique({ where: { id: searchParams.siteId } })
+  const site = isAdmin && siteId
+    ? await prisma.site.findUnique({ where: { id: siteId } })
     : await prisma.site.findUnique({ where: { userId: user.id } })
 
   if (!site) redirect(isAdmin ? '/admin' : '/dashboard/criar')
