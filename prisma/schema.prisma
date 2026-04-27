@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MENTORADO
+}
+
+enum SiteStatus {
+  DRAFT
+  GENERATING
+  PREVIEW
+  PUBLISHED
+  ERROR
+}
+
+enum Segmento {
+  CLINICA
+  ESCRITORIO
+  OFICINA
+  CONSULTORIA
+  OUTRO
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  role      Role     @default(MENTORADO)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site      Site?
+
+  @@map("users")
+}
+
+model Site {
+  id          String     @id @default(uuid())
+  userId      String     @unique
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Identidade
+  nomeNegocio String
+  segmento    Segmento
+  cidade      String
+  bairro      String
+  corPaleta   String
+  logoUrl     String?
+
+  // Serviços
+  servico1Nome     String
+  servico1Desc     String
+  servico2Nome     String?
+  servico2Desc     String?
+  servico3Nome     String?
+  servico3Desc     String?
+  servicoDestaque  String
+  resultadoCliente String
+
+  // Público
+  clienteIdeal String
+  dorPrincipal String
+
+  // Credibilidade
+  anosNoMercado  Int
+  totalClientes  Int?
+  certificados   String?
+  depoimentos    Depoimento[]
+
+  // Contato
+  whatsapp           String
+  whatsappMensagem   String
+  instagram          String?
+  horarioAtendimento String
+
+  // Site gerado
+  slug            String?    @unique
+  subdomain       String?    @unique
+  htmlGerado      String?    @db.Text
+  vercelProjectId String?
+  vercelUrl       String?
+  status          SiteStatus @default(DRAFT)
+  geracoesCount   Int        @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sites")
+}
+
+model Depoimento {
+  id          String @id @default(uuid())
+  siteId      String
+  site        Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  nomeCliente String
+  texto       String
+
+  @@map("depoimentos")
+}
