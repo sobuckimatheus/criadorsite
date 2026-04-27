@@ -56,6 +56,16 @@ export async function deployToVercel(
   const projectId: string = deploy.projectId
   const deploymentUrl = `https://${deploy.url}`
 
+  // Disable deployment protection so the site is publicly accessible
+  await fetch(`https://api.vercel.com/v9/projects/${projectId}${teamQuery}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ ssoProtection: null, passwordProtection: null }),
+  })
+
   let customDomain: string | null = null
 
   if (mentorDomain) {
