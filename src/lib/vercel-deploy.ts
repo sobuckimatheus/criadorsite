@@ -31,21 +31,20 @@ export async function deployToVercel(
     body: htmlContent,
   })
 
-  const deployBody: Record<string, unknown> = {
-    name: projectName,
-    files: [{ file: 'index.html', sha, size }],
-    target: 'production',
-    projectSettings: { framework: null, outputDirectory: '.' },
-  }
-  if (teamId) deployBody.teamId = teamId
+  const teamQuery = teamId ? `?teamId=${teamId}` : ''
 
-  const deployRes = await fetch('https://api.vercel.com/v13/deployments', {
+  const deployRes = await fetch(`https://api.vercel.com/v13/deployments${teamQuery}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(deployBody),
+    body: JSON.stringify({
+      name: projectName,
+      files: [{ file: 'index.html', sha, size }],
+      target: 'production',
+      projectSettings: { framework: null, outputDirectory: '.' },
+    }),
   })
 
   if (!deployRes.ok) {
@@ -58,7 +57,7 @@ export async function deployToVercel(
 
   const customDomain = `${projectName}.${mentorDomain}`
   const domainRes = await fetch(
-    `https://api.vercel.com/v10/projects/${projectId}/domains`,
+    `https://api.vercel.com/v10/projects/${projectId}/domains${teamQuery}`,
     {
       method: 'POST',
       headers: {
