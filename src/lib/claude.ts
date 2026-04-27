@@ -67,7 +67,9 @@ REGRAS ABSOLUTAS:
 - Sem markdown, sem blocos de código (sem \`\`\`html), sem explicações
 - CSS embutido em <style> dentro do <head>
 - JavaScript mínimo inline em <script> no final do body se necessário
-- Sem frameworks externos — apenas Google Fonts via @import no CSS`
+- Sem frameworks externos — apenas Google Fonts via @import no CSS
+- CRÍTICO: Gere TODAS as seções antes de encerrar. Não pare no meio. O site deve estar 100% completo com </html> no final.
+- Use CSS conciso com variáveis CSS (:root) para não desperdiçar tokens em repetição`
 
   const userPrompt = `Gere um site completo e profissional de alta conversão para o seguinte negócio local:
 
@@ -126,7 +128,9 @@ REQUISITOS TÉCNICOS:
 - Suave scroll behavior: html { scroll-behavior: smooth }
 - Cores de texto com contraste adequado para acessibilidade
 
-Todos os links de WhatsApp devem usar exatamente: ${whatsappLink}`
+Todos os links de WhatsApp devem usar exatamente: ${whatsappLink}
+
+IMPORTANTE: Certifique-se de gerar TODAS as 7 seções acima e fechar corretamente com </body></html>. Priorize completude sobre detalhamento de CSS.`
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
@@ -144,8 +148,9 @@ Todos os links de WhatsApp devem usar exatamente: ${whatsappLink}`
   const content = message.content[0]
   if (content.type !== 'text') throw new Error('Resposta inesperada da IA')
 
+  console.log(`stop_reason: ${message.stop_reason} | tokens usados: ${message.usage.output_tokens} | tamanho HTML: ${content.text.length} chars`)
   if (message.stop_reason === 'max_tokens') {
-    console.warn('HTML gerado foi cortado pelo limite de tokens')
+    console.warn('HTML gerado foi cortado pelo limite de tokens — aumente max_tokens')
   }
 
   return content.text
