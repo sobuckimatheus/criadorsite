@@ -31,9 +31,12 @@ type SiteData = {
 }
 
 function getPaleta(corPaleta: string) {
-  const found = PALETAS.find((p) => p.id === corPaleta)
-  if (found) return found
-  return { primary: corPaleta, secondary: corPaleta, light: '#FFFFFF', dark: '#111827' }
+  return PALETAS.find((p) => p.id === corPaleta) ?? {
+    primary: corPaleta,
+    secondary: corPaleta,
+    light: '#FFFFFF',
+    dark: '#111827',
+  }
 }
 
 export async function generateSiteHTML(data: SiteData): Promise<string> {
@@ -98,9 +101,9 @@ ${data.instagram ? `- Instagram: @${data.instagram.replace('@', '')}` : ''}
 
 IDENTIDADE VISUAL:
 - Cor primária: ${paleta.primary}
-- Cor secundária: ${'secondary' in paleta ? paleta.secondary : paleta.primary}
-- Cor de fundo clara: ${'light' in paleta ? paleta.light : '#FFFFFF'}
-- Cor escura/texto: ${'dark' in paleta ? paleta.dark : '#111827'}
+- Cor secundária: ${paleta.secondary}
+- Cor de fundo clara: ${paleta.light}
+- Cor escura/texto: ${paleta.dark}
 ${data.logoUrl ? `- Logo: ${data.logoUrl}` : ''}
 
 ESTRUTURA OBRIGATÓRIA (nesta ordem):
