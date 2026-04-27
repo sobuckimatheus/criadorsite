@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { AlertCircle } from 'lucide-react'
 
-export default function AuthErroPage({
+export default async function AuthErroPage({
   searchParams,
 }: {
-  searchParams: { message?: string }
+  searchParams: Promise<{ message?: string }>
 }) {
-  const message = searchParams.message || 'Ocorreu um erro de autenticação.'
+  const { message: rawMessage } = await searchParams
+  const message = rawMessage || 'Ocorreu um erro de autenticação.'
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
