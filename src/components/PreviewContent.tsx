@@ -168,7 +168,7 @@ export function PreviewContent({
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-center px-4">
             <Loader2 className="w-10 h-10 text-blue-400 animate-spin mb-4" />
             <p className="text-white font-medium text-lg">Gerando seu site com IA...</p>
-            <p className="text-gray-400 text-sm mt-1">Isso pode levar até 30 segundos</p>
+            <p className="text-gray-400 text-sm mt-1">Isso pode levar até 3 minutos</p>
           </div>
         ) : serverStatus === 'ERROR' ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-center px-4">
