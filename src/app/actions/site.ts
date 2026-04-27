@@ -150,7 +150,8 @@ export async function publishSite(siteId: string): Promise<Result<{ url: string 
     revalidatePath('/dashboard/preview')
     revalidatePath('/admin')
 
-    return { success: true, data: { url: result.customDomain } }
+    const publicUrl = result.customDomain ?? result.deploymentUrl
+    return { success: true, data: { url: publicUrl } }
   } catch (e) {
     console.error('publishSite error:', e)
     await prisma.site.update({ where: { id: siteId }, data: { status: 'ERROR' } })

@@ -3,7 +3,7 @@ import crypto from 'crypto'
 type DeployResult = {
   projectId: string
   deploymentUrl: string
-  customDomain: string
+  customDomain: string | null
 }
 
 export async function deployToVercel(
@@ -12,7 +12,7 @@ export async function deployToVercel(
 ): Promise<DeployResult> {
   const token = process.env.VERCEL_TOKEN!
   const teamId = process.env.VERCEL_TEAM_ID || undefined
-  const mentorDomain = process.env.MENTOR_DOMAIN!
+  const mentorDomain = process.env.MENTOR_DOMAIN || undefined
 
   const sha = crypto.createHash('sha1').update(htmlContent).digest('hex')
   const size = Buffer.byteLength(htmlContent, 'utf8')
@@ -54,28 +54,34 @@ export async function deployToVercel(
 
   const deploy = await deployRes.json()
   const projectId: string = deploy.projectId
+  const deploymentUrl = `https://${deploy.url}`
 
-  const customDomain = `${projectName}.${mentorDomain}`
-  const domainRes = await fetch(
-    `https://api.vercel.com/v10/projects/${projectId}/domains${teamQuery}`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name: customDomain }),
+  let customDomain: string | null = null
+
+  if (mentorDomain) {
+    const domainName = `${projectName}.${mentorDomain}`
+    const domainRes = await fetch(
+      `https://api.vercel.com/v10/projects/${projectId}/domains${teamQuery}`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: domainName }),
+      }
+    )
+    if (domainRes.ok || domainRes.status === 409) {
+      customDomain = `https://${domainName}`
+    } else {
+      console.warn('Aviso: domínio customizado não configurado', await domainRes.json())
     }
-  )
-
-  if (!domainRes.ok && domainRes.status !== 409) {
-    console.warn('Aviso: domínio customizado não configurado', await domainRes.json())
   }
 
   return {
     projectId,
-    deploymentUrl: `https://${deploy.url}`,
-    customDomain: `https://${customDomain}`,
+    deploymentUrl,
+    customDomain,
   }
 }
 
