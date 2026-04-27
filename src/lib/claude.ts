@@ -120,7 +120,7 @@ ESTRUTURA OBRIGATÓRIA (nesta ordem):
 REQUISITOS TÉCNICOS:
 - Mobile-first responsivo (breakpoint principal: 768px)
 - Google Font 'Inter' via @import no CSS
-- Botão WhatsApp flutuante fixo (canto inferior direito) com ícone ✉ ou 📱
+- Botão WhatsApp flutuante fixo (canto inferior direito): position:fixed; bottom:24px; right:24px; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; com ícone 💬
 - Efeito hover nos cards de serviços
 - Gradiente suave no hero usando as cores da paleta
 - Meta tags: title, description, viewport, og:title, og:description, og:type
