@@ -14,6 +14,8 @@ import {
   Copy,
   Check,
   Pencil,
+  Monitor,
+  Smartphone,
 } from 'lucide-react'
 import { generateSite, publishSite } from '@/app/actions/site'
 import { Button } from '@/components/ui/button'
@@ -39,6 +41,7 @@ export function PreviewContent({
   const [isPendingGenerate, startGenerateTransition] = useTransition()
   const [isPendingPublish, startPublishTransition] = useTransition()
   const [copied, setCopied] = useState(false)
+  const [viewport, setViewport] = useState<'desktop' | 'mobile'>('desktop')
   const autoTriggered = useRef(false)
 
   const isGenerating = isPendingGenerate || serverStatus === 'GENERATING'
@@ -105,6 +108,26 @@ export function PreviewContent({
             <p className="text-gray-400 text-xs">{geracoesCount}/3 gerações usadas</p>
           </div>
         </div>
+
+        {/* Viewport toggle */}
+        {htmlGerado && !isGenerating && (
+          <div className="hidden sm:flex items-center bg-gray-700 rounded-lg p-0.5 gap-0.5">
+            <button
+              onClick={() => setViewport('desktop')}
+              title="Desktop"
+              className={`p-1.5 rounded-md transition-colors ${viewport === 'desktop' ? 'bg-gray-500 text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              <Monitor className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewport('mobile')}
+              title="Mobile"
+              className={`p-1.5 rounded-md transition-colors ${viewport === 'mobile' ? 'bg-gray-500 text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              <Smartphone className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center gap-2 flex-shrink-0">
           {serverStatus === 'PUBLISHED' && publishedUrl && (
@@ -193,12 +216,18 @@ export function PreviewContent({
             )}
           </div>
         ) : htmlGerado ? (
-          <iframe
-            srcDoc={htmlGerado}
-            className="w-full h-full border-0"
-            title="Preview do site"
-            sandbox="allow-scripts allow-same-origin"
-          />
+          <div className={`h-full flex flex-col items-center transition-all duration-300 ${viewport === 'mobile' ? 'bg-gray-800 py-4' : ''}`}>
+            <iframe
+              srcDoc={htmlGerado}
+              className={`border-0 transition-all duration-300 ${
+                viewport === 'mobile'
+                  ? 'w-[390px] flex-1 rounded-xl shadow-2xl'
+                  : 'w-full h-full'
+              }`}
+              title="Preview do site"
+              sandbox="allow-scripts allow-same-origin"
+            />
+          </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
             <p className="text-gray-500">Preparando geração...</p>
