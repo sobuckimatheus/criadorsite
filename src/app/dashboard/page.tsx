@@ -11,13 +11,18 @@ import {
   Plus,
   Eye,
   AlertTriangle,
+  FlaskConical,
 } from 'lucide-react'
 import { CopyButton } from '@/components/CopyButton'
+import { resetSiteForTesting } from '@/app/actions/site'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
+  const isAdmin = dbUser?.role === 'ADMIN'
 
   const site = await prisma.site.findUnique({
     where: { userId: user.id },
@@ -100,6 +105,19 @@ export default async function DashboardPage() {
                     Editar formulário
                   </Link>
                 </Button>
+
+                {isAdmin && (
+                  <form action={async () => {
+                    'use server'
+                    await resetSiteForTesting(site.id)
+                    redirect('/dashboard/criar')
+                  }}>
+                    <Button variant="outline" size="sm" type="submit" className="border-orange-200 text-orange-600 hover:bg-orange-50">
+                      <FlaskConical />
+                      Novo teste
+                    </Button>
+                  </form>
+                )}
 
                 {site.status !== 'DRAFT' && (
                   <Button asChild size="sm">

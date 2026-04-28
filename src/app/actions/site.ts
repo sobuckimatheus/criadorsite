@@ -159,6 +159,20 @@ export async function publishSite(siteId: string): Promise<Result<{ url: string 
   }
 }
 
+export async function resetSiteForTesting(siteId: string): Promise<void> {
+  const user = await getAuthUser()
+  if (!user) return
+
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
+  if (dbUser?.role !== 'ADMIN') return
+
+  // Delete only the DB record — Vercel project stays live
+  await prisma.depoimento.deleteMany({ where: { siteId } })
+  await prisma.site.delete({ where: { id: siteId } })
+
+  revalidatePath('/dashboard')
+}
+
 export async function removeSite(siteId: string): Promise<Result> {
   const user = await getAuthUser()
   if (!user) return { success: false, error: 'Não autorizado' }
