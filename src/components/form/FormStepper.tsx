@@ -23,7 +23,7 @@ const STEPS = [
   { label: 'Contato', component: StepContato },
 ]
 
-export function FormStepper({ initialData }: { initialData: Partial<FormData> | null }) {
+export function FormStepper({ initialData, siteId }: { initialData: Partial<FormData> | null; siteId?: string }) {
   const [step, setStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const router = useRouter()
@@ -41,7 +41,7 @@ export function FormStepper({ initialData }: { initialData: Partial<FormData> | 
 
   async function handleSubmit(data: FormData) {
     setSaving(true)
-    const result = await saveSite(data)
+    const result = await saveSite(data, siteId)
     setSaving(false)
 
     if (!result.success) {
@@ -50,7 +50,7 @@ export function FormStepper({ initialData }: { initialData: Partial<FormData> | 
     }
 
     toast.success('Dados salvos! Gerando seu site...')
-    router.push('/dashboard/preview')
+    router.push(`/dashboard/preview?siteId=${result.data.id}`)
   }
 
   const CurrentStep = STEPS[step - 1].component

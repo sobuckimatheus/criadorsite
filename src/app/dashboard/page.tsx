@@ -11,10 +11,8 @@ import {
   Plus,
   Eye,
   AlertTriangle,
-  FlaskConical,
 } from 'lucide-react'
 import { CopyButton } from '@/components/CopyButton'
-import { resetSiteForTesting } from '@/app/actions/site'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -24,7 +22,119 @@ export default async function DashboardPage() {
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
   const isAdmin = dbUser?.role === 'ADMIN'
 
-  const site = await prisma.site.findUnique({
+  if (isAdmin) {
+    const sites = await prisma.site.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return (
+      <div className="p-8 max-w-3xl">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Meus Sites (Admin)</h1>
+            <p className="text-gray-500 text-sm mt-1">{sites.length} site{sites.length !== 1 ? 's' : ''} criado{sites.length !== 1 ? 's' : ''}</p>
+          </div>
+          <Button asChild>
+            <Link href="/dashboard/criar">
+              <Plus />
+              Criar novo site
+            </Link>
+          </Button>
+        </div>
+
+        {sites.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <p className="text-gray-500 text-sm mb-4">Nenhum site criado ainda.</p>
+                <Button asChild>
+                  <Link href="/dashboard/criar">
+                    <Plus />
+                    Criar primeiro site
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {sites.map((site) => (
+              <Card key={site.id}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">{site.nomeNegocio}</h2>
+                      <p className="text-sm text-gray-500">{site.cidade}, {site.bairro}</p>
+                    </div>
+                    <StatusBadge status={site.status} />
+                  </div>
+
+                  {site.status === 'PUBLISHED' && (site.subdomain || site.vercelUrl) && (
+                    <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-100 rounded-lg mb-4">
+                      <ExternalLink className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      <a
+                        href={site.subdomain || site.vercelUrl!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-green-700 hover:underline font-medium flex-1 truncate"
+                      >
+                        {site.subdomain || site.vercelUrl}
+                      </a>
+                      <CopyButton text={site.subdomain || site.vercelUrl!} />
+                    </div>
+                  )}
+
+                  {site.status === 'ERROR' && (
+                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded-lg mb-4">
+                      <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                      <p className="text-sm text-red-600">Erro na última operação. Tente republicar.</p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 text-xs text-gray-400 mb-5">
+                    <span>Criado em {new Date(site.createdAt).toLocaleDateString('pt-BR')}</span>
+                    <span>·</span>
+                    <span>{site.geracoesCount}/3 gerações</span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/dashboard/criar?siteId=${site.id}`}>
+                        <Pencil />
+                        Editar
+                      </Link>
+                    </Button>
+
+                    {site.status !== 'DRAFT' && (
+                      <Button asChild size="sm">
+                        <Link href={`/dashboard/preview?siteId=${site.id}`}>
+                          <Eye />
+                          {site.status === 'PUBLISHED' ? 'Ver preview' : 'Preview / Publicar'}
+                        </Link>
+                      </Button>
+                    )}
+
+                    {site.status === 'DRAFT' && (
+                      <Button asChild size="sm">
+                        <Link href={`/dashboard/preview?siteId=${site.id}`}>
+                          <Plus />
+                          Gerar site
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Regular user — single site
+  const site = await prisma.site.findFirst({
     where: { userId: user.id },
   })
 
@@ -105,19 +215,6 @@ export default async function DashboardPage() {
                     Editar formulário
                   </Link>
                 </Button>
-
-                {isAdmin && (
-                  <form action={async () => {
-                    'use server'
-                    await resetSiteForTesting(site.id)
-                    redirect('/dashboard/criar')
-                  }}>
-                    <Button variant="outline" size="sm" type="submit" className="border-orange-200 text-orange-600 hover:bg-orange-50">
-                      <FlaskConical />
-                      Novo teste
-                    </Button>
-                  </form>
-                )}
 
                 {site.status !== 'DRAFT' && (
                   <Button asChild size="sm">

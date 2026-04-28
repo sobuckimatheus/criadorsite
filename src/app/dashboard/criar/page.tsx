@@ -4,15 +4,26 @@ import { prisma } from '@/lib/prisma'
 import { FormStepper } from '@/components/form/FormStepper'
 import type { FormData } from '@/types'
 
-export default async function CriarPage() {
+export default async function CriarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ siteId?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const site = await prisma.site.findUnique({
-    where: { userId: user.id },
-    include: { depoimentos: true },
-  })
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
+  const isAdmin = dbUser?.role === 'ADMIN'
+
+  const { siteId } = await searchParams
+
+  // Admin editing a specific site, or regular user's own site
+  const site = siteId
+    ? await prisma.site.findUnique({ where: { id: siteId }, include: { depoimentos: true } })
+    : isAdmin
+      ? null
+      : await prisma.site.findFirst({ where: { userId: user.id }, include: { depoimentos: true } })
 
   const initialData: Partial<FormData> | null = site
     ? {
@@ -51,13 +62,13 @@ export default async function CriarPage() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">
-            {site ? 'Editar site' : 'Criar meu site'}
+            {site ? 'Editar site' : 'Criar novo site'}
           </h1>
           <p className="text-gray-500 mt-1 text-sm">
-            Preencha as informações do seu negócio para gerar seu site com IA
+            Preencha as informações do negócio para gerar o site com IA
           </p>
         </div>
-        <FormStepper initialData={initialData} />
+        <FormStepper initialData={initialData} siteId={site?.id} />
       </div>
     </div>
   )

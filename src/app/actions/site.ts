@@ -30,7 +30,7 @@ async function ensureUniqueSlug(base: string, excludeId?: string): Promise<strin
   return slug
 }
 
-export async function saveSite(data: unknown): Promise<Result<{ id: string }>> {
+export async function saveSite(data: unknown, siteId?: string): Promise<Result<{ id: string }>> {
   const user = await getAuthUser()
   if (!user) return { success: false, error: 'Não autorizado' }
 
@@ -38,32 +38,41 @@ export async function saveSite(data: unknown): Promise<Result<{ id: string }>> {
   if (!parsed.success) return { success: false, error: 'Dados do formulário inválidos' }
 
   const { depoimentos, ...siteFields } = parsed.data
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
+  const isAdmin = dbUser?.role === 'ADMIN'
 
   try {
-    const existing = await prisma.site.findUnique({ where: { userId: user.id } })
-
-    if (existing) {
-      await prisma.depoimento.deleteMany({ where: { siteId: existing.id } })
-      await prisma.site.update({
-        where: { id: existing.id },
-        data: {
-          ...siteFields,
-          status: 'DRAFT',
-          htmlGerado: null,
-          geracoesCount: 0,
-          depoimentos: { create: depoimentos },
-        },
-      })
-      revalidatePath('/dashboard')
-      return { success: true, data: { id: existing.id } }
+    // Edit existing site (by siteId)
+    if (siteId) {
+      const existing = await prisma.site.findUnique({ where: { id: siteId } })
+      if (existing) {
+        await prisma.depoimento.deleteMany({ where: { siteId: existing.id } })
+        await prisma.site.update({
+          where: { id: existing.id },
+          data: { ...siteFields, status: 'DRAFT', htmlGerado: null, geracoesCount: 0, depoimentos: { create: depoimentos } },
+        })
+        revalidatePath('/dashboard')
+        return { success: true, data: { id: existing.id } }
+      }
     }
 
+    // Regular user: upsert by userId
+    if (!isAdmin) {
+      const existing = await prisma.site.findFirst({ where: { userId: user.id } })
+      if (existing) {
+        await prisma.depoimento.deleteMany({ where: { siteId: existing.id } })
+        await prisma.site.update({
+          where: { id: existing.id },
+          data: { ...siteFields, status: 'DRAFT', htmlGerado: null, geracoesCount: 0, depoimentos: { create: depoimentos } },
+        })
+        revalidatePath('/dashboard')
+        return { success: true, data: { id: existing.id } }
+      }
+    }
+
+    // Admin without siteId, or new regular user: create
     const site = await prisma.site.create({
-      data: {
-        ...siteFields,
-        userId: user.id,
-        depoimentos: { create: depoimentos },
-      },
+      data: { ...siteFields, userId: user.id, depoimentos: { create: depoimentos } },
     })
 
     revalidatePath('/dashboard')
