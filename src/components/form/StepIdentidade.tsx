@@ -8,13 +8,6 @@ import { Label } from '@/components/ui/label'
 import { type FormData, PALETAS } from '@/types'
 import { cn } from '@/lib/utils'
 
-const SEGMENTOS = [
-  { value: 'CLINICA', label: 'Clínica' },
-  { value: 'ESCRITORIO', label: 'Escritório' },
-  { value: 'OFICINA', label: 'Oficina' },
-  { value: 'CONSULTORIA', label: 'Consultoria' },
-  { value: 'OUTRO', label: 'Outro' },
-]
 
 function hexToHsl(hex: string): [number, number, number] {
   const r = parseInt(hex.slice(1, 3), 16) / 255
@@ -154,17 +147,13 @@ export default function StepIdentidade() {
       </div>
 
       <div>
-        <Label htmlFor="segmento">Segmento *</Label>
-        <select
+        <Label htmlFor="segmento">Segmento / Nicho *</Label>
+        <Input
           id="segmento"
           {...register('segmento')}
-          className="mt-1.5 flex h-9 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          <option value="">Selecione...</option>
-          {SEGMENTOS.map((s) => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
+          className="mt-1.5"
+          placeholder="Ex: Estética, Advocacia, Mecânica, Nutrição..."
+        />
         {errors.segmento && <p className="text-xs text-red-500 mt-1">{errors.segmento.message}</p>}
       </div>
 

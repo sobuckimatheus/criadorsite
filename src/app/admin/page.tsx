@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { StatusBadge } from '@/components/StatusBadge'
-import { SEGMENTO_LABELS } from '@/types'
 import { AdminSiteActions } from '@/components/AdminSiteActions'
 
 type FilterStatus = 'ALL' | 'DRAFT' | 'GENERATING' | 'PREVIEW' | 'PUBLISHED' | 'ERROR'
@@ -110,7 +109,7 @@ export default async function AdminPage({
                   <p className="text-gray-400 text-xs">{site.user.email}</p>
                 </td>
                 <td className="px-5 py-4 text-gray-600">
-                  {SEGMENTO_LABELS[site.segmento] ?? site.segmento}
+                  {site.segmento}
                 </td>
                 <td className="px-5 py-4">
                   <StatusBadge status={site.status} />

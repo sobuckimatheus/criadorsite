@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const step1Schema = z.object({
   nomeNegocio: z.string().min(2, 'Nome obrigatório'),
-  segmento: z.enum(['CLINICA', 'ESCRITORIO', 'OFICINA', 'CONSULTORIA', 'OUTRO']),
+  segmento: z.string().min(2, 'Segmento obrigatório'),
   cidade: z.string().min(2, 'Cidade obrigatória'),
   bairro: z.string().min(2, 'Bairro obrigatório'),
   corPaleta: z.string().min(1, 'Selecione uma paleta'),
@@ -137,13 +137,6 @@ export const PALETAS = [
   },
 ]
 
-export const SEGMENTO_LABELS: Record<string, string> = {
-  CLINICA: 'Clínica',
-  ESCRITORIO: 'Escritório',
-  OFICINA: 'Oficina',
-  CONSULTORIA: 'Consultoria',
-  OUTRO: 'Outro',
-}
 
 export const STATUS_LABELS: Record<string, string> = {
   DRAFT: 'Rascunho',

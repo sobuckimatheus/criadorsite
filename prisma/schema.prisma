@@ -21,13 +21,6 @@ enum SiteStatus {
   ERROR
 }
 
-enum Segmento {
-  CLINICA
-  ESCRITORIO
-  OFICINA
-  CONSULTORIA
-  OUTRO
-}
 
 model User {
   id        String   @id @default(uuid())
@@ -49,7 +42,7 @@ model Site {
 
   // Identidade
   nomeNegocio String
-  segmento    Segmento
+  segmento    String
   cidade      String
   bairro      String
   corPaleta   String
