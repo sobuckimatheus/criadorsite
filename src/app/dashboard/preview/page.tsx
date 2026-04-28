@@ -22,7 +22,7 @@ export default async function PreviewPage({
   // Admin can preview any site via ?siteId=
   const site = isAdmin && siteId
     ? await prisma.site.findUnique({ where: { id: siteId } })
-    : await prisma.site.findUnique({ where: { userId: user.id } })
+    : await prisma.site.findFirst({ where: { userId: user.id } })
 
   if (!site) redirect(isAdmin ? '/admin' : '/dashboard/criar')
 
