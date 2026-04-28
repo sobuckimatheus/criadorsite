@@ -30,13 +30,59 @@ type SiteData = {
   horarioAtendimento: string
 }
 
-function getPaleta(corPaleta: string) {
-  return PALETAS.find((p) => p.id === corPaleta) ?? {
-    primary: corPaleta,
-    secondary: corPaleta,
-    light: '#FFFFFF',
-    dark: '#111827',
+function hexToHsl(hex: string): [number, number, number] {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b)
+  let h = 0, s = 0
+  const l = (max + min) / 2
+  if (max !== min) {
+    const d = max - min
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break
+      case g: h = ((b - r) / d + 2) / 6; break
+      case b: h = ((r - g) / d + 4) / 6; break
+    }
   }
+  return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)]
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const hNorm = h / 360, sNorm = s / 100, lNorm = l / 100
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1; if (t > 1) t -= 1
+    if (t < 1/6) return p + (q - p) * 6 * t
+    if (t < 1/2) return q
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6
+    return p
+  }
+  let r, g, b
+  if (s === 0) { r = g = b = lNorm } else {
+    const q = lNorm < 0.5 ? lNorm * (1 + sNorm) : lNorm + sNorm - lNorm * sNorm
+    const p = 2 * lNorm - q
+    r = hue2rgb(p, q, hNorm + 1/3); g = hue2rgb(p, q, hNorm); b = hue2rgb(p, q, hNorm - 1/3)
+  }
+  return `#${Math.round(r * 255).toString(16).padStart(2, '0')}${Math.round(g * 255).toString(16).padStart(2, '0')}${Math.round(b * 255).toString(16).padStart(2, '0')}`
+}
+
+function getPaleta(corPaleta: string) {
+  const preset = PALETAS.find((p) => p.id === corPaleta)
+  if (preset) return preset
+
+  // corPaleta is a raw hex color (from logo extraction)
+  if (/^#[0-9a-fA-F]{6}$/.test(corPaleta)) {
+    const [h, s, l] = hexToHsl(corPaleta)
+    return {
+      primary: hslToHex(h, s, Math.min(Math.max(l, 25), 45)),
+      secondary: hslToHex(h, Math.max(s - 10, 40), Math.min(l + 20, 65)),
+      light: hslToHex(h, Math.min(s, 40), 95),
+      dark: hslToHex(h, s, Math.max(l - 20, 10)),
+    }
+  }
+
+  return { primary: '#1E40AF', secondary: '#3B82F6', light: '#EFF6FF', dark: '#1E3A8A' }
 }
 
 export async function generateSiteHTML(data: SiteData): Promise<string> {
