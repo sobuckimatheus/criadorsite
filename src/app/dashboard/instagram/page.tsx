@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Loader2, Instagram, CheckCircle2, AlertCircle, ChevronRight, Zap, Target, Hash, BarChart2, FileText, Lightbulb, User } from 'lucide-react'
+import { Search, Loader2, Instagram, CheckCircle2, AlertCircle, ChevronRight, Zap, Target, Hash, BarChart2, FileText, Lightbulb, User, Star, Pin } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { NICHE_REFERENCES } from '@/lib/niches'
@@ -61,6 +61,22 @@ type Analysis = {
     analiseComparativa: string
     metasSugeridas: { seguidores3meses: number; engajamentoAlvo: number; frequenciaPostagem: string }
   }
+  destaques: {
+    quantidade: number
+    avaliacao: string
+    listaAnalise: { titulo: string; tituloOk: boolean; sugestao: string }[]
+    coberturas: string
+    sugestoesTitulos: string[]
+    recomendacoes: string[]
+  }
+  postsFixados: {
+    quantidade: number
+    avaliacao: string
+    temApresentacao: boolean
+    temResultado: boolean
+    analise: string
+    recomendacoes: { posicao: number; tipo: string; descricao: string }[]
+  }
 }
 
 function ScoreCircle({ score, label, size = 80 }: { score: number; label: string; size?: number }) {
@@ -108,11 +124,12 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
   )
 }
 
-type Tab = 'diagnostico' | 'bio' | 'plano' | 'posts' | 'hashtags' | 'comparacao'
+type Tab = 'diagnostico' | 'bio' | 'plano' | 'posts' | 'hashtags' | 'comparacao' | 'destaques'
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'diagnostico', label: 'Diagnóstico', icon: BarChart2 },
   { id: 'bio', label: 'Bio', icon: FileText },
+  { id: 'destaques', label: 'Destaques & Fixados', icon: Star },
   { id: 'plano', label: 'Plano de Ação', icon: Target },
   { id: 'posts', label: 'Ideias de Post', icon: Lightbulb },
   { id: 'hashtags', label: 'Hashtags', icon: Hash },
@@ -157,7 +174,12 @@ export default function InstagramPage() {
       const analyzeRes = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profile: igData.profile, nicheId: selectedNiche || undefined }),
+        body: JSON.stringify({
+          profile: igData.profile,
+          nicheId: selectedNiche || undefined,
+          highlights: igData.highlights,
+          pinnedPosts: igData.pinnedPosts,
+        }),
       })
       const analyzeData = await analyzeRes.json()
       if (!analyzeRes.ok) throw new Error(analyzeData.error ?? 'Erro ao analisar')
@@ -514,6 +536,130 @@ export default function InstagramPage() {
                     <h3 className="text-sm font-semibold text-gray-700 mb-2">Frequência de postagem sugerida</h3>
                     <p className="text-sm text-gray-600">{analysis.comparacao.metasSugeridas.frequenciaPostagem}</p>
                   </div>
+                </div>
+              )}
+
+              {/* Destaques & Fixados */}
+              {activeTab === 'destaques' && (
+                <div className="space-y-6">
+
+                  {/* Destaques */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Star className="w-4 h-4 text-amber-500" />
+                      <h2 className="font-semibold text-gray-900">Destaques (Highlights)</h2>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        analysis.destaques?.avaliacao === 'ótimo' ? 'bg-green-100 text-green-700' :
+                        analysis.destaques?.avaliacao === 'bom' ? 'bg-blue-100 text-blue-700' :
+                        analysis.destaques?.avaliacao === 'regular' ? 'bg-amber-100 text-amber-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>{analysis.destaques?.avaliacao ?? '—'}</span>
+                    </div>
+
+                    {analysis.destaques?.quantidade === 0 ? (
+                      <div className="bg-red-50 border border-red-100 rounded-lg p-4 text-sm text-red-700">
+                        Nenhum destaque encontrado. Destaques são essenciais para organizar seu conteúdo e manter visitantes engajados.
+                      </div>
+                    ) : (
+                      <div className="space-y-2 mb-4">
+                        {(analysis.destaques?.listaAnalise ?? []).map((d, i) => (
+                          <div key={i} className={`flex items-start gap-3 p-3 rounded-lg border ${d.tituloOk ? 'border-green-100 bg-green-50' : 'border-amber-100 bg-amber-50'}`}>
+                            <div className="mt-0.5">
+                              {d.tituloOk
+                                ? <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                : <AlertCircle className="w-4 h-4 text-amber-500" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900">"{d.titulo || '(sem título)'}"</p>
+                              {!d.tituloOk && <p className="text-xs text-amber-700 mt-0.5">{d.sugestao}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {analysis.destaques?.coberturas && (
+                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
+                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Capas dos destaques</h3>
+                        <p className="text-sm text-gray-700">{analysis.destaques.coberturas}</p>
+                      </div>
+                    )}
+
+                    {(analysis.destaques?.sugestoesTitulos ?? []).length > 0 && (
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-700 mb-2">Sugestões de títulos</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {(analysis.destaques.sugestoesTitulos ?? []).map((t, i) => (
+                            <span key={i} className="text-sm px-3 py-1 bg-amber-50 text-amber-800 rounded-full border border-amber-100">{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {(analysis.destaques?.recomendacoes ?? []).length > 0 && (
+                      <div className="mt-4">
+                        <h3 className="text-sm font-semibold text-gray-700 mb-2">Recomendações</h3>
+                        <ul className="space-y-1.5">
+                          {(analysis.destaques.recomendacoes ?? []).map((r, i) => (
+                            <li key={i} className="text-sm text-gray-600 flex items-start gap-1.5">
+                              <ChevronRight className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-amber-400" />{r}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-6">
+                    {/* Posts Fixados */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <Pin className="w-4 h-4 text-blue-500" />
+                      <h2 className="font-semibold text-gray-900">Posts Fixados</h2>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        analysis.postsFixados?.avaliacao === 'ótimo' ? 'bg-green-100 text-green-700' :
+                        analysis.postsFixados?.avaliacao === 'bom' ? 'bg-blue-100 text-blue-700' :
+                        analysis.postsFixados?.avaliacao === 'regular' ? 'bg-amber-100 text-amber-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>{analysis.postsFixados?.avaliacao ?? '—'}</span>
+                      <span className="text-xs text-gray-400">{analysis.postsFixados?.quantidade ?? 0}/3 fixados</span>
+                    </div>
+
+                    {analysis.postsFixados?.analise && (
+                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
+                        <p className="text-sm text-gray-700">{analysis.postsFixados.analise}</p>
+                      </div>
+                    )}
+
+                    {analysis.postsFixados?.quantidade > 0 && (
+                      <div className="flex gap-3 mb-4">
+                        {[
+                          { label: 'Post de apresentação', ok: analysis.postsFixados.temApresentacao },
+                          { label: 'Post de resultado', ok: analysis.postsFixados.temResultado },
+                        ].map(({ label, ok }) => (
+                          <div key={label} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border ${ok ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                            {ok ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                            {label}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-3">Posts ideais para fixar</h3>
+                      <div className="space-y-2">
+                        {(analysis.postsFixados?.recomendacoes ?? []).map((r, i) => (
+                          <div key={i} className="border border-blue-100 bg-blue-50 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">{r.posicao}</span>
+                              <span className="text-sm font-semibold text-blue-900">{r.tipo}</span>
+                            </div>
+                            <p className="text-sm text-blue-800 ml-7">{r.descricao}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               )}
             </div>

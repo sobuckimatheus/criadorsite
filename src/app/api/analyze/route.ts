@@ -5,8 +5,11 @@ import { detectNiche, NICHE_REFERENCES } from '@/lib/niches'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function POST(req: NextRequest) {
-  const { profile, nicheId } = await req.json()
+  const { profile, nicheId, highlights, pinnedPosts } = await req.json()
   if (!profile) return NextResponse.json({ error: 'Profile obrigatório' }, { status: 400 })
+
+  const highlightsList: { title: string; hasCoverImage: boolean; mediaCount: number }[] = highlights ?? []
+  const pinnedPostsList: { caption: string; mediaType: number; likeCount: number }[] = pinnedPosts ?? []
 
   const niche = nicheId
     ? (NICHE_REFERENCES.find((n) => n.id === nicheId) ?? detectNiche({
@@ -93,6 +96,16 @@ DADOS DO PERFIL:
 - Média de comentários: ${avgComments}
 - Taxa de engajamento calculada: ${engagementRate.toFixed(2)}%
 
+DESTAQUES (Highlights):
+${highlightsList.length > 0
+  ? highlightsList.map((h, i) => `- Destaque ${i + 1}: título="${h.title}" | capa com imagem=${h.hasCoverImage ? 'sim' : 'não (só cor)'} | ${h.mediaCount} stories`).join('\n')
+  : '- Nenhum destaque encontrado ou perfil sem destaques'}
+
+POSTS FIXADOS (Pinned):
+${pinnedPostsList.length > 0
+  ? pinnedPostsList.map((p, i) => `- Post fixado ${i + 1}: "${p.caption || '(sem legenda)'}" | tipo=${p.mediaType === 2 ? 'vídeo' : p.mediaType === 8 ? 'carrossel' : 'foto'} | ${p.likeCount} likes`).join('\n')
+  : '- Nenhum post fixado encontrado'}
+
 NICHO DETECTADO: ${niche.label}
 REFERÊNCIAS DO NICHO:
 ${nicheRef}
@@ -162,6 +175,30 @@ Com base nesses dados, gere uma análise JSON completa com EXATAMENTE esta estru
       "engajamentoAlvo": <percentual alvo>,
       "frequenciaPostagem": "${niche.bestPostingFrequency}"
     }
+  },
+  "destaques": {
+    "quantidade": ${highlightsList.length},
+    "avaliacao": "<ótimo/bom/regular/fraco/ausente>",
+    "listaAnalise": [
+      ${highlightsList.length > 0
+        ? '{"titulo": "<título analisado>", "tituloOk": <true/false>, "sugestao": "<sugestão de melhoria ou ok>"}'
+        : '{"titulo": "", "tituloOk": false, "sugestao": "Nenhum destaque criado"}'}
+    ],
+    "coberturas": "<análise geral das capas: usar imagens do nicho ao invés de cores sólidas? customizadas ou padrão?>",
+    "sugestoesTitulos": ["<título sugerido 1>", "<título sugerido 2>", "<título sugerido 3>", "<título sugerido 4>", "<título sugerido 5>"],
+    "recomendacoes": ["<recomendação 1>", "<recomendação 2>", "<recomendação 3>"]
+  },
+  "postsFixados": {
+    "quantidade": ${pinnedPostsList.length},
+    "avaliacao": "<ótimo/bom/regular/ausente>",
+    "temApresentacao": <true se algum post fixado parecer ser de apresentação da profissional>,
+    "temResultado": <true se algum post fixado mostrar resultado/trabalho>,
+    "analise": "<análise dos posts fixados encontrados ou ausência deles>",
+    "recomendacoes": [
+      {"posicao": 1, "tipo": "Apresentação", "descricao": "<o que postar: quem é, o que faz, diferencial>"},
+      {"posicao": 2, "tipo": "Resultado/Trabalho", "descricao": "<o que postar: antes/depois, caso de sucesso>"},
+      {"posicao": 3, "tipo": "CTA/Serviços", "descricao": "<o que postar: serviços, como contratar, link>"}
+    ]
   }
 }
 
