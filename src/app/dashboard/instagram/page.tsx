@@ -331,7 +331,7 @@ export default function InstagramPage() {
                         <CheckCircle2 className="w-4 h-4" /> Pontos Fortes
                       </h3>
                       <ul className="space-y-1.5">
-                        {analysis.diagnostico.pontosFortesLista.map((item, i) => (
+                        {(analysis.diagnostico.pontosFortesLista ?? []).map((item, i) => (
                           <li key={i} className="text-sm text-green-700 flex items-start gap-1.5">
                             <ChevronRight className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />{item}
                           </li>
@@ -343,7 +343,7 @@ export default function InstagramPage() {
                         <AlertCircle className="w-4 h-4" /> Pontos de Atenção
                       </h3>
                       <ul className="space-y-1.5">
-                        {analysis.diagnostico.pontosDeAtencaoLista.map((item, i) => (
+                        {(analysis.diagnostico.pontosDeAtencaoLista ?? []).map((item, i) => (
                           <li key={i} className="text-sm text-red-700 flex items-start gap-1.5">
                             <ChevronRight className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />{item}
                           </li>
@@ -364,11 +364,11 @@ export default function InstagramPage() {
                     </div>
                   </div>
 
-                  {analysis.bioAnalise.problemas.length > 0 && (
+                  {(analysis.bioAnalise.problemas ?? []).length > 0 && (
                     <div>
                       <h3 className="text-sm font-semibold text-red-700 mb-2">Problemas identificados</h3>
                       <ul className="space-y-1">
-                        {analysis.bioAnalise.problemas.map((p, i) => (
+                        {(analysis.bioAnalise.problemas ?? []).map((p, i) => (
                           <li key={i} className="text-sm text-red-600 flex items-start gap-1.5">
                             <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />{p}
                           </li>
@@ -402,7 +402,7 @@ export default function InstagramPage() {
                   <div>
                     <h3 className="text-sm font-semibold text-gray-700 mb-2">Dicas Gerais</h3>
                     <ul className="space-y-1.5">
-                      {analysis.bioAnalise.dicasGerais.map((d, i) => (
+                      {(analysis.bioAnalise.dicasGerais ?? []).map((d, i) => (
                         <li key={i} className="text-sm text-gray-600 flex items-start gap-1.5">
                           <ChevronRight className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-pink-400" />{d}
                         </li>
@@ -443,7 +443,7 @@ export default function InstagramPage() {
               {/* Ideias de Post */}
               {activeTab === 'posts' && (
                 <div className="space-y-3">
-                  {analysis.ideiasDePost.map((post, i) => (
+                  {(analysis.ideiasDePost ?? []).map((post, i) => (
                     <div key={i} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-sm font-semibold text-gray-900">{post.titulo}</h3>
