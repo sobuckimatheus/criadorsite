@@ -10,13 +10,15 @@ export async function POST(req: NextRequest) {
   if (!rapidApiKey) return NextResponse.json({ error: 'RAPIDAPI_KEY não configurado' }, { status: 500 })
 
   const res = await fetch(
-    `https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${encodeURIComponent(clean)}`,
+    'https://instagram-scraper-stable-api.p.rapidapi.com/ig_get_fb_profile_v3.php',
     {
-      method: 'GET',
+      method: 'POST',
       headers: {
-        'x-rapidapi-host': 'instagram-scraper-api2.p.rapidapi.com',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'x-rapidapi-host': 'instagram-scraper-stable-api.p.rapidapi.com',
         'x-rapidapi-key': rapidApiKey,
       },
+      body: `username_or_url=${encodeURIComponent(clean)}`,
     }
   )
 
