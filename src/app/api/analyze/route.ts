@@ -69,16 +69,21 @@ export async function POST(req: NextRequest) {
 
 Analise o perfil do Instagram abaixo e forneça uma análise completa e acionável.
 
+IMPORTANTE sobre os campos do perfil:
+- O campo "Categoria" é exibido logo abaixo do @username no Instagram (visível para todos os visitantes). Informações presentes na Categoria NÃO precisam ser repetidas na Bio — considere-as complementares.
+- A "Bio" é o texto de descrição livre que aparece abaixo da Categoria.
+- Ao analisar a bio e apontar problemas, leve em conta o perfil COMPLETO (Nome + Categoria + Bio + Link), não só a bio isolada.
+
 DADOS DO PERFIL:
 - Nome: ${name}
 - Username: @${profile.username}
-- Bio: ${bio || '(sem bio)'}
-- Categoria: ${category || '(não informada)'}
+- Categoria (visível no perfil): ${category || '(não informada)'}
+- Bio (texto livre): ${bio || '(sem bio)'}
+- Link externo: ${externalUrl || '(nenhum)'}
 - Seguidores: ${followers.toLocaleString('pt-BR')}
 - Seguindo: ${following.toLocaleString('pt-BR')}
 - Posts: ${posts}
 - Verificado: ${isVerified ? 'Sim' : 'Não'}
-- Link externo: ${externalUrl || '(nenhum)'}
 - Média de likes (últimos posts): ${avgLikes}
 - Média de comentários: ${avgComments}
 - Taxa de engajamento calculada: ${engagementRate.toFixed(2)}%
