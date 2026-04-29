@@ -158,19 +158,24 @@ Com base nesses dados, gere uma análise JSON completa com EXATAMENTE esta estru
 Responda APENAS com o JSON válido, sem markdown, sem explicações.`
 
   const message = await client.messages.create({
-    model: 'claude-opus-4-5',
-    max_tokens: 4096,
+    model: 'claude-sonnet-4-6',
+    max_tokens: 8000,
     messages: [{ role: 'user', content: prompt }],
   })
 
   const content = message.content[0]
   if (content.type !== 'text') throw new Error('Resposta inesperada')
 
+  const raw = content.text.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim()
+
   let analysis
   try {
-    analysis = JSON.parse(content.text.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim())
+    analysis = JSON.parse(raw)
   } catch {
-    analysis = JSON.parse(content.text)
+    return NextResponse.json(
+      { error: `Erro ao processar resposta da IA. stop_reason: ${message.stop_reason}` },
+      { status: 500 }
+    )
   }
 
   return NextResponse.json({
