@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   if (!rapidApiKey) return NextResponse.json({ error: 'RAPIDAPI_KEY não configurado' }, { status: 500 })
 
   const res = await fetch(
-    `https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_info_v2.php?username=${encodeURIComponent(clean)}`,
+    `https://instagram-scraper-stable-api.p.rapidapi.com/v1/info?username_or_id_or_url=${encodeURIComponent(clean)}`,
     {
       method: 'GET',
       headers: {
@@ -20,17 +20,13 @@ export async function POST(req: NextRequest) {
     }
   )
 
-  if (!res.ok) {
-    const text = await res.text()
-    return NextResponse.json({ error: `Erro ao buscar perfil: ${text}` }, { status: res.status })
-  }
-
   const data = await res.json()
 
-  if (data.status === false || data.error) {
-    return NextResponse.json({ error: data.error ?? 'Perfil não encontrado' }, { status: 404 })
+  if (!res.ok || data.status === false || data.error || data.message) {
+    const msg = data.message ?? data.error ?? `HTTP ${res.status}`
+    return NextResponse.json({ error: `Erro ao buscar perfil: ${msg}` }, { status: res.status || 400 })
   }
 
-  const user = data.data?.user ?? data.user ?? data
+  const user = data.data?.user ?? data.data ?? data.user ?? data
   return NextResponse.json({ profile: user })
 }
