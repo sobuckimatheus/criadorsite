@@ -23,6 +23,10 @@ type SiteData = {
   anosNoMercado: number
   totalClientes?: number | null
   certificados?: string | null
+  foto1Url?: string | null
+  foto2Url?: string | null
+  foto3Url?: string | null
+  fotoProfissionalUrl?: string | null
   depoimentos: { nomeCliente: string; texto: string }[]
   whatsapp: string
   whatsappMensagem: string
@@ -137,6 +141,12 @@ CREDIBILIDADE:
 - Anos no mercado: ${data.anosNoMercado}
 ${data.totalClientes ? `- Clientes atendidos: ${data.totalClientes}+` : ''}
 ${data.certificados ? `- Certificações/Formações: ${data.certificados}` : ''}
+${data.fotoProfissionalUrl ? `- Foto do profissional: ${data.fotoProfissionalUrl}` : ''}
+
+FOTOS DO NEGÓCIO:
+${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0
+  ? [data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).map((url, i) => `- Foto ${i + 1}: ${url}`).join('\n')
+  : '- Nenhuma foto fornecida'}
 
 DEPOIMENTOS:
 ${depoimentosList}
@@ -155,13 +165,14 @@ IDENTIDADE VISUAL:
 ${data.logoUrl ? `- Logo: ${data.logoUrl}` : ''}
 
 ESTRUTURA OBRIGATÓRIA (nesta ordem):
-1. <header> — nome do negócio, menu âncora (Serviços, Sobre, Contato)${data.logoUrl ? ', logo' : ''}
+1. <header> — nome do negócio, menu âncora (Serviços, Sobre, Espaço, Contato)${data.logoUrl ? ', logo' : ''}
 2. <section id="hero"> — headline impactante baseada na dor+resultado, subheadline, botão WhatsApp CTA grande
 3. <section id="servicos"> — cards dos serviços com ícone emoji, título e descrição
-4. <section id="sobre"> — números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}
-5. ${data.depoimentos.length > 0 ? '<section id="depoimentos"> — cards de depoimentos com nome e texto' : '<!-- sem depoimentos -->'}
-6. <section id="cta"> — seção CTA final com botão WhatsApp
-7. <footer> — dados de contato, horário, Instagram (se houver), copyright
+4. <section id="sobre"> — números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}${data.fotoProfissionalUrl ? `, foto do profissional em destaque com object-fit:cover border-radius:12px` : ''}
+5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — galeria com as fotos do negócio em grid responsivo (use as URLs exatas fornecidas com object-fit:cover, aspect-ratio:4/3, border-radius:12px)` : '<!-- sem galeria de fotos -->'}
+6. ${data.depoimentos.length > 0 ? '<section id="depoimentos"> — cards de depoimentos com nome e texto' : '<!-- sem depoimentos -->'}
+7. <section id="cta"> — seção CTA final com botão WhatsApp
+8. <footer> — dados de contato, horário, Instagram (se houver), copyright
 
 REQUISITOS TÉCNICOS:
 - Mobile-first responsivo (breakpoint principal: 768px)
@@ -173,10 +184,11 @@ REQUISITOS TÉCNICOS:
 - Schema.org LocalBusiness em JSON-LD dentro de <script type="application/ld+json">
 - Suave scroll behavior: html { scroll-behavior: smooth }
 - Cores de texto com contraste adequado para acessibilidade
+- Use as URLs das fotos EXATAMENTE como fornecidas, sem modificar
 
 Todos os links de WhatsApp devem usar exatamente: ${whatsappLink}
 
-IMPORTANTE: Certifique-se de gerar TODAS as 7 seções acima e fechar corretamente com </body></html>. Priorize completude sobre detalhamento de CSS.`
+IMPORTANTE: Certifique-se de gerar TODAS as seções acima e fechar corretamente com </body></html>. Priorize completude sobre detalhamento de CSS.`
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',

@@ -68,6 +68,12 @@ model Site {
   certificados   String?
   depoimentos    Depoimento[]
 
+  // Fotos
+  foto1Url            String?
+  foto2Url            String?
+  foto3Url            String?
+  fotoProfissionalUrl String?
+
   // Contato
   whatsapp           String
   whatsappMensagem   String

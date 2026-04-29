@@ -29,6 +29,10 @@ export const step4Schema = z.object({
   anosNoMercado: z.coerce.number().min(0, 'Anos no mercado obrigatório'),
   totalClientes: z.coerce.number().optional(),
   certificados: z.string().optional(),
+  foto1Url: z.string().optional(),
+  foto2Url: z.string().optional(),
+  foto3Url: z.string().optional(),
+  fotoProfissionalUrl: z.string().optional(),
   depoimentos: z
     .array(
       z.object({

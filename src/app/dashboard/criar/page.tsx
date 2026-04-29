@@ -46,6 +46,10 @@ export default async function CriarPage({
         anosNoMercado: site.anosNoMercado,
         totalClientes: site.totalClientes ?? undefined,
         certificados: site.certificados ?? undefined,
+        foto1Url: site.foto1Url ?? undefined,
+        foto2Url: site.foto2Url ?? undefined,
+        foto3Url: site.foto3Url ?? undefined,
+        fotoProfissionalUrl: site.fotoProfissionalUrl ?? undefined,
         depoimentos: site.depoimentos.map((d) => ({
           nomeCliente: d.nomeCliente,
           texto: d.texto,
