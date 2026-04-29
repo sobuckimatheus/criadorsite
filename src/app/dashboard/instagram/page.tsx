@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Loader2, Instagram, CheckCircle2, AlertCircle, ChevronRight, Zap, Target, Hash, BarChart2, FileText, Lightbulb } from 'lucide-react'
+import { Search, Loader2, Instagram, CheckCircle2, AlertCircle, ChevronRight, Zap, Target, Hash, BarChart2, FileText, Lightbulb, User } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { NICHE_REFERENCES } from '@/lib/niches'
 
 type ProfileSummary = {
   username: string
@@ -131,6 +132,7 @@ export default function InstagramPage() {
   const [error, setError] = useState<string | null>(null)
   const [profile, setProfile] = useState<ProfileSummary | null>(null)
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
+  const [selectedNiche, setSelectedNiche] = useState('')
   const [activeTab, setActiveTab] = useState<Tab>('diagnostico')
   const [copiedBio, setCopiedBio] = useState<number | null>(null)
 
@@ -155,7 +157,7 @@ export default function InstagramPage() {
       const analyzeRes = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profile: igData.profile }),
+        body: JSON.stringify({ profile: igData.profile, nicheId: selectedNiche || undefined }),
       })
       const analyzeData = await analyzeRes.json()
       if (!analyzeRes.ok) throw new Error(analyzeData.error ?? 'Erro ao analisar')
@@ -188,22 +190,38 @@ export default function InstagramPage() {
       </div>
 
       {/* Search */}
-      <div className="flex gap-2 mb-8">
-        <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
-          <Input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !loading && handleAnalyze()}
-            placeholder="usuario do instagram"
-            className="pl-8"
-            disabled={loading}
-          />
+      <div className="space-y-3 mb-8">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
+            <Input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !loading && handleAnalyze()}
+              placeholder="usuario do instagram"
+              className="pl-8"
+              disabled={loading}
+            />
+          </div>
+          <Button onClick={handleAnalyze} disabled={loading || !username.trim()} className="gap-2">
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+            {loading ? (step === 'fetching' ? 'Buscando...' : 'Analisando...') : 'Analisar'}
+          </Button>
         </div>
-        <Button onClick={handleAnalyze} disabled={loading || !username.trim()} className="gap-2">
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-          {loading ? (step === 'fetching' ? 'Buscando...' : 'Analisando...') : 'Analisar'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500 whitespace-nowrap">Nicho do perfil:</label>
+          <select
+            value={selectedNiche}
+            onChange={(e) => setSelectedNiche(e.target.value)}
+            disabled={loading}
+            className="flex-1 text-sm border border-gray-200 rounded-md px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-300"
+          >
+            <option value="">Detectar automaticamente pela bio</option>
+            {NICHE_REFERENCES.map((n) => (
+              <option key={n.id} value={n.id}>{n.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {error && (
@@ -226,13 +244,18 @@ export default function InstagramPage() {
         <>
           {/* Profile Card */}
           <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6 flex items-start gap-4">
-            {profile.profilePic && (
-              <img
-                src={profile.profilePic}
-                alt={profile.name}
-                className="w-16 h-16 rounded-full object-cover flex-shrink-0 border border-gray-200"
-              />
-            )}
+            <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border border-gray-200 bg-gray-100 flex items-center justify-center">
+              {profile.profilePic ? (
+                <img
+                  src={`/api/proxy-image?url=${encodeURIComponent(profile.profilePic)}`}
+                  alt={profile.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              ) : (
+                <User className="w-7 h-7 text-gray-400" />
+              )}
+            </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-gray-900">{profile.name}</span>

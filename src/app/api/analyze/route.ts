@@ -5,15 +5,22 @@ import { detectNiche, NICHE_REFERENCES } from '@/lib/niches'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function POST(req: NextRequest) {
-  const { profile } = await req.json()
+  const { profile, nicheId } = await req.json()
   if (!profile) return NextResponse.json({ error: 'Profile obrigatório' }, { status: 400 })
 
-  const niche = detectNiche({
-    biography: profile.biography,
-    category: profile.category?.name ?? profile.category,
-    full_name: profile.full_name,
-    username: profile.username,
-  })
+  const niche = nicheId
+    ? (NICHE_REFERENCES.find((n) => n.id === nicheId) ?? detectNiche({
+        biography: profile.biography,
+        category: profile.category?.name ?? profile.category,
+        full_name: profile.full_name,
+        username: profile.username,
+      }))
+    : detectNiche({
+        biography: profile.biography,
+        category: profile.category?.name ?? profile.category,
+        full_name: profile.full_name,
+        username: profile.username,
+      })
 
   const followers = profile.edge_followed_by?.count ?? profile.follower_count ?? 0
   const following = profile.edge_follow?.count ?? profile.following_count ?? 0
