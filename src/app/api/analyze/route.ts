@@ -74,6 +74,11 @@ IMPORTANTE sobre os campos do perfil:
 - A "Bio" é o texto de descrição livre que aparece abaixo da Categoria.
 - Ao analisar a bio e apontar problemas, leve em conta o perfil COMPLETO (Nome + Categoria + Bio + Link), não só a bio isolada.
 
+IMPORTANTE sobre sugestões de bio:
+- A tendência atual do Instagram é bio SEM emojis ou com no máximo 1 emoji discreto.
+- Bios limpas e diretas convertem melhor do que bios cheias de emojis.
+- Nas três sugestões de bio, NÃO use emojis (ou use no máximo 1, apenas se for muito relevante para o nicho).
+
 DADOS DO PERFIL:
 - Nome: ${name}
 - Username: @${profile.username}
@@ -113,9 +118,9 @@ Com base nesses dados, gere uma análise JSON completa com EXATAMENTE esta estru
   "bioAnalise": {
     "bioAtual": "${bio.replace(/"/g, '\\"')}",
     "problemas": ["problema1", "problema2"],
-    "bioSugerida1": "<bio otimizada opção 1, máx 150 chars>",
-    "bioSugerida2": "<bio otimizada opção 2, máx 150 chars>",
-    "bioSugerida3": "<bio otimizada opção 3, máx 150 chars>",
+    "bioSugerida1": "<bio otimizada opção 1, máx 150 chars, SEM emojis ou no máximo 1>",
+    "bioSugerida2": "<bio otimizada opção 2, máx 150 chars, SEM emojis ou no máximo 1>",
+    "bioSugerida3": "<bio otimizada opção 3, máx 150 chars, SEM emojis ou no máximo 1>",
     "dicasGerais": ["dica1", "dica2", "dica3"]
   },
   "planoDeAcao": {
