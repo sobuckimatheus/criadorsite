@@ -65,14 +65,20 @@ Retorne APENAS um JSON com esta estrutura exata, sem markdown, sem explicações
   const content = message.content[0]
   if (content.type !== 'text') throw new Error('Resposta inesperada')
 
-  const raw = content.text.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim()
+  const text = content.text
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+
+  if (start === -1 || end === -1) {
+    return NextResponse.json({ error: 'IA não retornou JSON válido' }, { status: 500 })
+  }
 
   let carrossel
   try {
-    carrossel = JSON.parse(raw)
+    carrossel = JSON.parse(text.slice(start, end + 1))
   } catch {
     return NextResponse.json(
-      { error: `Erro ao processar resposta da IA. stop_reason: ${message.stop_reason}` },
+      { error: 'Erro ao processar resposta da IA. Tente novamente.' },
       { status: 500 }
     )
   }
