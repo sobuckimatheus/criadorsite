@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, LogOut, ShieldCheck, Instagram } from 'lucide-react'
+import { LayoutDashboard, LogOut, ShieldCheck, Instagram, GalleryHorizontal } from 'lucide-react'
 import { signOut } from '@/app/actions/auth'
 import { UserAvatar } from './UserAvatar'
 import { cn } from '@/lib/utils'
@@ -34,6 +34,19 @@ export function Sidebar({ userName, userEmail, isAdmin }: Props) {
         >
           <LayoutDashboard className="w-4 h-4" />
           Meu Site
+        </Link>
+
+        <Link
+          href="/dashboard/carrossel"
+          className={cn(
+            'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+            pathname.startsWith('/dashboard/carrossel')
+              ? 'bg-purple-50 text-purple-700 font-medium'
+              : 'text-gray-600 hover:bg-gray-100'
+          )}
+        >
+          <GalleryHorizontal className="w-4 h-4" />
+          Carrossel Viral
         </Link>
 
         <Link
