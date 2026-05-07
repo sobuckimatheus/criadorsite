@@ -40,15 +40,16 @@ ESTRUTURA DOS SLIDES:
 - Slides 10-11: A resolução e resultado — o que aconteceu depois
 - Slide 12: Frase de impacto isolada + CTA para comentar
 
-Retorne APENAS um JSON com esta estrutura exata, sem markdown, sem explicações:
+CRÍTICO: Retorne APENAS JSON válido. Dentro das strings use \\n para quebrar linha, NUNCA quebras de linha literais. Sem markdown, sem texto fora do JSON.
+
 {
   "titulo": "título resumido do carrossel",
   "nicho": "${nicho}",
   "tipo_narrativa": "${tipoLabel}",
   "slides": [
     {
-      "texto": "texto completo do slide com **negrito** nas palavras de impacto, parágrafos separados por \\n\\n",
-      "imagem_sugerida": "descrição curta da imagem ideal para este slide (ou 'sem imagem' se só texto)",
+      "texto": "texto do slide com **negrito** nas palavras de impacto. Use \\n\\n para separar parágrafos.",
+      "imagem_sugerida": "descrição curta da imagem ideal (ou 'sem imagem')",
       "destaque": "frase de 3-6 palavras que resume o slide"
     }
   ],
@@ -73,14 +74,26 @@ Retorne APENAS um JSON com esta estrutura exata, sem markdown, sem explicações
     return NextResponse.json({ error: 'IA não retornou JSON válido' }, { status: 500 })
   }
 
+  const raw = text.slice(start, end + 1)
+
   let carrossel
   try {
-    carrossel = JSON.parse(text.slice(start, end + 1))
+    carrossel = JSON.parse(raw)
   } catch {
-    return NextResponse.json(
-      { error: 'Erro ao processar resposta da IA. Tente novamente.' },
-      { status: 500 }
-    )
+    // Repair: escape unescaped newlines inside JSON string values
+    const repaired = raw.replace(/("(?:[^"\\]|\\.)*")|[\n\r]/g, (match, str) => {
+      if (str) return str // inside a string: keep as-is (already matched whole string)
+      return ' ' // outside string: replace bare newlines with space
+    })
+    try {
+      carrossel = JSON.parse(repaired)
+    } catch {
+      console.error('RAW RESPONSE (first 500):', raw.slice(0, 500))
+      return NextResponse.json(
+        { error: 'Erro ao processar resposta da IA. Tente novamente.' },
+        { status: 500 }
+      )
+    }
   }
 
   return NextResponse.json({ carrossel })
