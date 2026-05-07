@@ -58,7 +58,7 @@ Retorne APENAS um JSON com esta estrutura exata, sem markdown, sem explicações
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 4000,
+    max_tokens: 8000,
     messages: [{ role: 'user', content: prompt }],
   })
 
@@ -66,7 +66,16 @@ Retorne APENAS um JSON com esta estrutura exata, sem markdown, sem explicações
   if (content.type !== 'text') throw new Error('Resposta inesperada')
 
   const raw = content.text.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim()
-  const carrossel = JSON.parse(raw)
+
+  let carrossel
+  try {
+    carrossel = JSON.parse(raw)
+  } catch {
+    return NextResponse.json(
+      { error: `Erro ao processar resposta da IA. stop_reason: ${message.stop_reason}` },
+      { status: 500 }
+    )
+  }
 
   return NextResponse.json({ carrossel })
 }
