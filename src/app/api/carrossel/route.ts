@@ -3,6 +3,42 @@ import Anthropic from '@anthropic-ai/sdk'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+async function searchPexelsImage(query: string): Promise<string | null> {
+  const key = process.env.PEXELS_API_KEY
+  if (!key) return null
+  try {
+    const res = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&orientation=portrait`,
+      { headers: { Authorization: key } }
+    )
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.photos?.[0]?.src?.large ?? data.photos?.[0]?.src?.medium ?? null
+  } catch {
+    return null
+  }
+}
+
+function parseCarrossel(text: string) {
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start === -1 || end === -1) return null
+
+  const raw = text.slice(start, end + 1)
+  try {
+    return JSON.parse(raw)
+  } catch {
+    const repaired = raw.replace(/("(?:[^"\\]|\\.)*")|[\n\r]/g, (match, str) =>
+      str ? str : ' '
+    )
+    try {
+      return JSON.parse(repaired)
+    } catch {
+      return null
+    }
+  }
+}
+
 export async function POST(req: NextRequest) {
   const { nicho, nome, tipo, tipoLabel, tipoDesc, tom, tomLabel, tomDesc, tema } = await req.json()
 
@@ -40,7 +76,7 @@ ESTRUTURA DOS SLIDES:
 - Slides 10-11: A resolução e resultado — o que aconteceu depois
 - Slide 12: Frase de impacto isolada + CTA para comentar
 
-CRÍTICO: Retorne APENAS JSON válido. Dentro das strings use \\n para quebrar linha, NUNCA quebras de linha literais. Sem markdown, sem texto fora do JSON.
+CRÍTICO: Retorne APENAS JSON válido. Use \\n para quebrar linha dentro das strings, NUNCA quebras de linha literais. Sem markdown, sem texto fora do JSON.
 
 {
   "titulo": "título resumido do carrossel",
@@ -49,7 +85,7 @@ CRÍTICO: Retorne APENAS JSON válido. Dentro das strings use \\n para quebrar l
   "slides": [
     {
       "texto": "texto do slide com **negrito** nas palavras de impacto. Use \\n\\n para separar parágrafos.",
-      "imagem_sugerida": "descrição curta da imagem ideal (ou 'sem imagem')",
+      "imagem_sugerida": "3-5 palavras em inglês descrevendo a foto ideal para busca (ou 'sem imagem' se slide só texto)",
       "destaque": "frase de 3-6 palavras que resume o slide"
     }
   ],
@@ -66,35 +102,21 @@ CRÍTICO: Retorne APENAS JSON válido. Dentro das strings use \\n para quebrar l
   const content = message.content[0]
   if (content.type !== 'text') throw new Error('Resposta inesperada')
 
-  const text = content.text
-  const start = text.indexOf('{')
-  const end = text.lastIndexOf('}')
-
-  if (start === -1 || end === -1) {
-    return NextResponse.json({ error: 'IA não retornou JSON válido' }, { status: 500 })
+  const carrossel = parseCarrossel(content.text)
+  if (!carrossel) {
+    return NextResponse.json({ error: 'Erro ao processar resposta da IA. Tente novamente.' }, { status: 500 })
   }
 
-  const raw = text.slice(start, end + 1)
-
-  let carrossel
-  try {
-    carrossel = JSON.parse(raw)
-  } catch {
-    // Repair: escape unescaped newlines inside JSON string values
-    const repaired = raw.replace(/("(?:[^"\\]|\\.)*")|[\n\r]/g, (match, str) => {
-      if (str) return str // inside a string: keep as-is (already matched whole string)
-      return ' ' // outside string: replace bare newlines with space
+  // Fetch Pexels images in parallel for slides that need one
+  const slides = carrossel.slides as { texto: string; imagem_sugerida: string; destaque: string; imageUrl?: string }[]
+  await Promise.all(
+    slides.map(async (slide, i) => {
+      if (slide.imagem_sugerida && slide.imagem_sugerida !== 'sem imagem') {
+        const url = await searchPexelsImage(slide.imagem_sugerida)
+        if (url) slides[i].imageUrl = url
+      }
     })
-    try {
-      carrossel = JSON.parse(repaired)
-    } catch {
-      console.error('RAW RESPONSE (first 500):', raw.slice(0, 500))
-      return NextResponse.json(
-        { error: 'Erro ao processar resposta da IA. Tente novamente.' },
-        { status: 500 }
-      )
-    }
-  }
+  )
 
   return NextResponse.json({ carrossel })
 }

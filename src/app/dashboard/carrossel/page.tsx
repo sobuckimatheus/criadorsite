@@ -6,6 +6,7 @@ interface Slide {
   texto: string
   imagem_sugerida: string
   destaque: string
+  imageUrl?: string
 }
 
 interface Carrossel {
@@ -135,9 +136,19 @@ export default function CarrosselPage() {
           ))}
         </div>
         {slide.imagem_sugerida && slide.imagem_sugerida !== 'sem imagem' && (
-          <div className="mt-4 bg-gray-50 border border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-2">
-            <span className="text-lg">🖼️</span>
-            <p className="text-gray-400 text-xs italic">{slide.imagem_sugerida}</p>
+          <div className="mt-4 rounded-xl overflow-hidden border border-gray-200">
+            {slide.imageUrl ? (
+              <img
+                src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
+                alt={slide.imagem_sugerida}
+                className="w-full h-48 object-cover"
+              />
+            ) : (
+              <div className="bg-gray-50 p-3 flex items-center gap-2">
+                <span className="text-lg">🖼️</span>
+                <p className="text-gray-400 text-xs italic">{slide.imagem_sugerida}</p>
+              </div>
+            )}
           </div>
         )}
         <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
