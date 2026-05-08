@@ -222,10 +222,12 @@ export default function CarrosselPage() {
     const isWikipedia = isWikipediaPerson || isWikipediaBrand
     const isPexels = slide.imageType === 'pexels'
 
-    // Thread: all images go inside the body after text (same margin as text, rounded corners)
+    // Thread: images break out of body padding to go full-width, rounded corners
     const threadImageEl = isThread && slide.imageUrl ? (
       <div style={{
-        width: '100%',
+        marginLeft: '-20px',
+        marginRight: '-20px',
+        width: 'calc(100% + 40px)',
         height: isWikipediaPerson ? '155px' : isWikipediaBrand ? '80px' : '115px',
         overflow: 'hidden',
         flexShrink: 0,

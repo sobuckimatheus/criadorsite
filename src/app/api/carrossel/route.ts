@@ -86,10 +86,10 @@ REGRAS OBRIGATÓRIAS DE ESTILO (baseadas nos melhores carrosséis virais brasile
 3. Use NEGRITO nas palavras de maior impacto (números, nomes, viradas)
 4. Termine cada slide com uma frase que OBRIGA o leitor a passar pro próximo
 5. Use datas, números reais e nomes quando possível — especificidade gera credibilidade
-6. Ponto final sozinho numa linha dá peso: use essa técnica
-7. O slide 1 deve apresentar o resultado/surpresa ANTES de contar a história
-8. Alterne slides de texto puro com slides que pedem imagem
-9. Máximo 12 slides, mínimo 8
+6. O slide 1 deve apresentar o resultado/surpresa ANTES de contar a história
+7. Alterne slides de texto puro com slides que pedem imagem
+8. Máximo 12 slides, mínimo 8
+9. NUNCA coloque um ponto ( . ) sozinho em uma linha — isso não é usado
 
 ESTRUTURA DOS SLIDES:
 - Slide 1: Gancho de contraste — mostre o resultado surpreendente antes de explicar
