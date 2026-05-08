@@ -217,38 +217,73 @@ export default function CarrosselPage() {
       ? '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif'
       : 'Georgia, serif'
 
-    const isWikipediaPerson = slide.imageType === 'pessoa'
     const isWikipediaBrand = slide.imageType === 'empresa'
+
+    // ── THREAD / SIMPLES ──────────────────────────────────────────────────
+    if (isThread) {
+      return (
+        <div style={{
+          display: 'flex', flexDirection: 'column',
+          background: '#ffffff', borderRadius: '16px', overflow: 'hidden',
+          width: '100%', aspectRatio: '1 / 1',
+          border: '1px solid #e7e7e7', boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+          fontFamily,
+        }}>
+          {/* Header */}
+          <div style={{ padding: '20px 20px 0', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+            <div style={{ ...t.avatarStyle, width: 38, height: 38, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
+              {initial}
+            </div>
+            <div>
+              <p style={{ color: '#0f1419', fontWeight: 800, fontSize: 14, margin: 0, lineHeight: 1.2, fontFamily: 'system-ui' }}>{nome || nicho}</p>
+              <p style={{ color: '#536471', fontSize: 12, margin: '2px 0 0', fontFamily: 'system-ui' }}>@{handle}</p>
+            </div>
+          </div>
+
+          {/* Texto */}
+          <div style={{ padding: '16px 20px', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', overflow: 'hidden' }}>
+            {linhas.map((linha, i) => (
+              <p key={i} style={{ color: '#0f1419', fontSize: 15, lineHeight: 1.6, margin: 0, fontFamily }}
+                dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#0f1419;font-weight:800">$1</strong>') }}
+              />
+            ))}
+          </div>
+
+          {/* Imagem — colada no rodapé, sem padding, sem border-radius */}
+          {slide.imageUrl && (
+            <div style={{ marginTop: 'auto', width: '100%', flexShrink: 0 }}>
+              <img
+                src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
+                alt="" crossOrigin="anonymous"
+                style={{
+                  width: '100%',
+                  display: 'block',
+                  objectFit: isWikipediaBrand ? 'contain' : 'cover',
+                  objectPosition: 'center top',
+                  maxHeight: '260px',
+                  background: isWikipediaBrand ? '#f5f5f5' : 'transparent',
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    // ── OUTROS TEMAS ──────────────────────────────────────────────────────
+    const isWikipediaPerson = slide.imageType === 'pessoa'
     const isWikipedia = isWikipediaPerson || isWikipediaBrand
     const isPexels = slide.imageType === 'pexels'
 
-    // Thread: image aligned with text, pushed to bottom of body, rounded corners
-    const threadImageEl = isThread && slide.imageUrl ? (
-      <div style={{
-        width: '100%',
-        height: isWikipediaPerson ? '160px' : isWikipediaBrand ? '80px' : '115px',
-        overflow: 'hidden',
-        flexShrink: 0,
-        marginTop: 'auto',
-        borderRadius: '12px',
-        background: isWikipediaBrand ? '#f5f5f5' : 'transparent',
-      }}>
-        <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
-          alt="" crossOrigin="anonymous"
-          style={{ width: '100%', height: '100%', objectFit: isWikipediaBrand ? 'contain' : 'cover', objectPosition: isWikipediaPerson ? '50% 20%' : 'center' }} />
-      </div>
-    ) : null
-
-    // Non-thread: Wikipedia full-bleed after header, Pexels full-bleed before text
-    const nonThreadWikiEl = !isThread && isWikipedia && slide.imageUrl ? (
+    const nonThreadWikiEl = isWikipedia && slide.imageUrl ? (
       <div style={{ width: '100%', height: isWikipediaBrand ? '80px' : '160px', overflow: 'hidden', flexShrink: 0, background: isWikipediaBrand ? '#fff' : 'transparent' }}>
         <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
           alt="" crossOrigin="anonymous"
-          style={{ width: '100%', height: '100%', objectFit: isWikipediaBrand ? 'contain' : 'cover', objectPosition: isWikipediaPerson ? 'top center' : 'center' }} />
+          style={{ width: '100%', height: '100%', objectFit: isWikipediaBrand ? 'contain' : 'cover', objectPosition: 'center top' }} />
       </div>
     ) : null
 
-    const nonThreadPexelsEl = !isThread && isPexels && slide.imageUrl ? (
+    const nonThreadPexelsEl = isPexels && slide.imageUrl ? (
       <div style={{ width: '100%', height: '140px', overflow: 'hidden', flexShrink: 0 }}>
         <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
           alt="" crossOrigin="anonymous"
@@ -261,33 +296,28 @@ export default function CarrosselPage() {
 
         {/* Header */}
         <div style={t.headerStyle}>
-          <div style={{ ...t.avatarStyle, width: isThread ? 38 : 36, height: isThread ? 38 : 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isThread ? 15 : 14, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
+          <div style={{ ...t.avatarStyle, width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
             {initial}
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ color: isThread ? '#0f1419' : '#fff', fontWeight: 800, fontSize: isThread ? 14 : 14, margin: 0, lineHeight: 1.2, fontFamily: 'system-ui' }}>{nome || nicho}</p>
-            <p style={{ color: isThread ? '#536471' : 'rgba(255,255,255,0.7)', fontSize: isThread ? 12 : 11, margin: '2px 0 0', fontFamily: 'system-ui' }}>@{handle}</p>
+            <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, margin: 0, lineHeight: 1.2, fontFamily: 'system-ui' }}>{nome || nicho}</p>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, margin: '2px 0 0', fontFamily: 'system-ui' }}>@{handle}</p>
           </div>
-          {!isThread && (
-            <div style={{ display: 'flex', gap: 3 }}>
-              {[0,1,2].map(i => <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.5)' }} />)}
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: 3 }}>
+            {[0,1,2].map(i => <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.5)' }} />)}
+          </div>
         </div>
 
-        {/* Non-thread: Wikipedia after header, Pexels before text */}
         {nonThreadWikiEl}
         {nonThreadPexelsEl}
 
         {/* Text body */}
         <div style={{ ...t.bodyStyle, overflow: 'hidden' }}>
           {linhas.map((linha, i) => (
-            <p key={i} style={{ color: t.textColor, fontSize: isThread ? 15 : 15, lineHeight: isThread ? 1.6 : 1.7, margin: 0, fontFamily }}
+            <p key={i} style={{ color: t.textColor, fontSize: 15, lineHeight: 1.7, margin: 0, fontFamily }}
               dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${t.textColor};font-weight:800">$1</strong>`) }}
             />
           ))}
-          {/* Thread: image after text, same padding as text, rounded */}
-          {threadImageEl}
         </div>
 
         {/* Footer (hidden for thread) */}
