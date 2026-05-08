@@ -184,9 +184,14 @@ export default function CarrosselPage() {
     setGerandoTodas(true)
     setProgressoIA({ atual: 0, total: carrossel.slides.length })
 
-    for (let i = 0; i < carrossel.slides.length; i++) {
-      setProgressoIA({ atual: i + 1, total: carrossel.slides.length })
-      const slide = carrossel.slides[i]
+    const semImagem = carrossel.slides.map((s, i) => ({ s, i })).filter(({ s }) => !s.imageUrl)
+    if (semImagem.length === 0) {
+      setGerandoTodas(false); setProgressoIA(null); return
+    }
+    setProgressoIA({ atual: 0, total: semImagem.length })
+
+    for (const { s: slide, i } of semImagem) {
+      setProgressoIA(prev => prev ? { ...prev, atual: prev.atual + 1 } : null)
 
       // Tenta até 2 vezes por slide antes de pular
       for (let attempt = 0; attempt < 2; attempt++) {
@@ -208,11 +213,10 @@ export default function CarrosselPage() {
             break  // sucesso — passa para o próximo slide
           }
         } catch {
-          // aguarda 2s antes de tentar novamente
           if (attempt === 0) await new Promise(r => setTimeout(r, 2000))
         }
       }
-    }
+    } // fim for semImagem
 
     setGerandoTodas(false)
     setProgressoIA(null)
@@ -583,7 +587,7 @@ export default function CarrosselPage() {
                   className="w-full py-3 rounded-xl text-sm font-semibold border-2 border-violet-400 text-violet-700 bg-violet-50 hover:bg-violet-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
                   {gerandoTodas && progressoIA
                     ? `⏳ Gerando imagens... ${progressoIA.atual} / ${progressoIA.total}`
-                    : '🎨 Gerar todas as imagens com IA'}
+                    : `🎨 Gerar imagens sem foto com IA${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} slides)` : ''}`}
                 </button>
 
                 {/* Lista de slides */}
