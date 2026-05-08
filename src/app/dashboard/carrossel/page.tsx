@@ -42,7 +42,7 @@ const TONS = [
   { id: 'provocativo', label: '😤 Provocativo', desc: 'Questiona e desafia' },
 ]
 
-type ThemeId = 'roxo' | 'dark' | 'gradiente' | 'minimal'
+type ThemeId = 'thread' | 'roxo' | 'dark' | 'gradiente' | 'minimal'
 
 interface ThemeDef {
   label: string
@@ -58,6 +58,18 @@ interface ThemeDef {
 }
 
 const THEMES: Record<ThemeId, ThemeDef> = {
+  thread: {
+    label: 'Thread',
+    swatch: 'linear-gradient(135deg,#1d9bf0,#0d8bd9)',
+    cardStyle: { background: '#ffffff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.06)' },
+    headerStyle: { background: '#ffffff', padding: '16px 20px 8px', display: 'flex', alignItems: 'center', gap: '12px' },
+    bodyStyle: { background: '#ffffff', flex: 1, padding: '4px 20px 16px', display: 'flex', flexDirection: 'column', gap: '14px' },
+    footerStyle: { display: 'none' } as React.CSSProperties,
+    textColor: '#0f1419',
+    mutedColor: '#536471',
+    accentColor: '#1d9bf0',
+    avatarStyle: { background: 'linear-gradient(135deg,#1d9bf0,#a855f7)', color: '#fff' },
+  },
   roxo: {
     label: 'Roxo',
     swatch: 'linear-gradient(135deg,#7c3aed,#ec4899)',
@@ -116,7 +128,7 @@ export default function CarrosselPage() {
   const [tom, setTom] = useState('narrativo')
   const [tema, setTema] = useState('')
   const [nome, setNome] = useState('')
-  const [estilo, setEstilo] = useState<ThemeId>('roxo')
+  const [estilo, setEstilo] = useState<ThemeId>('thread')
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState('')
   const [carrossel, setCarrossel] = useState<Carrossel | null>(null)
@@ -194,53 +206,73 @@ export default function CarrosselPage() {
 
   function renderSlide(slide: Slide, idx: number) {
     const t = THEMES[estilo]
+    const isThread = estilo === 'thread'
     const linhas = slide.texto.split(/\n\n|\n/).filter(Boolean)
     const handle = (nome || nicho).toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')
     const initial = (nome || nicho)[0]?.toUpperCase() ?? '?'
+    const fontFamily = isThread
+      ? '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif'
+      : 'Georgia, serif'
+
+    const imageEl = slide.imageUrl ? (
+      <div style={{ width: '100%', height: '160px', overflow: 'hidden', flexShrink: 0, borderRadius: isThread ? '12px' : '0' }}>
+        <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
+          alt="" crossOrigin="anonymous"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      </div>
+    ) : null
 
     return (
-      <div style={{ ...t.cardStyle, height: '480px', display: 'flex', flexDirection: 'column', fontFamily: 'Georgia, serif' }}>
+      <div style={{ ...t.cardStyle, height: '480px', display: 'flex', flexDirection: 'column', fontFamily }}>
+
         {/* Header */}
         <div style={t.headerStyle}>
-          <div style={{ ...t.avatarStyle, width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
+          <div style={{ ...t.avatarStyle, width: isThread ? 44 : 36, height: isThread ? 44 : 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isThread ? 17 : 14, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
             {initial}
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ color: '#fff', fontWeight: 700, fontSize: 14, margin: 0, lineHeight: 1, fontFamily: 'system-ui' }}>{nome || nicho}</p>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, margin: '3px 0 0', fontFamily: 'system-ui' }}>@{handle}</p>
+            {isThread ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <p style={{ color: '#0f1419', fontWeight: 800, fontSize: 15, margin: 0, lineHeight: 1.2, fontFamily: 'system-ui' }}>{nome || nicho}</p>
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18, borderRadius: '50%', background: '#1d9bf0', color: '#fff', fontSize: 10, fontWeight: 900, flexShrink: 0 }}>✓</span>
+              </div>
+            ) : (
+              <p style={{ color: '#fff', fontWeight: 700, fontSize: 14, margin: 0, lineHeight: 1, fontFamily: 'system-ui' }}>{nome || nicho}</p>
+            )}
+            <p style={{ color: isThread ? '#536471' : 'rgba(255,255,255,0.7)', fontSize: isThread ? 14 : 11, margin: '3px 0 0', fontFamily: 'system-ui' }}>@{handle}</p>
           </div>
-          <div style={{ display: 'flex', gap: 3 }}>
-            {[0,1,2].map(i => <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.5)' }} />)}
-          </div>
+          {!isThread && (
+            <div style={{ display: 'flex', gap: 3 }}>
+              {[0,1,2].map(i => <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.5)' }} />)}
+            </div>
+          )}
         </div>
 
-        {/* Image */}
-        {slide.imageUrl && (
-          <div style={{ width: '100%', height: '160px', overflow: 'hidden', flexShrink: 0 }}>
-            <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
-              alt="" crossOrigin="anonymous"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-        )}
+        {/* Image before text (non-thread themes) */}
+        {!isThread && imageEl}
 
-        {/* Text */}
+        {/* Text body */}
         <div style={{ ...t.bodyStyle, overflow: 'hidden' }}>
           {linhas.map((linha, i) => (
-            <p key={i} style={{ color: t.textColor, fontSize: 15, lineHeight: 1.7, margin: 0 }}
-              dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${t.textColor}">$1</strong>`) }}
+            <p key={i} style={{ color: t.textColor, fontSize: isThread ? 18 : 15, lineHeight: isThread ? 1.65 : 1.7, margin: 0, fontFamily }}
+              dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${t.textColor};font-weight:800">$1</strong>`) }}
             />
           ))}
+          {/* Image after text (thread only) */}
+          {isThread && imageEl}
         </div>
 
-        {/* Footer */}
-        <div style={t.footerStyle}>
-          <span style={{ color: t.accentColor, fontSize: 11, fontWeight: 700, fontFamily: 'system-ui' }}>
-            {idx + 1} / {carrossel?.slides.length}
-          </span>
-          <span style={{ color: t.mutedColor, fontSize: 11, fontStyle: 'italic', fontFamily: 'system-ui' }}>
-            {slide.destaque}
-          </span>
-        </div>
+        {/* Footer (hidden for thread) */}
+        {!isThread && (
+          <div style={t.footerStyle}>
+            <span style={{ color: t.accentColor, fontSize: 11, fontWeight: 700, fontFamily: 'system-ui' }}>
+              {idx + 1} / {carrossel?.slides.length}
+            </span>
+            <span style={{ color: t.mutedColor, fontSize: 11, fontStyle: 'italic', fontFamily: 'system-ui' }}>
+              {slide.destaque}
+            </span>
+          </div>
+        )}
       </div>
     )
   }
