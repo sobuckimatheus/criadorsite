@@ -140,6 +140,8 @@ export default function CarrosselPage() {
   const [copiado, setCopiado] = useState(false)
   const [exportando, setExportando] = useState(false)
   const [gerandoImagem, setGerandoImagem] = useState(false)
+  const [gerandoTodas, setGerandoTodas] = useState(false)
+  const [progressoIA, setProgressoIA] = useState<{ atual: number; total: number } | null>(null)
   const [error, setError] = useState('')
   const slideRef = useRef<HTMLDivElement>(null)
 
@@ -175,6 +177,39 @@ export default function CarrosselPage() {
     } finally {
       setGerandoImagem(false)
     }
+  }
+
+  async function gerarTodasImagensIA() {
+    if (!carrossel || gerandoTodas) return
+    setGerandoTodas(true)
+    setProgressoIA({ atual: 0, total: carrossel.slides.length })
+
+    for (let i = 0; i < carrossel.slides.length; i++) {
+      setProgressoIA({ atual: i + 1, total: carrossel.slides.length })
+      const slide = carrossel.slides[i]
+      try {
+        const res = await fetch('/api/carrossel/gerar-imagem', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho }),
+        })
+        const data = await res.json()
+        const url: string | undefined = data.imageUrl ?? data.imageData
+        if (res.ok && url) {
+          setCarrossel(prev => {
+            if (!prev) return prev
+            const slides = [...prev.slides]
+            slides[i] = { ...slides[i], imageUrl: url, imageType: 'pexels' }
+            return { ...prev, slides }
+          })
+        }
+      } catch {
+        // continua para o próximo slide em caso de erro
+      }
+    }
+
+    setGerandoTodas(false)
+    setProgressoIA(null)
   }
 
   async function gerarCarrossel() {
@@ -527,7 +562,7 @@ export default function CarrosselPage() {
 
                 {/* Ações do slide */}
                 <div className="grid grid-cols-2 gap-2">
-                  <button onClick={gerarImagemIA} disabled={gerandoImagem || !carrossel}
+                  <button onClick={gerarImagemIA} disabled={gerandoImagem || gerandoTodas}
                     className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
                     {gerandoImagem ? '⏳ Gerando...' : '✨ Imagem com IA'}
                   </button>
@@ -536,6 +571,14 @@ export default function CarrosselPage() {
                     {exportando ? '⏳ Exportando...' : '⬇️ Baixar PNG'}
                   </button>
                 </div>
+
+                {/* Gerar todas as imagens com IA */}
+                <button onClick={gerarTodasImagensIA} disabled={gerandoTodas || gerandoImagem}
+                  className="w-full py-3 rounded-xl text-sm font-semibold border-2 border-violet-400 text-violet-700 bg-violet-50 hover:bg-violet-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                  {gerandoTodas && progressoIA
+                    ? `⏳ Gerando imagens... ${progressoIA.atual} / ${progressoIA.total}`
+                    : '🎨 Gerar todas as imagens com IA'}
+                </button>
 
                 {/* Lista de slides */}
                 <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
