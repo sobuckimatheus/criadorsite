@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 interface Slide {
   texto: string
@@ -42,18 +42,89 @@ const TONS = [
   { id: 'provocativo', label: '😤 Provocativo', desc: 'Questiona e desafia' },
 ]
 
+type ThemeId = 'roxo' | 'dark' | 'gradiente' | 'minimal'
+
+interface ThemeDef {
+  label: string
+  swatch: string
+  cardStyle: React.CSSProperties
+  headerStyle: React.CSSProperties
+  bodyStyle: React.CSSProperties
+  footerStyle: React.CSSProperties
+  textColor: string
+  mutedColor: string
+  accentColor: string
+  avatarStyle: React.CSSProperties
+}
+
+const THEMES: Record<ThemeId, ThemeDef> = {
+  roxo: {
+    label: 'Roxo',
+    swatch: 'linear-gradient(135deg,#7c3aed,#ec4899)',
+    cardStyle: { background: '#ffffff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.10)' },
+    headerStyle: { background: 'linear-gradient(135deg,#7c3aed,#ec4899)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' },
+    bodyStyle: { background: '#ffffff', flex: 1, padding: '24px 24px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' },
+    footerStyle: { background: '#ffffff', borderTop: '1px solid #f3f4f6', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+    textColor: '#111827',
+    mutedColor: '#9333ea',
+    accentColor: '#7c3aed',
+    avatarStyle: { background: 'rgba(255,255,255,0.25)', color: '#fff' },
+  },
+  dark: {
+    label: 'Dark',
+    swatch: 'linear-gradient(135deg,#1e1b4b,#4c1d95)',
+    cardStyle: { background: '#0f0f1a', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' },
+    headerStyle: { background: 'linear-gradient(135deg,#1e1b4b,#312e81)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' },
+    bodyStyle: { background: '#0f0f1a', flex: 1, padding: '24px 24px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' },
+    footerStyle: { background: '#0f0f1a', borderTop: '1px solid #1e1b4b', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+    textColor: '#e2e8f0',
+    mutedColor: '#a78bfa',
+    accentColor: '#a78bfa',
+    avatarStyle: { background: 'rgba(139,92,246,0.3)', color: '#c4b5fd' },
+  },
+  gradiente: {
+    label: 'Grad.',
+    swatch: 'linear-gradient(135deg,#7c3aed,#a21caf,#ec4899)',
+    cardStyle: { background: 'linear-gradient(135deg,#6d28d9,#a21caf,#db2777)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(124,58,237,0.4)' },
+    headerStyle: { background: 'rgba(0,0,0,0.25)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' },
+    bodyStyle: { flex: 1, padding: '24px 24px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' },
+    footerStyle: { borderTop: '1px solid rgba(255,255,255,0.2)', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+    textColor: '#ffffff',
+    mutedColor: 'rgba(255,255,255,0.75)',
+    accentColor: 'rgba(255,255,255,0.9)',
+    avatarStyle: { background: 'rgba(255,255,255,0.2)', color: '#fff' },
+  },
+  minimal: {
+    label: 'Minimal',
+    swatch: 'linear-gradient(135deg,#111827,#374151)',
+    cardStyle: { background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' },
+    headerStyle: { background: '#111827', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' },
+    bodyStyle: { background: '#f9fafb', flex: 1, padding: '24px 24px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' },
+    footerStyle: { background: '#f9fafb', borderTop: '1px solid #e5e7eb', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+    textColor: '#111827',
+    mutedColor: '#6b7280',
+    accentColor: '#374151',
+    avatarStyle: { background: 'rgba(255,255,255,0.15)', color: '#fff' },
+  },
+}
+
+const THEME_IDS = Object.keys(THEMES) as ThemeId[]
+
 export default function CarrosselPage() {
   const [nicho, setNicho] = useState('')
   const [tipo, setTipo] = useState('')
   const [tom, setTom] = useState('narrativo')
   const [tema, setTema] = useState('')
   const [nome, setNome] = useState('')
+  const [estilo, setEstilo] = useState<ThemeId>('roxo')
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState('')
   const [carrossel, setCarrossel] = useState<Carrossel | null>(null)
   const [slideAtivo, setSlideAtivo] = useState(0)
   const [copiado, setCopiado] = useState(false)
+  const [exportando, setExportando] = useState(false)
   const [error, setError] = useState('')
+  const slideRef = useRef<HTMLDivElement>(null)
 
   const msgs = [
     '✍️ Construindo o gancho perfeito...',
@@ -84,15 +155,7 @@ export default function CarrosselPage() {
       const res = await fetch('/api/carrossel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nicho, nome, tipo,
-          tipoLabel: tipoObj?.label,
-          tipoDesc: tipoObj?.desc,
-          tom,
-          tomLabel: tomObj?.label,
-          tomDesc: tomObj?.desc,
-          tema,
-        }),
+        body: JSON.stringify({ nicho, nome, tipo, tipoLabel: tipoObj?.label, tipoDesc: tipoObj?.desc, tom, tomLabel: tomObj?.label, tomDesc: tomObj?.desc, tema }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar')
@@ -106,6 +169,21 @@ export default function CarrosselPage() {
     }
   }
 
+  async function exportarSlide() {
+    if (!slideRef.current || !carrossel) return
+    setExportando(true)
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(slideRef.current, { scale: 2, useCORS: true, allowTaint: true })
+      const link = document.createElement('a')
+      link.download = `slide-${slideAtivo + 1}-de-${carrossel.slides.length}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } finally {
+      setExportando(false)
+    }
+  }
+
   function copiarLegenda() {
     if (!carrossel) return
     const texto = `${carrossel.legenda}\n\n${(carrossel.hashtags ?? []).map(h => `#${h.replace('#', '')}`).join(' ')}`
@@ -115,45 +193,53 @@ export default function CarrosselPage() {
   }
 
   function renderSlide(slide: Slide, idx: number) {
-    const linhas = slide.texto.split('\n\n').filter(Boolean)
+    const t = THEMES[estilo]
+    const linhas = slide.texto.split(/\n\n|\n/).filter(Boolean)
+    const handle = (nome || nicho).toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')
+    const initial = (nome || nicho)[0]?.toUpperCase() ?? '?'
+
     return (
-      <div className="bg-white rounded-2xl p-7 min-h-[340px] flex flex-col justify-between shadow-md border border-gray-200 select-none"
-        style={{ fontFamily: "'Georgia', serif" }}>
-        <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-100">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            {nome ? nome[0].toUpperCase() : nicho[0]?.toUpperCase()}
+      <div style={{ ...t.cardStyle, minHeight: '420px', display: 'flex', flexDirection: 'column', fontFamily: 'Georgia, serif' }}>
+        {/* Header */}
+        <div style={t.headerStyle}>
+          <div style={{ ...t.avatarStyle, width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
+            {initial}
           </div>
-          <div>
-            <p className="text-gray-900 font-bold text-sm leading-none">{nome || nicho}</p>
-            <p className="text-gray-400 text-xs mt-0.5">@{(nome || nicho).toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')}</p>
+          <div style={{ flex: 1 }}>
+            <p style={{ color: '#fff', fontWeight: 700, fontSize: 14, margin: 0, lineHeight: 1, fontFamily: 'system-ui' }}>{nome || nicho}</p>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, margin: '3px 0 0', fontFamily: 'system-ui' }}>@{handle}</p>
+          </div>
+          <div style={{ display: 'flex', gap: 3 }}>
+            {[0,1,2].map(i => <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.5)' }} />)}
           </div>
         </div>
-        <div className="flex-1 space-y-3">
+
+        {/* Image */}
+        {slide.imageUrl && (
+          <div style={{ width: '100%', height: 200, overflow: 'hidden', flexShrink: 0 }}>
+            <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
+              alt="" crossOrigin="anonymous"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        )}
+
+        {/* Text */}
+        <div style={t.bodyStyle}>
           {linhas.map((linha, i) => (
-            <p key={i} className="text-gray-900 text-[15px] leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }}
+            <p key={i} style={{ color: t.textColor, fontSize: 15, lineHeight: 1.7, margin: 0 }}
+              dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${t.textColor}">$1</strong>`) }}
             />
           ))}
         </div>
-        {slide.imagem_sugerida && slide.imagem_sugerida !== 'sem imagem' && (
-          <div className="mt-4 rounded-xl overflow-hidden border border-gray-200">
-            {slide.imageUrl ? (
-              <img
-                src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
-                alt={slide.imagem_sugerida}
-                className="w-full h-48 object-cover"
-              />
-            ) : (
-              <div className="bg-gray-50 p-3 flex items-center gap-2">
-                <span className="text-lg">🖼️</span>
-                <p className="text-gray-400 text-xs italic">{slide.imagem_sugerida}</p>
-              </div>
-            )}
-          </div>
-        )}
-        <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
-          <span className="text-gray-300 text-xs">{idx + 1} / {carrossel?.slides.length}</span>
-          <span className="text-purple-500 text-xs font-medium">{slide.destaque}</span>
+
+        {/* Footer */}
+        <div style={t.footerStyle}>
+          <span style={{ color: t.accentColor, fontSize: 11, fontWeight: 700, fontFamily: 'system-ui' }}>
+            {idx + 1} / {carrossel?.slides.length}
+          </span>
+          <span style={{ color: t.mutedColor, fontSize: 11, fontStyle: 'italic', fontFamily: 'system-ui' }}>
+            {slide.destaque}
+          </span>
         </div>
       </div>
     )
@@ -163,11 +249,8 @@ export default function CarrosselPage() {
     <div className="py-8 px-6">
       <div className="max-w-6xl mx-auto">
 
-        {/* Header */}
         <div className="mb-8 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl flex-shrink-0">
-            ✨
-          </div>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl flex-shrink-0">✨</div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Criador de Carrossel Viral</h1>
             <p className="text-sm text-gray-500">Gere carrosséis que param o scroll — no estilo das maiores threads do Brasil</p>
@@ -183,8 +266,7 @@ export default function CarrosselPage() {
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Seu nome ou negócio</label>
               <input value={nome} onChange={e => setNome(e.target.value)}
                 placeholder="Ex: Dr. Carlos • Clínica Smile"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm"
-              />
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm" />
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
@@ -192,11 +274,7 @@ export default function CarrosselPage() {
               <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
                 {NICHOS.map(n => (
                   <button key={n} onClick={() => setNicho(n)}
-                    className={`text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${
-                      nicho === n
-                        ? 'bg-purple-50 border-purple-300 text-purple-700'
-                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-                    }`}>
+                    className={`text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${nicho === n ? 'bg-purple-50 border-purple-300 text-purple-700' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}`}>
                     {n}
                   </button>
                 ))}
@@ -208,11 +286,7 @@ export default function CarrosselPage() {
               <div className="space-y-1.5">
                 {TIPOS_NARRATIVA.map(t => (
                   <button key={t.id} onClick={() => setTipo(t.id)}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors border flex items-start gap-2.5 ${
-                      tipo === t.id
-                        ? 'bg-purple-50 border-purple-300'
-                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                    }`}>
+                    className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors border flex items-start gap-2.5 ${tipo === t.id ? 'bg-purple-50 border-purple-300' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
                     <span className="text-base mt-0.5">{t.emoji}</span>
                     <div>
                       <p className={`text-sm font-medium ${tipo === t.id ? 'text-purple-700' : 'text-gray-700'}`}>{t.label}</p>
@@ -228,13 +302,22 @@ export default function CarrosselPage() {
               <div className="grid grid-cols-2 gap-1.5">
                 {TONS.map(t => (
                   <button key={t.id} onClick={() => setTom(t.id)}
-                    className={`px-3 py-2.5 rounded-lg text-xs text-left transition-colors border ${
-                      tom === t.id
-                        ? 'bg-purple-50 border-purple-300 text-purple-700'
-                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-                    }`}>
+                    className={`px-3 py-2.5 rounded-lg text-xs text-left transition-colors border ${tom === t.id ? 'bg-purple-50 border-purple-300 text-purple-700' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}`}>
                     <p className="font-medium">{t.label}</p>
                     <p className="text-gray-400 mt-0.5 text-[10px]">{t.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Visual do Slide</label>
+              <div className="grid grid-cols-4 gap-2">
+                {THEME_IDS.map(id => (
+                  <button key={id} onClick={() => setEstilo(id)}
+                    className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all ${estilo === id ? 'border-purple-300 bg-purple-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                    <div className="w-9 h-9 rounded-lg flex-shrink-0" style={{ background: THEMES[id].swatch }} />
+                    <span className={`text-[10px] font-medium ${estilo === id ? 'text-purple-700' : 'text-gray-600'}`}>{THEMES[id].label}</span>
                   </button>
                 ))}
               </div>
@@ -245,12 +328,11 @@ export default function CarrosselPage() {
               <textarea value={tema} onChange={e => setTema(e.target.value)} rows={3}
                 placeholder={
                   tipo === 'origem' ? 'Ex: Como saí de R$800/mês para R$20k atendendo em casa'
-                  : tipo === 'caso_sucesso' ? 'Ex: Paciente com medo de dentista há 15 anos. O que aconteceu na primeira consulta.'
+                  : tipo === 'caso_sucesso' ? 'Ex: Paciente com medo de dentista há 15 anos. O que aconteceu.'
                   : tipo === 'polemica' ? 'Ex: Por que plano odontológico destrói sua saúde bucal'
                   : 'Descreva o tema do seu carrossel...'
                 }
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm resize-none"
-              />
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm resize-none" />
             </div>
 
             <button onClick={gerarCarrossel} disabled={loading || !nicho || !tipo || !tema.trim()}
@@ -271,8 +353,7 @@ export default function CarrosselPage() {
                 </div>
                 <div className="flex justify-center gap-2">
                   {[0, 1, 2].map(i => (
-                    <div key={i} className="w-2 h-2 rounded-full bg-purple-400 animate-bounce"
-                      style={{ animationDelay: `${i * 0.2}s` }} />
+                    <div key={i} className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: `${i * 0.2}s` }} />
                   ))}
                 </div>
               </div>
@@ -302,8 +383,12 @@ export default function CarrosselPage() {
                   <span className="text-2xl">🔥</span>
                 </div>
 
-                {renderSlide(carrossel.slides[slideAtivo], slideAtivo)}
+                {/* Slide preview */}
+                <div ref={slideRef}>
+                  {renderSlide(carrossel.slides[slideAtivo], slideAtivo)}
+                </div>
 
+                {/* Controles de navegação */}
                 <div className="flex items-center justify-between">
                   <button onClick={() => setSlideAtivo(Math.max(0, slideAtivo - 1))} disabled={slideAtivo === 0}
                     className="px-4 py-2 rounded-lg text-sm text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-30 transition-colors">
@@ -313,11 +398,7 @@ export default function CarrosselPage() {
                     {(carrossel.slides ?? []).map((_, i) => (
                       <button key={i} onClick={() => setSlideAtivo(i)}
                         className="rounded-full transition-all"
-                        style={{
-                          width: i === slideAtivo ? '20px' : '8px',
-                          height: '8px',
-                          background: i === slideAtivo ? 'linear-gradient(135deg, #a855f7, #ec4899)' : '#e5e7eb',
-                        }} />
+                        style={{ width: i === slideAtivo ? '20px' : '8px', height: '8px', background: i === slideAtivo ? 'linear-gradient(135deg,#a855f7,#ec4899)' : '#e5e7eb' }} />
                     ))}
                   </div>
                   <button onClick={() => setSlideAtivo(Math.min(carrossel.slides.length - 1, slideAtivo + 1))} disabled={slideAtivo === carrossel.slides.length - 1}
@@ -326,14 +407,19 @@ export default function CarrosselPage() {
                   </button>
                 </div>
 
+                {/* Export */}
+                <button onClick={exportarSlide} disabled={exportando}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                  {exportando ? '⏳ Exportando...' : '⬇️ Baixar slide como PNG'}
+                </button>
+
+                {/* Lista de slides */}
                 <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Todos os slides</p>
                   <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
                     {(carrossel.slides ?? []).map((slide, i) => (
                       <button key={i} onClick={() => setSlideAtivo(i)}
-                        className={`w-full text-left px-3 py-2 rounded-lg flex items-start gap-2.5 transition-colors border ${
-                          slideAtivo === i ? 'bg-purple-50 border-purple-200' : 'border-transparent hover:bg-gray-50'
-                        }`}>
+                        className={`w-full text-left px-3 py-2 rounded-lg flex items-start gap-2.5 transition-colors border ${slideAtivo === i ? 'bg-purple-50 border-purple-200' : 'border-transparent hover:bg-gray-50'}`}>
                         <span className={`text-xs font-bold w-5 text-center flex-shrink-0 mt-0.5 ${slideAtivo === i ? 'text-purple-600' : 'text-gray-300'}`}>{i + 1}</span>
                         <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{slide.destaque}</p>
                       </button>
@@ -341,13 +427,12 @@ export default function CarrosselPage() {
                   </div>
                 </div>
 
+                {/* Legenda */}
                 <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Legenda + Hashtags</p>
                     <button onClick={copiarLegenda}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-                        copiado ? 'bg-green-50 border-green-200 text-green-700' : 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100'
-                      }`}>
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${copiado ? 'bg-green-50 border-green-200 text-green-700' : 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100'}`}>
                       {copiado ? '✅ Copiado!' : '📋 Copiar tudo'}
                     </button>
                   </div>

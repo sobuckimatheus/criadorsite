@@ -3,6 +3,22 @@ import Anthropic from '@anthropic-ai/sdk'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+function repairLiteralNewlines(str: string): string {
+  let out = ''
+  let inStr = false
+  let esc = false
+  for (const ch of str) {
+    if (esc) { out += ch; esc = false; continue }
+    if (ch === '\\' && inStr) { out += ch; esc = true; continue }
+    if (ch === '"') { inStr = !inStr; out += ch; continue }
+    if (inStr && ch === '\n') { out += '\\n'; continue }
+    if (inStr && ch === '\r') { out += '\\r'; continue }
+    if (inStr && ch === '\t') { out += '\\t'; continue }
+    out += ch
+  }
+  return out
+}
+
 async function searchPexelsImage(query: string): Promise<string | null> {
   const key = process.env.PEXELS_API_KEY
   if (!key) return null
@@ -110,11 +126,15 @@ Use a ferramenta create_carousel para retornar o carrossel completo. Para diálo
     carrossel = toolUse.input as Record<string, unknown>
   }
 
-  // slides may arrive as a JSON string (single or double-encoded); unwrap until it's an array
+  // slides may arrive as a JSON-encoded string with literal newlines; unwrap until it's an array
   let slidesVal: unknown = carrossel.slides
   let attempts = 0
   while (typeof slidesVal === 'string' && attempts < 4) {
-    try { slidesVal = JSON.parse(slidesVal) } catch { break }
+    try {
+      slidesVal = JSON.parse(slidesVal)
+    } catch {
+      try { slidesVal = JSON.parse(repairLiteralNewlines(slidesVal as string)) } catch { break }
+    }
     attempts++
   }
   // Handle object-with-numeric-keys (non-standard array serialization)
@@ -127,10 +147,7 @@ Use a ferramenta create_carousel para retornar o carrossel completo. Para diálo
   carrossel.slides = slidesVal
 
   if (!Array.isArray(carrossel.slides)) {
-    const preview = typeof carrossel.slides === 'string'
-      ? (carrossel.slides as string).substring(0, 300)
-      : JSON.stringify(carrossel.slides)?.substring(0, 300)
-    return NextResponse.json({ error: `DEBUG slides: ${preview}` }, { status: 500 })
+    return NextResponse.json({ error: 'IA retornou slides em formato inválido' }, { status: 500 })
   }
 
   // Normalize hashtags: Claude sometimes returns as a space-separated string
