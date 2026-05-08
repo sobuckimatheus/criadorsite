@@ -101,11 +101,31 @@ Use a ferramenta create_carousel para retornar o carrossel completo. Para diálo
     return NextResponse.json({ error: 'IA não retornou os dados esperados' }, { status: 500 })
   }
 
-  const carrossel = toolUse.input as Record<string, unknown>
+  // toolUse.input may arrive as a JSON string in some SDK/runtime combos
+  let carrossel: Record<string, unknown>
+  if (typeof toolUse.input === 'string') {
+    try { carrossel = JSON.parse(toolUse.input as string) }
+    catch { return NextResponse.json({ error: 'Falha ao parsear input da ferramenta' }, { status: 500 }) }
+  } else {
+    carrossel = toolUse.input as Record<string, unknown>
+  }
 
-  // Normalize slides to array
+  // slides may arrive as a JSON string or object-with-numeric-keys
+  if (typeof carrossel.slides === 'string') {
+    try { carrossel.slides = JSON.parse(carrossel.slides as string) } catch { /* keep as-is */ }
+  }
+  if (carrossel.slides !== null && typeof carrossel.slides === 'object' && !Array.isArray(carrossel.slides)) {
+    const keys = Object.keys(carrossel.slides as object)
+    if (keys.length > 0 && keys.every(k => !isNaN(Number(k)))) {
+      carrossel.slides = Object.values(carrossel.slides as object)
+    }
+  }
+
   if (!Array.isArray(carrossel.slides)) {
-    return NextResponse.json({ error: 'IA retornou slides em formato inválido' }, { status: 500 })
+    const debugType = typeof carrossel.slides
+    const debugKeys = carrossel.slides && typeof carrossel.slides === 'object' ? Object.keys(carrossel.slides as object).slice(0, 5).join(',') : 'n/a'
+    const inputType = typeof toolUse.input
+    return NextResponse.json({ error: `Debug: slides=${debugType} keys=[${debugKeys}] inputType=${inputType}` }, { status: 500 })
   }
 
   // Normalize hashtags: Claude sometimes returns as a space-separated string
