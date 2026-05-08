@@ -109,7 +109,8 @@ CRÍTICO: Retorne APENAS JSON válido. Use \\n para quebrar linha dentro das str
 
   const carrossel = parseCarrossel(content.text)
   if (!carrossel) {
-    return NextResponse.json({ error: 'Erro ao processar resposta da IA. Tente novamente.' }, { status: 500 })
+    const preview = content.text.slice(0, 400).replace(/\n/g, '↵')
+    return NextResponse.json({ error: `Parse falhou. Início da resposta: ${preview}` }, { status: 500 })
   }
 
   // Fetch Pexels images in parallel for slides that need one
