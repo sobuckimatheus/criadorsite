@@ -127,7 +127,10 @@ Use a ferramenta create_carousel para retornar o carrossel completo. Para diálo
   carrossel.slides = slidesVal
 
   if (!Array.isArray(carrossel.slides)) {
-    return NextResponse.json({ error: 'IA retornou slides em formato inválido' }, { status: 500 })
+    const preview = typeof carrossel.slides === 'string'
+      ? (carrossel.slides as string).substring(0, 300)
+      : JSON.stringify(carrossel.slides)?.substring(0, 300)
+    return NextResponse.json({ error: `DEBUG slides: ${preview}` }, { status: 500 })
   }
 
   // Normalize hashtags: Claude sometimes returns as a space-separated string
