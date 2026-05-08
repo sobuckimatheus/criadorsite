@@ -24,9 +24,10 @@ interface Carrossel {
 const NICHOS = [
   'Saúde e Estética', 'Odontologia', 'Psicologia', 'Direito',
   'Infoprodutos', 'Arquitetura', 'Barbearia', 'Contabilidade',
-  'Design de Interiores', 'E-commerce', 'Educação', 'Estética Automotiva',
-  'Estúdio de Tatuagem', 'Inteligência Artificial', 'Joias e Semi-joias',
-  'Óticas', 'Pet Shop', 'Posicionamento', 'Roupas e Calçados', 'Salão de Beleza',
+  'Design de Interiores', 'E-commerce', 'Educação', 'Empreendedorismo',
+  'Estética Automotiva', 'Estúdio de Tatuagem', 'Inteligência Artificial',
+  'Joias e Semi-joias', 'Óticas', 'Pet Shop', 'Posicionamento',
+  'Roupas e Calçados', 'Salão de Beleza',
 ]
 
 const TIPOS_NARRATIVA = [
