@@ -19,30 +19,6 @@ async function searchPexelsImage(query: string): Promise<string | null> {
   }
 }
 
-function parseCarrossel(text: string) {
-  const start = text.indexOf('{')
-  const end = text.lastIndexOf('}')
-  if (start === -1 || end === -1) return null
-
-  const raw = text.slice(start, end + 1)
-  try {
-    return JSON.parse(raw)
-  } catch {
-    // Escape control characters that appear literally inside JSON string values
-    const repaired = raw.replace(/"(?:[^"\\]|\\.)*"/g, (match) =>
-      match
-        .replace(/\n/g, '\\n')
-        .replace(/\r/g, '\\r')
-        .replace(/\t/g, '\\t')
-    )
-    try {
-      return JSON.parse(repaired)
-    } catch {
-      console.error('RAW (500):', raw.slice(0, 500))
-      return null
-    }
-  }
-}
 
 export async function POST(req: NextRequest) {
   const { nicho, nome, tipo, tipoLabel, tipoDesc, tom, tomLabel, tomDesc, tema } = await req.json()
@@ -81,37 +57,50 @@ ESTRUTURA DOS SLIDES:
 - Slides 10-11: A resolução e resultado — o que aconteceu depois
 - Slide 12: Frase de impacto isolada + CTA para comentar
 
-CRÍTICO: Retorne APENAS JSON válido. Use \\n para quebrar linha dentro das strings, NUNCA quebras de linha literais. Sem markdown, sem texto fora do JSON.
-
-{
-  "titulo": "título resumido do carrossel",
-  "nicho": "${nicho}",
-  "tipo_narrativa": "${tipoLabel}",
-  "slides": [
-    {
-      "texto": "texto do slide com **negrito** nas palavras de impacto. Use \\n\\n para separar parágrafos.",
-      "imagem_sugerida": "3-5 palavras em inglês descrevendo a foto ideal para busca (ou 'sem imagem' se slide só texto)",
-      "destaque": "frase de 3-6 palavras que resume o slide"
-    }
-  ],
-  "legenda": "legenda completa para o post no Instagram com gancho inicial, desenvolvimento de 3-4 linhas e CTA final. Use emojis estratégicos.",
-  "hashtags": ["hashtag1", "hashtag2", "hashtag3", "hashtag4", "hashtag5", "hashtag6", "hashtag7", "hashtag8", "hashtag9", "hashtag10"]
-}`
+Use a ferramenta create_carousel para retornar o carrossel completo. Para diálogos ou citações dentro do texto dos slides, use aspas curvas (") ou travessão (—) em vez de aspas retas.`
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 8000,
+    tools: [
+      {
+        name: 'create_carousel',
+        description: 'Cria o carrossel viral completo',
+        input_schema: {
+          type: 'object' as const,
+          properties: {
+            titulo: { type: 'string' },
+            nicho: { type: 'string' },
+            tipo_narrativa: { type: 'string' },
+            slides: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  texto: { type: 'string', description: 'Texto do slide com **negrito** e \\n\\n entre parágrafos' },
+                  imagem_sugerida: { type: 'string', description: '3-5 palavras em inglês para busca de foto, ou "sem imagem"' },
+                  destaque: { type: 'string', description: 'Frase de 3-6 palavras resumindo o slide' },
+                },
+                required: ['texto', 'imagem_sugerida', 'destaque'],
+              },
+            },
+            legenda: { type: 'string' },
+            hashtags: { type: 'array', items: { type: 'string' } },
+          },
+          required: ['titulo', 'nicho', 'tipo_narrativa', 'slides', 'legenda', 'hashtags'],
+        },
+      },
+    ],
+    tool_choice: { type: 'tool', name: 'create_carousel' },
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const content = message.content[0]
-  if (content.type !== 'text') throw new Error('Resposta inesperada')
-
-  const carrossel = parseCarrossel(content.text)
-  if (!carrossel) {
-    const preview = content.text.slice(0, 400).replace(/\n/g, '↵')
-    return NextResponse.json({ error: `Parse falhou. Início da resposta: ${preview}` }, { status: 500 })
+  const toolUse = message.content.find((c) => c.type === 'tool_use')
+  if (!toolUse || toolUse.type !== 'tool_use') {
+    return NextResponse.json({ error: 'IA não retornou os dados esperados' }, { status: 500 })
   }
+
+  const carrossel = toolUse.input as Record<string, unknown>
 
   // Fetch Pexels images in parallel for slides that need one
   const slides = carrossel.slides as { texto: string; imagem_sugerida: string; destaque: string; imageUrl?: string }[]
