@@ -46,7 +46,7 @@ const TONS = [
   { id: 'provocativo', label: '😤 Provocativo', desc: 'Questiona e desafia' },
 ]
 
-type ThemeId = 'thread' | 'roxo' | 'dark' | 'gradiente' | 'minimal'
+type ThemeId = 'thread' | 'roxo' | 'dark' | 'gradiente' | 'minimal' | 'bold' | 'clean' | 'luxury'
 
 interface ThemeDef {
   label: string
@@ -122,6 +122,42 @@ const THEMES: Record<ThemeId, ThemeDef> = {
     accentColor: '#374151',
     avatarStyle: { background: 'rgba(255,255,255,0.15)', color: '#fff' },
   },
+  bold: {
+    label: 'Bold',
+    swatch: 'linear-gradient(135deg,#7C3AED,#EC4899)',
+    cardStyle: { borderRadius: '16px', overflow: 'hidden' },
+    headerStyle: {},
+    bodyStyle: {},
+    footerStyle: {},
+    textColor: '#ffffff',
+    mutedColor: 'rgba(255,255,255,0.7)',
+    accentColor: '#ffffff',
+    avatarStyle: { background: 'rgba(255,255,255,0.2)', color: '#fff' },
+  },
+  clean: {
+    label: 'Clean',
+    swatch: 'linear-gradient(135deg,#f0f4ff 50%,#7C3AED 50%)',
+    cardStyle: { borderRadius: '16px', overflow: 'hidden', background: '#ffffff', border: '1px solid #e5e7eb' },
+    headerStyle: {},
+    bodyStyle: {},
+    footerStyle: {},
+    textColor: '#111827',
+    mutedColor: '#6b7280',
+    accentColor: '#7C3AED',
+    avatarStyle: { background: '#7C3AED', color: '#fff' },
+  },
+  luxury: {
+    label: 'Luxury',
+    swatch: 'linear-gradient(135deg,#0a0a0a 65%,#D4AF37 65%)',
+    cardStyle: { borderRadius: '16px', overflow: 'hidden', background: '#0a0a0a' },
+    headerStyle: {},
+    bodyStyle: {},
+    footerStyle: {},
+    textColor: '#e5e5e5',
+    mutedColor: 'rgba(212,175,55,0.7)',
+    accentColor: '#D4AF37',
+    avatarStyle: { background: 'rgba(212,175,55,0.15)', color: '#D4AF37' },
+  },
 }
 
 const THEME_IDS = Object.keys(THEMES) as ThemeId[]
@@ -144,6 +180,7 @@ export default function CarrosselPage() {
   const [progressoIA, setProgressoIA] = useState<{ atual: number; total: number } | null>(null)
   const [error, setError] = useState('')
   const slideRef = useRef<HTMLDivElement>(null)
+  const isVisualTheme = estilo === 'bold' || estilo === 'clean' || estilo === 'luxury'
 
   const msgs = [
     '✍️ Construindo o gancho perfeito...',
@@ -339,6 +376,120 @@ export default function CarrosselPage() {
               />
             </div>
           )}
+        </div>
+      )
+    }
+
+    // ── BOLD (tipografia + cores vibrantes) ──────────────────────────────
+    if (estilo === 'bold') {
+      const BOLD_GRADIENTS = [
+        'linear-gradient(135deg,#7C3AED 0%,#4F46E5 100%)',
+        'linear-gradient(135deg,#EC4899 0%,#EF4444 100%)',
+        'linear-gradient(135deg,#F59E0B 0%,#EF4444 100%)',
+        'linear-gradient(135deg,#10B981 0%,#059669 100%)',
+        'linear-gradient(135deg,#6366F1 0%,#8B5CF6 100%)',
+        'linear-gradient(135deg,#0EA5E9 0%,#6366F1 100%)',
+        'linear-gradient(135deg,#EC4899 0%,#8B5CF6 100%)',
+        'linear-gradient(135deg,#F59E0B 0%,#10B981 100%)',
+        'linear-gradient(135deg,#EF4444 0%,#F97316 100%)',
+        'linear-gradient(135deg,#3B82F6 0%,#06B6D4 100%)',
+        'linear-gradient(135deg,#8B5CF6 0%,#EC4899 100%)',
+        'linear-gradient(135deg,#14B8A6 0%,#3B82F6 100%)',
+      ]
+      const bg = BOLD_GRADIENTS[idx % BOLD_GRADIENTS.length]
+      return (
+        <div style={{
+          background: bg, borderRadius: '16px', width: '100%', aspectRatio: '1/1',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
+          fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
+        }}>
+          <div style={{
+            position: 'absolute', right: 16, top: 8, fontSize: 130, fontWeight: 900,
+            color: 'rgba(255,255,255,0.10)', lineHeight: 1, userSelect: 'none', fontFamily: 'Georgia,serif',
+          }}>{idx + 1}</div>
+          <div style={{
+            flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            padding: '36px 32px 16px', position: 'relative', zIndex: 1, overflow: 'hidden',
+          }}>
+            {linhas.map((linha, i) => (
+              <p key={i} style={{ color: '#fff', fontSize: i === 0 ? 19 : 15, lineHeight: 1.6, margin: '0 0 10px', fontWeight: i === 0 ? 800 : 400 }}
+                dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#fff;font-weight:900">$1</strong>') }}
+              />
+            ))}
+          </div>
+          <div style={{ padding: '0 32px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+            <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: 600 }}>@{handle}</span>
+            <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+              {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
+                <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? '#fff' : 'rgba(255,255,255,0.35)' }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // ── CLEAN (tipografia limpa + acento colorido) ────────────────────────
+    if (estilo === 'clean') {
+      const CLEAN_ACCENTS = ['#7C3AED','#EC4899','#F59E0B','#10B981','#6366F1','#0EA5E9','#EF4444','#8B5CF6','#F97316','#06B6D4','#84CC16','#14B8A6']
+      const accent = CLEAN_ACCENTS[idx % CLEAN_ACCENTS.length]
+      return (
+        <div style={{
+          background: '#ffffff', borderRadius: '16px', width: '100%', aspectRatio: '1/1',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          border: '1px solid #e5e7eb', boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
+          fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+        }}>
+          <div style={{ height: 5, background: accent, flexShrink: 0 }} />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 30px 12px', overflow: 'hidden' }}>
+            <div style={{ fontSize: 72, fontWeight: 900, lineHeight: 1, marginBottom: 12, color: accent, opacity: 0.1, fontFamily: 'Georgia,serif' }}>
+              {String(idx + 1).padStart(2, '0')}
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, overflow: 'hidden' }}>
+              {linhas.map((linha, i) => (
+                <p key={i} style={{ color: '#111827', fontSize: i === 0 ? 17 : 14, lineHeight: 1.65, margin: 0, fontWeight: i === 0 ? 700 : 400 }}
+                  dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${accent};font-weight:800">$1</strong>`) }}
+                />
+              ))}
+            </div>
+          </div>
+          <div style={{ padding: '10px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `2px solid ${accent}` }}>
+            <span style={{ color: '#9ca3af', fontSize: 11, fontWeight: 600 }}>@{handle}</span>
+            <span style={{ color: accent, fontSize: 11, fontWeight: 700 }}>{idx + 1} / {carrossel?.slides.length}</span>
+          </div>
+        </div>
+      )
+    }
+
+    // ── LUXURY (dark + tipografia serifada + dourado) ─────────────────────
+    if (estilo === 'luxury') {
+      return (
+        <div style={{
+          background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '1/1',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
+          fontFamily: 'Georgia,"Times New Roman",serif',
+          boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
+        }}>
+          <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,#D4AF37,transparent)', flexShrink: 0 }} />
+          <div style={{
+            position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)',
+            fontSize: 200, fontWeight: 900, color: 'rgba(212,175,55,0.04)', lineHeight: 1,
+            userSelect: 'none', fontFamily: 'Georgia,serif',
+          }}>{idx + 1}</div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '36px', position: 'relative', zIndex: 1, overflow: 'hidden' }}>
+            <div style={{ width: 36, height: 1, background: '#D4AF37', marginBottom: 24 }} />
+            {linhas.map((linha, i) => (
+              <p key={i} style={{ color: '#e2e2e2', fontSize: 15, lineHeight: 1.8, margin: '0 0 10px', fontStyle: i === 0 ? 'italic' : 'normal', fontWeight: i === 0 ? 400 : 300, letterSpacing: '0.01em' }}
+                dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#D4AF37;font-weight:600;font-style:normal">$1</strong>') }}
+              />
+            ))}
+          </div>
+          <div style={{ padding: '0 36px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+            <span style={{ color: 'rgba(212,175,55,0.6)', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: '-apple-system,sans-serif' }}>{nome || nicho}</span>
+            <span style={{ color: 'rgba(212,175,55,0.4)', fontSize: 10, letterSpacing: '0.08em', fontFamily: '-apple-system,sans-serif' }}>{idx + 1} / {carrossel?.slides.length}</span>
+          </div>
+          <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,#D4AF37,transparent)', flexShrink: 0 }} />
         </div>
       )
     }
@@ -571,24 +722,31 @@ export default function CarrosselPage() {
                 </div>
 
                 {/* Ações do slide */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={gerarImagemIA} disabled={gerandoImagem || gerandoTodas}
-                    className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                    {gerandoImagem ? '⏳ Gerando...' : '✨ Imagem com IA'}
-                  </button>
+                {isVisualTheme ? (
                   <button onClick={exportarSlide} disabled={exportando}
-                    className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
                     {exportando ? '⏳ Exportando...' : '⬇️ Baixar PNG'}
                   </button>
-                </div>
-
-                {/* Gerar todas as imagens com IA */}
-                <button onClick={gerarTodasImagensIA} disabled={gerandoTodas || gerandoImagem}
-                  className="w-full py-3 rounded-xl text-sm font-semibold border-2 border-violet-400 text-violet-700 bg-violet-50 hover:bg-violet-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                  {gerandoTodas && progressoIA
-                    ? `⏳ Gerando imagens... ${progressoIA.atual} / ${progressoIA.total}`
-                    : `🎨 Gerar imagens sem foto com IA${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} slides)` : ''}`}
-                </button>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button onClick={gerarImagemIA} disabled={gerandoImagem || gerandoTodas}
+                        className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                        {gerandoImagem ? '⏳ Gerando...' : '✨ Imagem com IA'}
+                      </button>
+                      <button onClick={exportarSlide} disabled={exportando}
+                        className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                        {exportando ? '⏳ Exportando...' : '⬇️ Baixar PNG'}
+                      </button>
+                    </div>
+                    <button onClick={gerarTodasImagensIA} disabled={gerandoTodas || gerandoImagem}
+                      className="w-full py-3 rounded-xl text-sm font-semibold border-2 border-violet-400 text-violet-700 bg-violet-50 hover:bg-violet-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                      {gerandoTodas && progressoIA
+                        ? `⏳ Gerando imagens... ${progressoIA.atual} / ${progressoIA.total}`
+                        : `🎨 Gerar imagens sem foto com IA${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} slides)` : ''}`}
+                    </button>
+                  </>
+                )}
 
                 {/* Lista de slides */}
                 <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
