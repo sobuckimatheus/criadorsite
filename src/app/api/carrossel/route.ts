@@ -160,9 +160,23 @@ REGRAS PARA IMAGENS (muito importante):
     }
 
     // Fetch images sequentially to avoid duplicates across slides
+    // Priority: Wikipedia (pessoa) → Wikipedia (empresa) → Pexels (imagem_sugerida)
+    // Fallback: if Wikipedia fails, tries Pexels with the person/company name
     const usedUrls = new Set<string>()
+
+    async function tryPexels(query: string, idx: number, type: 'pessoa' | 'empresa' | 'pexels') {
+      if (!query || query === 'sem imagem') return
+      const url = await searchPexelsImage(query)
+      if (url && !usedUrls.has(url)) {
+        usedUrls.add(url)
+        carrossel.slides[idx].imageUrl = url
+        carrossel.slides[idx].imageType = type
+      }
+    }
+
     for (let i = 0; i < carrossel.slides.length; i++) {
       const slide = carrossel.slides[i]
+
       if (slide.pessoa) {
         const url = await searchWikipediaImage(slide.pessoa)
         if (url && !usedUrls.has(url)) {
@@ -171,7 +185,11 @@ REGRAS PARA IMAGENS (muito importante):
           carrossel.slides[i].imageType = 'pessoa'
           continue
         }
+        // Wikipedia sem resultado → Pexels com o nome da pessoa como fallback
+        await tryPexels(slide.pessoa, i, 'pessoa')
+        if (carrossel.slides[i].imageUrl) continue
       }
+
       if (slide.empresa) {
         const url = await searchWikipediaImage(slide.empresa)
         if (url && !usedUrls.has(url)) {
@@ -180,14 +198,13 @@ REGRAS PARA IMAGENS (muito importante):
           carrossel.slides[i].imageType = 'empresa'
           continue
         }
+        // Wikipedia sem resultado → Pexels com o nome da empresa como fallback
+        await tryPexels(slide.empresa, i, 'empresa')
+        if (carrossel.slides[i].imageUrl) continue
       }
+
       if (slide.imagem_sugerida && slide.imagem_sugerida !== 'sem imagem') {
-        const url = await searchPexelsImage(slide.imagem_sugerida)
-        if (url && !usedUrls.has(url)) {
-          usedUrls.add(url)
-          carrossel.slides[i].imageUrl = url
-          carrossel.slides[i].imageType = 'pexels'
-        }
+        await tryPexels(slide.imagem_sugerida, i, 'pexels')
       }
     }
 
