@@ -240,8 +240,8 @@ export default function CarrosselPage() {
             </div>
           </div>
 
-          {/* Texto */}
-          <div style={{ padding: '16px 20px', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', overflow: 'hidden' }}>
+          {/* Texto — não cresce; quem cresce é a imagem */}
+          <div style={{ padding: '16px 20px 0', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px', ...(slide.imageUrl ? {} : { flex: 1 }) }}>
             {linhas.map((linha, i) => (
               <p key={i} style={{ color: '#0f1419', fontSize: 15, lineHeight: 1.6, margin: 0, fontFamily }}
                 dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#0f1419;font-weight:800">$1</strong>') }}
@@ -249,18 +249,18 @@ export default function CarrosselPage() {
             ))}
           </div>
 
-          {/* Imagem — colada no rodapé, sem padding, sem border-radius */}
+          {/* Imagem — cresce para preencher o espaço restante, pequeno respiro top/bottom */}
           {slide.imageUrl && (
-            <div style={{ marginTop: 'auto', width: '100%', flexShrink: 0 }}>
+            <div style={{ flex: 1, marginTop: '14px', marginBottom: '12px', minHeight: '80px', overflow: 'hidden' }}>
               <img
                 src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
                 alt="" crossOrigin="anonymous"
                 style={{
                   width: '100%',
+                  height: '100%',
                   display: 'block',
                   objectFit: isWikipediaBrand ? 'contain' : 'cover',
                   objectPosition: 'center top',
-                  maxHeight: '260px',
                   background: isWikipediaBrand ? '#f5f5f5' : 'transparent',
                 }}
               />
