@@ -46,7 +46,7 @@ const TONS = [
   { id: 'provocativo', label: '😤 Provocativo', desc: 'Questiona e desafia' },
 ]
 
-type ThemeId = 'thread' | 'roxo' | 'dark' | 'gradiente' | 'minimal' | 'bold' | 'clean' | 'luxury'
+type ThemeId = 'thread' | 'roxo' | 'dark' | 'gradiente' | 'minimal' | 'bold' | 'clean' | 'luxury' | 'luxofoto'
 
 interface ThemeDef {
   label: string
@@ -145,6 +145,18 @@ const THEMES: Record<ThemeId, ThemeDef> = {
     mutedColor: '#6b7280',
     accentColor: '#7C3AED',
     avatarStyle: { background: '#7C3AED', color: '#fff' },
+  },
+  luxofoto: {
+    label: 'Luxo+',
+    swatch: 'linear-gradient(135deg,#0a0a0a,#D4AF37)',
+    cardStyle: { borderRadius: '16px', overflow: 'hidden', background: '#0a0a0a' },
+    headerStyle: {},
+    bodyStyle: {},
+    footerStyle: {},
+    textColor: '#ffffff',
+    mutedColor: 'rgba(212,175,55,0.7)',
+    accentColor: '#D4AF37',
+    avatarStyle: { background: 'rgba(212,175,55,0.15)', color: '#D4AF37' },
   },
   luxury: {
     label: 'Luxury',
@@ -457,6 +469,78 @@ export default function CarrosselPage() {
           <div style={{ padding: '10px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `2px solid ${accent}` }}>
             <span style={{ color: '#9ca3af', fontSize: 11, fontWeight: 600 }}>@{handle}</span>
             <span style={{ color: accent, fontSize: 11, fontWeight: 700 }}>{idx + 1} / {carrossel?.slides.length}</span>
+          </div>
+        </div>
+      )
+    }
+
+    // ── LUXO+FOTO (dark + dourado + foto lateral com fade) ───────────────
+    if (estilo === 'luxofoto') {
+      const hasImage = !!slide.imageUrl
+      const isWikiBrand = slide.imageType === 'empresa'
+      const imgSrc = slide.imageUrl
+        ? (slide.imageUrl.startsWith('data:') ? slide.imageUrl : `/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`)
+        : null
+      return (
+        <div style={{
+          background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '1/1',
+          position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+          fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+          boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+        }}>
+          {/* Imagem lateral direita */}
+          {imgSrc && (
+            <>
+              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '55%', overflow: 'hidden' }}>
+                <img src={imgSrc} alt="" crossOrigin="anonymous"
+                  style={{ width: '100%', height: '100%', objectFit: isWikiBrand ? 'contain' : 'cover', objectPosition: 'center top', display: 'block', background: isWikiBrand ? '#111' : 'transparent' }}
+                />
+              </div>
+              {/* Fade horizontal para blend com fundo */}
+              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '70%', background: 'linear-gradient(90deg,#0a0a0a 25%,rgba(10,10,10,0.65) 55%,transparent 100%)', zIndex: 1, pointerEvents: 'none' }} />
+              {/* Fade vertical no rodapé */}
+              <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '30%', background: 'linear-gradient(0deg,#0a0a0a 30%,transparent 100%)', zIndex: 1, pointerEvents: 'none' }} />
+            </>
+          )}
+
+          {/* Conteúdo de texto */}
+          <div style={{
+            position: 'relative', zIndex: 2, flex: 1,
+            display: 'flex', flexDirection: 'column',
+            padding: '28px 28px 16px',
+            width: hasImage ? '62%' : '100%',
+            overflow: 'hidden',
+          }}>
+            {/* Número do slide */}
+            <div style={{ color: '#D4AF37', fontSize: 60, fontWeight: 900, lineHeight: 1, marginBottom: 10, fontFamily: 'Georgia,serif' }}>
+              {idx + 1}
+            </div>
+            {/* Linhas de texto */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, overflow: 'hidden' }}>
+              {linhas.map((linha, i) => (
+                <p key={i} style={{
+                  color: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.82)',
+                  fontSize: i === 0 ? 19 : 13,
+                  lineHeight: i === 0 ? 1.2 : 1.65,
+                  margin: 0,
+                  fontWeight: i === 0 ? 800 : 400,
+                  textTransform: i === 0 ? 'uppercase' : 'none',
+                  letterSpacing: i === 0 ? '0.03em' : '0',
+                }}
+                  dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#D4AF37;font-weight:800">$1</strong>') }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Rodapé */}
+          <div style={{ position: 'relative', zIndex: 2, padding: '0 28px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ color: 'rgba(212,175,55,0.65)', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{nome || nicho}</span>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
+                <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: i === idx ? '#D4AF37' : 'rgba(212,175,55,0.3)', border: i === idx ? 'none' : '1px solid rgba(212,175,55,0.4)' }} />
+              ))}
+            </div>
           </div>
         </div>
       )
