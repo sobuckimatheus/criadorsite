@@ -28,12 +28,17 @@ function parseCarrossel(text: string) {
   try {
     return JSON.parse(raw)
   } catch {
-    const repaired = raw.replace(/("(?:[^"\\]|\\.)*")|[\n\r]/g, (match, str) =>
-      str ? str : ' '
+    // Escape control characters that appear literally inside JSON string values
+    const repaired = raw.replace(/"(?:[^"\\]|\\.)*"/g, (match) =>
+      match
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t')
     )
     try {
       return JSON.parse(repaired)
     } catch {
+      console.error('RAW (500):', raw.slice(0, 500))
       return null
     }
   }
