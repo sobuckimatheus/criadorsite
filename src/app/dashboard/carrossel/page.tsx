@@ -507,27 +507,33 @@ export default function CarrosselPage() {
           <div style={{
             position: 'relative', zIndex: 2, flex: 1,
             display: 'flex', flexDirection: 'column',
-            padding: '28px 28px 16px',
-            width: hasImage ? '62%' : '100%',
+            padding: '26px 26px 14px',
+            width: hasImage ? '60%' : '100%',
             overflow: 'hidden',
           }}>
             {/* Número do slide */}
-            <div style={{ color: '#D4AF37', fontSize: 60, fontWeight: 900, lineHeight: 1, marginBottom: 10, fontFamily: 'Georgia,serif' }}>
+            <div style={{ color: '#D4AF37', fontSize: 58, fontWeight: 900, lineHeight: 1, marginBottom: 14, fontFamily: 'Georgia,serif', flexShrink: 0 }}>
               {idx + 1}
             </div>
-            {/* Linhas de texto */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, overflow: 'hidden' }}>
-              {linhas.map((linha, i) => (
+
+            {/* Título — primeira linha, bem maior */}
+            {linhas[0] && (
+              <p style={{
+                color: '#ffffff', fontSize: 22, fontWeight: 900, lineHeight: 1.2,
+                margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0,
+              }}
+                dangerouslySetInnerHTML={{ __html: linhas[0].replace(/\*\*(.*?)\*\*/g, '<strong style="color:#D4AF37;font-weight:900">$1</strong>') }}
+              />
+            )}
+
+            {/* Corpo — linhas seguintes com espaçamento generoso */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
+              {linhas.slice(1).map((linha, i) => (
                 <p key={i} style={{
-                  color: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.82)',
-                  fontSize: i === 0 ? 19 : 13,
-                  lineHeight: i === 0 ? 1.2 : 1.65,
-                  margin: 0,
-                  fontWeight: i === 0 ? 800 : 400,
-                  textTransform: i === 0 ? 'uppercase' : 'none',
-                  letterSpacing: i === 0 ? '0.03em' : '0',
+                  color: 'rgba(255,255,255,0.85)', fontSize: 14, lineHeight: 1.75,
+                  margin: 0, fontWeight: 400,
                 }}
-                  dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#D4AF37;font-weight:800">$1</strong>') }}
+                  dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#D4AF37;font-weight:700">$1</strong>') }}
                 />
               ))}
             </div>
