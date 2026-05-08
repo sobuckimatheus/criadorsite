@@ -216,10 +216,10 @@ export default function CarrosselPage() {
 
         {/* Image */}
         {slide.imageUrl && (
-          <div style={{ width: '100%', height: 200, overflow: 'hidden', flexShrink: 0 }}>
+          <div style={{ width: '100%', position: 'relative', paddingTop: '60%', overflow: 'hidden', flexShrink: 0 }}>
             <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
               alt="" crossOrigin="anonymous"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         )}
 

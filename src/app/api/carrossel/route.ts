@@ -3,17 +3,22 @@ import Anthropic from '@anthropic-ai/sdk'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-function repairLiteralNewlines(str: string): string {
+function repairControlChars(str: string): string {
   let out = ''
   let inStr = false
   let esc = false
   for (const ch of str) {
+    const code = ch.charCodeAt(0)
     if (esc) { out += ch; esc = false; continue }
     if (ch === '\\' && inStr) { out += ch; esc = true; continue }
     if (ch === '"') { inStr = !inStr; out += ch; continue }
-    if (inStr && ch === '\n') { out += '\\n'; continue }
-    if (inStr && ch === '\r') { out += '\\r'; continue }
-    if (inStr && ch === '\t') { out += '\\t'; continue }
+    if (inStr && code < 32) {
+      if (code === 10) { out += '\\n'; continue }
+      if (code === 13) { out += '\\r'; continue }
+      if (code === 9)  { out += '\\t'; continue }
+      out += `\\u${code.toString(16).padStart(4, '0')}`
+      continue
+    }
     out += ch
   }
   return out
@@ -24,7 +29,7 @@ async function searchPexelsImage(query: string): Promise<string | null> {
   if (!key) return null
   try {
     const res = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&orientation=portrait`,
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&orientation=square`,
       { headers: { Authorization: key } }
     )
     if (!res.ok) return null
@@ -74,7 +79,7 @@ ESTRUTURA DOS SLIDES:
 - Slides 10-11: A resolução e resultado — o que aconteceu depois
 - Slide 12: Frase de impacto isolada + CTA para comentar
 
-Use a ferramenta create_carousel para retornar o carrossel completo. Para diálogos ou citações dentro do texto dos slides, use aspas curvas (") ou travessão (—) em vez de aspas retas.`
+Use a ferramenta create_carousel para retornar o carrossel completo.`
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
@@ -91,11 +96,12 @@ Use a ferramenta create_carousel para retornar o carrossel completo. Para diálo
             tipo_narrativa: { type: 'string' },
             slides: {
               type: 'array',
+              description: 'Array nativo de objetos — NÃO codifique como string JSON',
               items: {
                 type: 'object',
                 properties: {
-                  texto: { type: 'string', description: 'Texto do slide com **negrito** e \\n\\n entre parágrafos' },
-                  imagem_sugerida: { type: 'string', description: '3-5 palavras em inglês para busca de foto, ou "sem imagem"' },
+                  texto: { type: 'string', description: 'Texto do slide com markdown **negrito**' },
+                  imagem_sugerida: { type: 'string', description: '3-5 palavras em inglês para busca de foto, ou sem imagem' },
                   destaque: { type: 'string', description: 'Frase de 3-6 palavras resumindo o slide' },
                 },
                 required: ['texto', 'imagem_sugerida', 'destaque'],
@@ -130,11 +136,13 @@ Use a ferramenta create_carousel para retornar o carrossel completo. Para diálo
   let slidesVal: unknown = carrossel.slides
   let attempts = 0
   while (typeof slidesVal === 'string' && attempts < 4) {
-    try {
-      slidesVal = JSON.parse(slidesVal)
-    } catch {
-      try { slidesVal = JSON.parse(repairLiteralNewlines(slidesVal as string)) } catch { break }
-    }
+    const s = slidesVal as string
+    try { slidesVal = JSON.parse(s); break }
+    catch { /* try repairs */ }
+    try { slidesVal = JSON.parse(repairControlChars(s)); break }
+    catch { /* try stripping all remaining control chars */ }
+    try { slidesVal = JSON.parse(s.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '')); break }
+    catch { break }
     attempts++
   }
   // Handle object-with-numeric-keys (non-standard array serialization)
