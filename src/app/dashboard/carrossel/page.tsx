@@ -222,15 +222,15 @@ export default function CarrosselPage() {
     const isWikipedia = isWikipediaPerson || isWikipediaBrand
     const isPexels = slide.imageType === 'pexels'
 
-    // Wikipedia images go after header (before text) — tall for person, short for brand
-    const wikiImageEl = isWikipedia && slide.imageUrl ? (
+    // Thread: all images go inside the body after text (same margin as text, rounded corners)
+    const threadImageEl = isThread && slide.imageUrl ? (
       <div style={{
         width: '100%',
-        height: isWikipediaBrand ? '80px' : '165px',
+        height: isWikipediaPerson ? '155px' : isWikipediaBrand ? '80px' : '115px',
         overflow: 'hidden',
         flexShrink: 0,
-        background: isWikipediaBrand ? '#fff' : 'transparent',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        borderRadius: '10px',
+        background: isWikipediaBrand ? '#f5f5f5' : 'transparent',
       }}>
         <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
           alt="" crossOrigin="anonymous"
@@ -238,9 +238,17 @@ export default function CarrosselPage() {
       </div>
     ) : null
 
-    // Pexels images stay in the body (full-width ambient photo)
-    const pexelsImageEl = isPexels && slide.imageUrl ? (
-      <div style={{ width: '100%', height: isThread ? '110px' : '140px', overflow: 'hidden', flexShrink: 0, borderRadius: isThread ? '10px' : '0' }}>
+    // Non-thread: Wikipedia full-bleed after header, Pexels full-bleed before text
+    const nonThreadWikiEl = !isThread && isWikipedia && slide.imageUrl ? (
+      <div style={{ width: '100%', height: isWikipediaBrand ? '80px' : '160px', overflow: 'hidden', flexShrink: 0, background: isWikipediaBrand ? '#fff' : 'transparent' }}>
+        <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
+          alt="" crossOrigin="anonymous"
+          style={{ width: '100%', height: '100%', objectFit: isWikipediaBrand ? 'contain' : 'cover', objectPosition: isWikipediaPerson ? 'top center' : 'center' }} />
+      </div>
+    ) : null
+
+    const nonThreadPexelsEl = !isThread && isPexels && slide.imageUrl ? (
+      <div style={{ width: '100%', height: '140px', overflow: 'hidden', flexShrink: 0 }}>
         <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
           alt="" crossOrigin="anonymous"
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
@@ -266,11 +274,9 @@ export default function CarrosselPage() {
           )}
         </div>
 
-        {/* Wikipedia person/brand: shown after header, before text */}
-        {wikiImageEl}
-
-        {/* Non-thread Pexels: shown before text */}
-        {!isThread && pexelsImageEl}
+        {/* Non-thread: Wikipedia after header, Pexels before text */}
+        {nonThreadWikiEl}
+        {nonThreadPexelsEl}
 
         {/* Text body */}
         <div style={{ ...t.bodyStyle, overflow: 'hidden' }}>
@@ -279,8 +285,8 @@ export default function CarrosselPage() {
               dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${t.textColor};font-weight:800">$1</strong>`) }}
             />
           ))}
-          {/* Thread Pexels: after text */}
-          {isThread && pexelsImageEl}
+          {/* Thread: image after text, same padding as text, rounded */}
+          {threadImageEl}
         </div>
 
         {/* Footer (hidden for thread) */}
