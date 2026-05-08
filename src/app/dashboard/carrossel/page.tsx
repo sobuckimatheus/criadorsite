@@ -199,7 +199,7 @@ export default function CarrosselPage() {
     const initial = (nome || nicho)[0]?.toUpperCase() ?? '?'
 
     return (
-      <div style={{ ...t.cardStyle, minHeight: '420px', display: 'flex', flexDirection: 'column', fontFamily: 'Georgia, serif' }}>
+      <div style={{ ...t.cardStyle, height: '480px', display: 'flex', flexDirection: 'column', fontFamily: 'Georgia, serif' }}>
         {/* Header */}
         <div style={t.headerStyle}>
           <div style={{ ...t.avatarStyle, width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
@@ -216,15 +216,15 @@ export default function CarrosselPage() {
 
         {/* Image */}
         {slide.imageUrl && (
-          <div style={{ width: '100%', position: 'relative', paddingTop: '60%', overflow: 'hidden', flexShrink: 0 }}>
+          <div style={{ width: '100%', height: '160px', overflow: 'hidden', flexShrink: 0 }}>
             <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
               alt="" crossOrigin="anonymous"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         )}
 
         {/* Text */}
-        <div style={t.bodyStyle}>
+        <div style={{ ...t.bodyStyle, overflow: 'hidden' }}>
           {linhas.map((linha, i) => (
             <p key={i} style={{ color: t.textColor, fontSize: 15, lineHeight: 1.7, margin: 0 }}
               dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${t.textColor}">$1</strong>`) }}
