@@ -159,23 +159,37 @@ REGRAS PARA IMAGENS (muito importante):
       slides,
     }
 
-    // Fetch images: Wikipedia for people/brands, Pexels for scene/ambient photos
-    await Promise.all(
-      carrossel.slides.map(async (slide, i) => {
-        if (slide.pessoa) {
-          const url = await searchWikipediaImage(slide.pessoa)
-          if (url) { carrossel.slides[i].imageUrl = url; carrossel.slides[i].imageType = 'pessoa'; return }
+    // Fetch images sequentially to avoid duplicates across slides
+    const usedUrls = new Set<string>()
+    for (let i = 0; i < carrossel.slides.length; i++) {
+      const slide = carrossel.slides[i]
+      if (slide.pessoa) {
+        const url = await searchWikipediaImage(slide.pessoa)
+        if (url && !usedUrls.has(url)) {
+          usedUrls.add(url)
+          carrossel.slides[i].imageUrl = url
+          carrossel.slides[i].imageType = 'pessoa'
+          continue
         }
-        if (slide.empresa) {
-          const url = await searchWikipediaImage(slide.empresa)
-          if (url) { carrossel.slides[i].imageUrl = url; carrossel.slides[i].imageType = 'empresa'; return }
+      }
+      if (slide.empresa) {
+        const url = await searchWikipediaImage(slide.empresa)
+        if (url && !usedUrls.has(url)) {
+          usedUrls.add(url)
+          carrossel.slides[i].imageUrl = url
+          carrossel.slides[i].imageType = 'empresa'
+          continue
         }
-        if (slide.imagem_sugerida && slide.imagem_sugerida !== 'sem imagem') {
-          const url = await searchPexelsImage(slide.imagem_sugerida)
-          if (url) { carrossel.slides[i].imageUrl = url; carrossel.slides[i].imageType = 'pexels' }
+      }
+      if (slide.imagem_sugerida && slide.imagem_sugerida !== 'sem imagem') {
+        const url = await searchPexelsImage(slide.imagem_sugerida)
+        if (url && !usedUrls.has(url)) {
+          usedUrls.add(url)
+          carrossel.slides[i].imageUrl = url
+          carrossel.slides[i].imageType = 'pexels'
         }
-      })
-    )
+      }
+    }
 
     return NextResponse.json({ carrossel })
   } catch (err) {
