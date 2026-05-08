@@ -186,7 +186,7 @@ export default function CarrosselPage() {
     setExportando(true)
     try {
       const html2canvas = (await import('html2canvas')).default
-      const canvas = await html2canvas(slideRef.current, { scale: 2, useCORS: true, allowTaint: true })
+      const canvas = await html2canvas(slideRef.current, { scale: 2.5, useCORS: true, allowTaint: true })
       const link = document.createElement('a')
       link.download = `slide-${slideAtivo + 1}-de-${carrossel.slides.length}.png`
       link.href = canvas.toDataURL('image/png')
@@ -223,7 +223,7 @@ export default function CarrosselPage() {
     ) : null
 
     return (
-      <div style={{ ...t.cardStyle, height: '480px', display: 'flex', flexDirection: 'column', fontFamily }}>
+      <div style={{ ...t.cardStyle, width: '100%', aspectRatio: '1 / 1', display: 'flex', flexDirection: 'column', fontFamily, overflow: 'hidden' }}>
 
         {/* Header */}
         <div style={t.headerStyle}>
