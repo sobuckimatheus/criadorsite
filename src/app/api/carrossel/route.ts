@@ -22,41 +22,6 @@ async function searchWikipediaImage(name: string): Promise<string | null> {
   return null
 }
 
-async function generateWithNanaBanana(destaque: string, texto: string): Promise<string | null> {
-  const apiKey = process.env.NANOBANANA_API_KEY
-  if (!apiKey) return null
-  try {
-    const prompt = `Professional editorial photography. Theme: ${destaque}. Context: ${texto.replace(/\*\*/g, '').substring(0, 120)}. Style: photojournalistic, cinematic, high contrast. No text, no watermarks. Square 1:1.`
-    const genRes = await fetch('https://api.nanobananaapi.ai/api/v1/nanobanana/generate', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, type: 'TEXTTOIAMGE', numImages: 1 }),
-    })
-    const genData = await genRes.json()
-    if (!genRes.ok || genData.code !== 200) return null
-    const taskId = String((genData.data as Record<string, unknown>)?.taskId ?? '')
-    if (!taskId) return null
-
-    // Poll até 90s
-    const deadline = Date.now() + 90_000
-    while (Date.now() < deadline) {
-      await new Promise(r => setTimeout(r, 3000))
-      const pollRes = await fetch(`https://api.nanobananaapi.ai/api/v1/nanobanana/record-info?taskId=${taskId}`, {
-        headers: { 'Authorization': `Bearer ${apiKey}` },
-      })
-      if (!pollRes.ok) continue
-      const pollData = await pollRes.json() as Record<string, unknown>
-      const flag = pollData.successFlag ?? (pollData.data as Record<string, unknown>)?.successFlag
-      const url = (pollData.response as Record<string, unknown>)?.resultImageUrl
-        ?? (pollData.data as Record<string, unknown>)?.resultImageUrl
-        ?? ((pollData.data as Record<string, unknown>)?.response as Record<string, unknown>)?.resultImageUrl
-      if (flag === 1 && typeof url === 'string') return url
-      if (flag === 2 || flag === 3) return null
-    }
-  } catch { /* silent */ }
-  return null
-}
-
 async function searchPexelsImage(query: string): Promise<string | null> {
   const key = process.env.PEXELS_API_KEY
   if (!key) return null
@@ -218,10 +183,6 @@ REGRAS PARA IMAGENS (muito importante):
           usedUrls.add(url); carrossel.slides[i].imageUrl = url; carrossel.slides[i].imageType = 'pessoa'; continue
         }
         await tryPexels(slide.pessoa, i, 'pessoa')
-        if (carrossel.slides[i].imageUrl) continue
-        // Último recurso: NanaBanana
-        const aiUrl = await generateWithNanaBanana(slide.destaque || slide.pessoa, slide.texto)
-        if (aiUrl && !usedUrls.has(aiUrl)) { usedUrls.add(aiUrl); carrossel.slides[i].imageUrl = aiUrl; carrossel.slides[i].imageType = 'pexels' }
         continue
       }
 
@@ -231,10 +192,6 @@ REGRAS PARA IMAGENS (muito importante):
           usedUrls.add(url); carrossel.slides[i].imageUrl = url; carrossel.slides[i].imageType = 'empresa'; continue
         }
         await tryPexels(slide.empresa, i, 'empresa')
-        if (carrossel.slides[i].imageUrl) continue
-        // Último recurso: NanaBanana
-        const aiUrl = await generateWithNanaBanana(slide.destaque || slide.empresa, slide.texto)
-        if (aiUrl && !usedUrls.has(aiUrl)) { usedUrls.add(aiUrl); carrossel.slides[i].imageUrl = aiUrl; carrossel.slides[i].imageType = 'pexels' }
         continue
       }
 

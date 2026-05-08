@@ -1,86 +1,75 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const BASE_URL = 'https://api.nanobananaapi.ai/api/v1/nanobanana'
-const POLL_INTERVAL_MS = 3000
-const MAX_WAIT_MS = 120_000
+const FAL_URL = 'https://fal.run/fal-ai/flux/dev'
 
-// Extracts successFlag from any known response shape
-function extractFlag(data: Record<string, unknown>): number | undefined {
-  const v = data.successFlag ?? (data.data as Record<string, unknown>)?.successFlag
-  return typeof v === 'number' ? v : undefined
-}
+function buildPrompt(destaque: string, texto: string, nicho: string): string {
+  const tema = destaque?.trim()
+    || String(texto ?? '').replace(/\*\*/g, '').substring(0, 60)
+    || 'professional editorial scene'
 
-// Extracts image URL from any known response shape
-function extractUrl(data: Record<string, unknown>): string | undefined {
-  const candidates = [
-    (data.response as Record<string, unknown>)?.resultImageUrl,
-    (data.data as Record<string, unknown>)?.resultImageUrl,
-    ((data.data as Record<string, unknown>)?.response as Record<string, unknown>)?.resultImageUrl,
-    data.resultImageUrl,
-    data.imageUrl,
-  ]
-  return candidates.find(u => typeof u === 'string' && u.startsWith('http')) as string | undefined
-}
+  const ctx = String(texto ?? '').replace(/\*\*/g, '').substring(0, 120)
+  const combined = (nicho ?? '') + ' ' + ctx
 
-async function submitGeneration(apiKey: string, prompt: string): Promise<string> {
-  const res = await fetch(`${BASE_URL}/generate`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, type: 'TEXTTOIAMGE', numImages: 1 }),
-  })
-  const data = await res.json() as Record<string, unknown>
-  if (!res.ok || data.code !== 200) {
-    throw new Error(String(data.msg ?? data.message ?? 'Falha ao criar tarefa'))
+  const baseQuality = 'ultra realistic, photorealistic 8k, sharp focus, no text, no watermarks, no logos, square 1:1'
+
+  if (/estética|harmoniz|saúde|odont|salão|barbearia|beleza|skincare|facial|pele|cosm/i.test(combined)) {
+    return `${tema}, luxury beauty portrait photography, dramatic cinematic studio lighting, dark elegant background, flawless skin, premium beauty campaign aesthetic, black and gold color palette, ${baseQuality}`
   }
-  const taskId = (data.data as Record<string, unknown>)?.taskId
-  if (!taskId) throw new Error('taskId não retornado')
-  return String(taskId)
-}
 
-async function pollResult(apiKey: string, taskId: string): Promise<string> {
-  const deadline = Date.now() + MAX_WAIT_MS
-  while (Date.now() < deadline) {
-    await new Promise(r => setTimeout(r, POLL_INTERVAL_MS))
-    const res = await fetch(`${BASE_URL}/record-info?taskId=${taskId}`, {
-      headers: { 'Authorization': `Bearer ${apiKey}` },
-    })
-    if (!res.ok) continue  // network hiccup — retry
-
-    const data = await res.json() as Record<string, unknown>
-    const flag = extractFlag(data)
-    const url = extractUrl(data)
-
-    if (flag === 1 && url) return url
-    if (flag === 1 && !url) throw new Error('Imagem gerada mas URL não encontrada — verifique resposta da API')
-    if (flag === 2 || flag === 3) throw new Error('Geração falhou na NanaBanana (flag ' + flag + ')')
-    // flag === 0 ou undefined → ainda gerando, continua polling
+  if (/roupa|moda|calçad|joia|semi.joia|ótica|fashion/i.test(combined)) {
+    return `${tema}, luxury fashion editorial photography, clean minimal background, premium product shot, cinematic lighting, high-end magazine style, ${baseQuality}`
   }
-  throw new Error('Tempo limite excedido (120s)')
+
+  if (/arquitetura|interior|design|imóv/i.test(combined)) {
+    return `${tema}, luxury interior architecture photography, dramatic natural lighting, premium real estate editorial, cinematic wide angle, ${baseQuality}`
+  }
+
+  if (/intelig.*artif|tecnolog|software|digital|ia\b/i.test(combined)) {
+    return `${tema}, futuristic technology concept, dark background with blue and purple neon accents, cinematic lighting, modern tech aesthetic, ${baseQuality}`
+  }
+
+  if (/empreend|negócio|startup|financ|contab/i.test(combined)) {
+    return `${tema}, professional business editorial photography, modern office environment, cinematic lighting, premium corporate aesthetic, ${baseQuality}`
+  }
+
+  return `${tema}, ${ctx.substring(0, 80)}, professional editorial photography for Instagram carousel, cinematic dramatic lighting, high contrast, premium aesthetic, ${baseQuality}`
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.NANOBANANA_API_KEY
+  const apiKey = process.env.FAL_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'NANOBANANA_API_KEY não configurada' }, { status: 500 })
+    return NextResponse.json({ error: 'FAL_KEY não configurada' }, { status: 500 })
   }
 
   try {
     const { destaque, texto, nicho } = await req.json()
+    const prompt = buildPrompt(destaque ?? '', texto ?? '', nicho ?? '')
 
-    // Garante prompt mesmo quando destaque está vazio
-    const tema = destaque?.trim()
-      || String(texto ?? '').replace(/\*\*/g, '').substring(0, 60)
-      || 'professional business scene'
+    const res = await fetch(FAL_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Key ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        image_size: 'square_hd',
+        num_inference_steps: 28,
+        guidance_scale: 3.5,
+        num_images: 1,
+        enable_safety_checker: true,
+        output_format: 'jpeg',
+      }),
+    })
 
-    const prompt = `Professional editorial photography for an Instagram carousel post.
-Theme: ${tema}.
-Context: ${String(texto ?? '').replace(/\*\*/g, '').substring(0, 150)}.
-Niche: ${nicho ?? 'business'}.
-Style: photojournalistic, clean composition, dramatic lighting, cinematic, high contrast.
-No text, no watermarks, no logos. Square 1:1 aspect ratio.`
+    if (!res.ok) {
+      const err = await res.text()
+      throw new Error(`Fal.ai ${res.status}: ${err.substring(0, 200)}`)
+    }
 
-    const taskId = await submitGeneration(apiKey, prompt)
-    const imageUrl = await pollResult(apiKey, taskId)
+    const data = await res.json() as { images?: { url: string }[] }
+    const imageUrl = data.images?.[0]?.url
+    if (!imageUrl) throw new Error('Nenhuma imagem retornada pela Fal.ai')
 
     return NextResponse.json({ imageUrl })
   } catch (err) {
