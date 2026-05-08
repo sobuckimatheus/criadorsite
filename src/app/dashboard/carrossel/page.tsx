@@ -163,10 +163,11 @@ export default function CarrosselPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar imagem')
+      const url: string = data.imageUrl ?? data.imageData
       setCarrossel(prev => {
         if (!prev) return prev
         const slides = [...prev.slides]
-        slides[slideAtivo] = { ...slides[slideAtivo], imageUrl: data.imageData, imageType: 'pexels' }
+        slides[slideAtivo] = { ...slides[slideAtivo], imageUrl: url, imageType: 'pexels' }
         return { ...prev, slides }
       })
     } catch (e) {
