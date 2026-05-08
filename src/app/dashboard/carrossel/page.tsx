@@ -249,9 +249,9 @@ export default function CarrosselPage() {
             ))}
           </div>
 
-          {/* Imagem — cresce para preencher o espaço restante, pequeno respiro top/bottom */}
+          {/* Imagem — alinhada com o texto (mesma margem lateral), cresce para preencher espaço restante */}
           {slide.imageUrl && (
-            <div style={{ flex: 1, marginTop: '14px', marginBottom: '12px', minHeight: '80px', overflow: 'hidden' }}>
+            <div style={{ flex: 1, marginTop: '14px', marginBottom: '16px', marginLeft: '20px', marginRight: '20px', minHeight: '80px', overflow: 'hidden', borderRadius: '10px' }}>
               <img
                 src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
                 alt="" crossOrigin="anonymous"
