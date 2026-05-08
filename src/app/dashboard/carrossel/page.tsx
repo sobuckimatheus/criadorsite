@@ -187,24 +187,30 @@ export default function CarrosselPage() {
     for (let i = 0; i < carrossel.slides.length; i++) {
       setProgressoIA({ atual: i + 1, total: carrossel.slides.length })
       const slide = carrossel.slides[i]
-      try {
-        const res = await fetch('/api/carrossel/gerar-imagem', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho }),
-        })
-        const data = await res.json()
-        const url: string | undefined = data.imageUrl ?? data.imageData
-        if (res.ok && url) {
-          setCarrossel(prev => {
-            if (!prev) return prev
-            const slides = [...prev.slides]
-            slides[i] = { ...slides[i], imageUrl: url, imageType: 'pexels' }
-            return { ...prev, slides }
+
+      // Tenta até 2 vezes por slide antes de pular
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch('/api/carrossel/gerar-imagem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho }),
           })
+          const data = await res.json()
+          const url: string | undefined = data.imageUrl ?? data.imageData
+          if (res.ok && url) {
+            setCarrossel(prev => {
+              if (!prev) return prev
+              const slides = [...prev.slides]
+              slides[i] = { ...slides[i], imageUrl: url, imageType: 'pexels' }
+              return { ...prev, slides }
+            })
+            break  // sucesso — passa para o próximo slide
+          }
+        } catch {
+          // aguarda 2s antes de tentar novamente
+          if (attempt === 0) await new Promise(r => setTimeout(r, 2000))
         }
-      } catch {
-        // continua para o próximo slide em caso de erro
       }
     }
 
