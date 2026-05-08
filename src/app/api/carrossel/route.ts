@@ -21,6 +21,7 @@ async function searchPexelsImage(query: string): Promise<string | null> {
 
 
 export async function POST(req: NextRequest) {
+  try {
   const { nicho, nome, tipo, tipoLabel, tipoDesc, tom, tomLabel, tomDesc, tema } = await req.json()
 
   if (!nicho || !tipo || !tema?.trim()) {
@@ -114,4 +115,8 @@ Use a ferramenta create_carousel para retornar o carrossel completo. Para diálo
   )
 
   return NextResponse.json({ carrossel })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Erro interno'
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
 }
