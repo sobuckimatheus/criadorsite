@@ -103,6 +103,18 @@ Use a ferramenta create_carousel para retornar o carrossel completo. Para diálo
 
   const carrossel = toolUse.input as Record<string, unknown>
 
+  // Normalize slides to array
+  if (!Array.isArray(carrossel.slides)) {
+    return NextResponse.json({ error: 'IA retornou slides em formato inválido' }, { status: 500 })
+  }
+
+  // Normalize hashtags: Claude sometimes returns as a space-separated string
+  if (typeof carrossel.hashtags === 'string') {
+    carrossel.hashtags = (carrossel.hashtags as string).split(/[\s,#]+/).filter(Boolean)
+  } else if (!Array.isArray(carrossel.hashtags)) {
+    carrossel.hashtags = []
+  }
+
   // Fetch Pexels images in parallel for slides that need one
   const slides = carrossel.slides as { texto: string; imagem_sugerida: string; destaque: string; imageUrl?: string }[]
   await Promise.all(

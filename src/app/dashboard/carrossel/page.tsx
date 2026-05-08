@@ -108,7 +108,7 @@ export default function CarrosselPage() {
 
   function copiarLegenda() {
     if (!carrossel) return
-    const texto = `${carrossel.legenda}\n\n${carrossel.hashtags.map(h => `#${h.replace('#', '')}`).join(' ')}`
+    const texto = `${carrossel.legenda}\n\n${(carrossel.hashtags ?? []).map(h => `#${h.replace('#', '')}`).join(' ')}`
     navigator.clipboard.writeText(texto)
     setCopiado(true)
     setTimeout(() => setCopiado(false), 2000)
@@ -310,7 +310,7 @@ export default function CarrosselPage() {
                     ← Anterior
                   </button>
                   <div className="flex gap-1.5">
-                    {carrossel.slides.map((_, i) => (
+                    {(carrossel.slides ?? []).map((_, i) => (
                       <button key={i} onClick={() => setSlideAtivo(i)}
                         className="rounded-full transition-all"
                         style={{
@@ -329,7 +329,7 @@ export default function CarrosselPage() {
                 <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Todos os slides</p>
                   <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
-                    {carrossel.slides.map((slide, i) => (
+                    {(carrossel.slides ?? []).map((slide, i) => (
                       <button key={i} onClick={() => setSlideAtivo(i)}
                         className={`w-full text-left px-3 py-2 rounded-lg flex items-start gap-2.5 transition-colors border ${
                           slideAtivo === i ? 'bg-purple-50 border-purple-200' : 'border-transparent hover:bg-gray-50'
@@ -353,7 +353,7 @@ export default function CarrosselPage() {
                   </div>
                   <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{carrossel.legenda}</p>
                   <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100">
-                    {carrossel.hashtags.map((tag, i) => (
+                    {(carrossel.hashtags ?? []).map((tag, i) => (
                       <span key={i} className="text-xs px-2.5 py-1 rounded-full bg-purple-50 border border-purple-100 text-purple-600">
                         #{tag.replace('#', '')}
                       </span>
