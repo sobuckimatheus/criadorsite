@@ -3,27 +3,6 @@ import Anthropic from '@anthropic-ai/sdk'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-function repairControlChars(str: string): string {
-  let out = ''
-  let inStr = false
-  let esc = false
-  for (const ch of str) {
-    const code = ch.charCodeAt(0)
-    if (esc) { out += ch; esc = false; continue }
-    if (ch === '\\' && inStr) { out += ch; esc = true; continue }
-    if (ch === '"') { inStr = !inStr; out += ch; continue }
-    if (inStr && code < 32) {
-      if (code === 10) { out += '\\n'; continue }
-      if (code === 13) { out += '\\r'; continue }
-      if (code === 9)  { out += '\\t'; continue }
-      out += `\\u${code.toString(16).padStart(4, '0')}`
-      continue
-    }
-    out += ch
-  }
-  return out
-}
-
 async function searchPexelsImage(query: string): Promise<string | null> {
   const key = process.env.PEXELS_API_KEY
   if (!key) return null
@@ -40,16 +19,36 @@ async function searchPexelsImage(query: string): Promise<string | null> {
   }
 }
 
+// Flat schema: one field per slide instead of nested array.
+// Avoids the model encoding the slides array as a JSON string.
+function buildSchema() {
+  const properties: Record<string, unknown> = {
+    titulo:        { type: 'string' },
+    nicho:         { type: 'string' },
+    tipo_narrativa:{ type: 'string' },
+    legenda:       { type: 'string' },
+    hashtags:      { type: 'string', description: 'Hashtags separadas por vírgula, sem o símbolo #' },
+    total_slides:  { type: 'integer', description: 'Número total de slides (entre 8 e 12)' },
+  }
+  for (let i = 1; i <= 12; i++) {
+    properties[`slide_${i}_texto`]   = { type: 'string', description: `Texto do slide ${i} — use **negrito** para ênfase` }
+    properties[`slide_${i}_imagem`]  = { type: 'string', description: `3-5 palavras em inglês para buscar foto no slide ${i}, ou: sem imagem` }
+    properties[`slide_${i}_destaque`]= { type: 'string', description: `3-6 palavras que resumem o slide ${i}` }
+  }
+  const required = ['titulo', 'nicho', 'tipo_narrativa', 'legenda', 'hashtags', 'total_slides',
+    ...Array.from({length: 8}, (_, i) => [`slide_${i+1}_texto`, `slide_${i+1}_imagem`, `slide_${i+1}_destaque`]).flat()]
+  return { type: 'object' as const, properties, required }
+}
 
 export async function POST(req: NextRequest) {
   try {
-  const { nicho, nome, tipo, tipoLabel, tipoDesc, tom, tomLabel, tomDesc, tema } = await req.json()
+    const { nicho, nome, tipo, tipoLabel, tipoDesc, tom, tomLabel, tomDesc, tema } = await req.json()
 
-  if (!nicho || !tipo || !tema?.trim()) {
-    return NextResponse.json({ error: 'Campos obrigatórios ausentes' }, { status: 400 })
-  }
+    if (!nicho || !tipo || !tema?.trim()) {
+      return NextResponse.json({ error: 'Campos obrigatórios ausentes' }, { status: 400 })
+    }
 
-  const prompt = `Você é um especialista em copywriting viral para Instagram, com domínio absoluto do estilo de thread narrativa que para o scroll.
+    const prompt = `Você é um especialista em copywriting viral para Instagram, com domínio absoluto do estilo de thread narrativa que para o scroll.
 
 Crie um carrossel viral completo para Instagram seguindo RIGOROSAMENTE a estrutura abaixo.
 
@@ -66,7 +65,7 @@ REGRAS OBRIGATÓRIAS DE ESTILO (baseadas nos melhores carrosséis virais brasile
 3. Use NEGRITO nas palavras de maior impacto (números, nomes, viradas)
 4. Termine cada slide com uma frase que OBRIGA o leitor a passar pro próximo
 5. Use datas, números reais e nomes quando possível — especificidade gera credibilidade
-6. Ponto final sozinho numa linha dá peso: "Não era." / "Ela se recusou." — use essa técnica
+6. Ponto final sozinho numa linha dá peso: use essa técnica
 7. O slide 1 deve apresentar o resultado/surpresa ANTES de contar a história
 8. Alterne slides de texto puro com slides que pedem imagem
 9. Máximo 12 slides, mínimo 8
@@ -79,104 +78,67 @@ ESTRUTURA DOS SLIDES:
 - Slides 10-11: A resolução e resultado — o que aconteceu depois
 - Slide 12: Frase de impacto isolada + CTA para comentar
 
-Use a ferramenta create_carousel para retornar o carrossel completo.`
+Preencha a ferramenta create_carousel com um campo por slide (slide_1_texto, slide_2_texto, etc.).`
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 8000,
-    tools: [
-      {
-        name: 'create_carousel',
-        description: 'Cria o carrossel viral completo',
-        input_schema: {
-          type: 'object' as const,
-          properties: {
-            titulo: { type: 'string' },
-            nicho: { type: 'string' },
-            tipo_narrativa: { type: 'string' },
-            slides: {
-              type: 'array',
-              description: 'Array nativo de objetos — NÃO codifique como string JSON',
-              items: {
-                type: 'object',
-                properties: {
-                  texto: { type: 'string', description: 'Texto do slide com markdown **negrito**' },
-                  imagem_sugerida: { type: 'string', description: '3-5 palavras em inglês para busca de foto, ou sem imagem' },
-                  destaque: { type: 'string', description: 'Frase de 3-6 palavras resumindo o slide' },
-                },
-                required: ['texto', 'imagem_sugerida', 'destaque'],
-              },
-            },
-            legenda: { type: 'string' },
-            hashtags: { type: 'array', items: { type: 'string' } },
-          },
-          required: ['titulo', 'nicho', 'tipo_narrativa', 'slides', 'legenda', 'hashtags'],
-        },
-      },
-    ],
-    tool_choice: { type: 'tool', name: 'create_carousel' },
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const toolUse = message.content.find((c) => c.type === 'tool_use')
-  if (!toolUse || toolUse.type !== 'tool_use') {
-    return NextResponse.json({ error: 'IA não retornou os dados esperados' }, { status: 500 })
-  }
-
-  // toolUse.input may arrive as a JSON string in some SDK/runtime combos
-  let carrossel: Record<string, unknown>
-  if (typeof toolUse.input === 'string') {
-    try { carrossel = JSON.parse(toolUse.input as string) }
-    catch { return NextResponse.json({ error: 'Falha ao parsear input da ferramenta' }, { status: 500 }) }
-  } else {
-    carrossel = toolUse.input as Record<string, unknown>
-  }
-
-  // slides may arrive as a JSON-encoded string with literal newlines; unwrap until it's an array
-  let slidesVal: unknown = carrossel.slides
-  let attempts = 0
-  while (typeof slidesVal === 'string' && attempts < 4) {
-    const s = slidesVal as string
-    try { slidesVal = JSON.parse(s); break }
-    catch { /* try repairs */ }
-    try { slidesVal = JSON.parse(repairControlChars(s)); break }
-    catch { /* try stripping all remaining control chars */ }
-    try { slidesVal = JSON.parse(s.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '')); break }
-    catch { break }
-    attempts++
-  }
-  // Handle object-with-numeric-keys (non-standard array serialization)
-  if (slidesVal !== null && typeof slidesVal === 'object' && !Array.isArray(slidesVal)) {
-    const keys = Object.keys(slidesVal as object)
-    if (keys.length > 0 && keys.every(k => !isNaN(Number(k)))) {
-      slidesVal = Object.values(slidesVal as object)
-    }
-  }
-  carrossel.slides = slidesVal
-
-  if (!Array.isArray(carrossel.slides)) {
-    return NextResponse.json({ error: 'IA retornou slides em formato inválido' }, { status: 500 })
-  }
-
-  // Normalize hashtags: Claude sometimes returns as a space-separated string
-  if (typeof carrossel.hashtags === 'string') {
-    carrossel.hashtags = (carrossel.hashtags as string).split(/[\s,#]+/).filter(Boolean)
-  } else if (!Array.isArray(carrossel.hashtags)) {
-    carrossel.hashtags = []
-  }
-
-  // Fetch Pexels images in parallel for slides that need one
-  const slides = carrossel.slides as { texto: string; imagem_sugerida: string; destaque: string; imageUrl?: string }[]
-  await Promise.all(
-    slides.map(async (slide, i) => {
-      if (slide.imagem_sugerida && slide.imagem_sugerida !== 'sem imagem') {
-        const url = await searchPexelsImage(slide.imagem_sugerida)
-        if (url) slides[i].imageUrl = url
-      }
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 8192,
+      tools: [{ name: 'create_carousel', description: 'Cria o carrossel viral', input_schema: buildSchema() }],
+      tool_choice: { type: 'tool', name: 'create_carousel' },
+      messages: [{ role: 'user', content: prompt }],
     })
-  )
 
-  return NextResponse.json({ carrossel })
+    if (message.stop_reason === 'max_tokens') {
+      return NextResponse.json({ error: 'Resposta muito longa. Tente um tema mais conciso.' }, { status: 500 })
+    }
+
+    const toolUse = message.content.find((c) => c.type === 'tool_use')
+    if (!toolUse || toolUse.type !== 'tool_use') {
+      return NextResponse.json({ error: 'IA não retornou os dados esperados' }, { status: 500 })
+    }
+
+    const input = toolUse.input as Record<string, unknown>
+
+    // Reconstruct slides from flat fields — no JSON parsing needed
+    const totalSlides = Math.min(12, Math.max(1, Number(input.total_slides) || 8))
+    const slides: { texto: string; imagem_sugerida: string; destaque: string; imageUrl?: string }[] = []
+    for (let i = 1; i <= totalSlides; i++) {
+      const texto = String(input[`slide_${i}_texto`] ?? '').trim()
+      if (!texto) continue
+      slides.push({
+        texto,
+        imagem_sugerida: String(input[`slide_${i}_imagem`] ?? 'sem imagem'),
+        destaque: String(input[`slide_${i}_destaque`] ?? ''),
+      })
+    }
+
+    if (slides.length === 0) {
+      return NextResponse.json({ error: 'IA não gerou slides' }, { status: 500 })
+    }
+
+    const hashtags = String(input.hashtags ?? '')
+      .split(/[,\s#]+/).map(h => h.trim()).filter(Boolean)
+
+    const carrossel = {
+      titulo: String(input.titulo ?? ''),
+      nicho: String(input.nicho ?? ''),
+      tipo_narrativa: String(input.tipo_narrativa ?? ''),
+      legenda: String(input.legenda ?? ''),
+      hashtags,
+      slides,
+    }
+
+    // Fetch Pexels images in parallel
+    await Promise.all(
+      carrossel.slides.map(async (slide, i) => {
+        if (slide.imagem_sugerida && slide.imagem_sugerida !== 'sem imagem') {
+          const url = await searchPexelsImage(slide.imagem_sugerida)
+          if (url) carrossel.slides[i].imageUrl = url
+        }
+      })
+    )
+
+    return NextResponse.json({ carrossel })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erro interno'
     return NextResponse.json({ error: msg }, { status: 500 })
