@@ -139,6 +139,7 @@ export default function CarrosselPage() {
   const [slideAtivo, setSlideAtivo] = useState(0)
   const [copiado, setCopiado] = useState(false)
   const [exportando, setExportando] = useState(false)
+  const [gerandoImagem, setGerandoImagem] = useState(false)
   const [error, setError] = useState('')
   const slideRef = useRef<HTMLDivElement>(null)
 
@@ -149,6 +150,31 @@ export default function CarrosselPage() {
     '📱 Formatando slides virais...',
     '🚀 Finalizando sua copy...',
   ]
+
+  async function gerarImagemIA() {
+    if (!carrossel || gerandoImagem) return
+    const slide = carrossel.slides[slideAtivo]
+    setGerandoImagem(true)
+    try {
+      const res = await fetch('/api/carrossel/gerar-imagem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar imagem')
+      setCarrossel(prev => {
+        if (!prev) return prev
+        const slides = [...prev.slides]
+        slides[slideAtivo] = { ...slides[slideAtivo], imageUrl: data.imageData, imageType: 'pexels' }
+        return { ...prev, slides }
+      })
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Erro ao gerar imagem')
+    } finally {
+      setGerandoImagem(false)
+    }
+  }
 
   async function gerarCarrossel() {
     if (!nicho || !tipo || !tema.trim()) return
@@ -254,7 +280,7 @@ export default function CarrosselPage() {
           {slide.imageUrl && (
             <div style={{ flex: 1, marginTop: '14px', marginBottom: '16px', marginLeft: '20px', marginRight: '20px', minHeight: '80px', overflow: 'hidden', borderRadius: '10px' }}>
               <img
-                src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
+                src={slide.imageUrl.startsWith('data:') ? slide.imageUrl : `/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
                 alt="" crossOrigin="anonymous"
                 style={{
                   width: '100%',
@@ -498,11 +524,17 @@ export default function CarrosselPage() {
                   </button>
                 </div>
 
-                {/* Export */}
-                <button onClick={exportarSlide} disabled={exportando}
-                  className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                  {exportando ? '⏳ Exportando...' : '⬇️ Baixar slide como PNG'}
-                </button>
+                {/* Ações do slide */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={gerarImagemIA} disabled={gerandoImagem || !carrossel}
+                    className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                    {gerandoImagem ? '⏳ Gerando...' : '✨ Imagem com IA'}
+                  </button>
+                  <button onClick={exportarSlide} disabled={exportando}
+                    className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                    {exportando ? '⏳ Exportando...' : '⬇️ Baixar PNG'}
+                  </button>
+                </div>
 
                 {/* Lista de slides */}
                 <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
