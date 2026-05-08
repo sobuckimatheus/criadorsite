@@ -222,21 +222,20 @@ export default function CarrosselPage() {
     const isWikipedia = isWikipediaPerson || isWikipediaBrand
     const isPexels = slide.imageType === 'pexels'
 
-    // Thread: images break out of body padding to go full-width, rounded corners
+    // Thread: image aligned with text, pushed to bottom of body, rounded corners
     const threadImageEl = isThread && slide.imageUrl ? (
       <div style={{
-        marginLeft: '-20px',
-        marginRight: '-20px',
-        width: 'calc(100% + 40px)',
-        height: isWikipediaPerson ? '155px' : isWikipediaBrand ? '80px' : '115px',
+        width: '100%',
+        height: isWikipediaPerson ? '160px' : isWikipediaBrand ? '80px' : '115px',
         overflow: 'hidden',
         flexShrink: 0,
-        borderRadius: '10px',
+        marginTop: 'auto',
+        borderRadius: '12px',
         background: isWikipediaBrand ? '#f5f5f5' : 'transparent',
       }}>
         <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
           alt="" crossOrigin="anonymous"
-          style={{ width: '100%', height: '100%', objectFit: isWikipediaBrand ? 'contain' : 'cover', objectPosition: isWikipediaPerson ? 'top center' : 'center' }} />
+          style={{ width: '100%', height: '100%', objectFit: isWikipediaBrand ? 'contain' : 'cover', objectPosition: isWikipediaPerson ? '50% 20%' : 'center' }} />
       </div>
     ) : null
 
