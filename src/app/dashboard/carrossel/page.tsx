@@ -6,6 +6,9 @@ interface Slide {
   texto: string
   imagem_sugerida: string
   destaque: string
+  pessoa?: string
+  empresa?: string
+  imageType?: 'pessoa' | 'empresa' | 'pexels'
   imageUrl?: string
 }
 
@@ -62,8 +65,8 @@ const THEMES: Record<ThemeId, ThemeDef> = {
     label: 'Simples',
     swatch: 'linear-gradient(135deg,#ffffff,#f3f4f6)',
     cardStyle: { background: '#ffffff', borderRadius: '16px', overflow: 'hidden', border: '1px solid #e7e7e7', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' },
-    headerStyle: { background: '#ffffff', padding: '20px 24px 12px', display: 'flex', alignItems: 'center', gap: '14px' },
-    bodyStyle: { background: '#ffffff', flex: 1, padding: '0 24px 20px', display: 'flex', flexDirection: 'column', gap: '16px', overflow: 'hidden' },
+    headerStyle: { background: '#ffffff', padding: '14px 20px 10px', display: 'flex', alignItems: 'center', gap: '12px' },
+    bodyStyle: { background: '#ffffff', flex: 1, padding: '0 20px 14px', display: 'flex', flexDirection: 'column', gap: '8px', overflow: 'hidden' },
     footerStyle: { display: 'none' } as React.CSSProperties,
     textColor: '#0f1419',
     mutedColor: '#536471',
@@ -214,11 +217,33 @@ export default function CarrosselPage() {
       ? '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif'
       : 'Georgia, serif'
 
-    const imageEl = slide.imageUrl ? (
-      <div style={{ width: '100%', height: '160px', overflow: 'hidden', flexShrink: 0, borderRadius: isThread ? '12px' : '0' }}>
+    const isWikipediaPerson = slide.imageType === 'pessoa'
+    const isWikipediaBrand = slide.imageType === 'empresa'
+    const isWikipedia = isWikipediaPerson || isWikipediaBrand
+    const isPexels = slide.imageType === 'pexels'
+
+    // Wikipedia images go after header (before text) — tall for person, short for brand
+    const wikiImageEl = isWikipedia && slide.imageUrl ? (
+      <div style={{
+        width: '100%',
+        height: isWikipediaBrand ? '80px' : '165px',
+        overflow: 'hidden',
+        flexShrink: 0,
+        background: isWikipediaBrand ? '#fff' : 'transparent',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
         <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
           alt="" crossOrigin="anonymous"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          style={{ width: '100%', height: '100%', objectFit: isWikipediaBrand ? 'contain' : 'cover', objectPosition: isWikipediaPerson ? 'top center' : 'center' }} />
+      </div>
+    ) : null
+
+    // Pexels images stay in the body (full-width ambient photo)
+    const pexelsImageEl = isPexels && slide.imageUrl ? (
+      <div style={{ width: '100%', height: isThread ? '110px' : '140px', overflow: 'hidden', flexShrink: 0, borderRadius: isThread ? '10px' : '0' }}>
+        <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
+          alt="" crossOrigin="anonymous"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
       </div>
     ) : null
 
@@ -227,12 +252,12 @@ export default function CarrosselPage() {
 
         {/* Header */}
         <div style={t.headerStyle}>
-          <div style={{ ...t.avatarStyle, width: isThread ? 46 : 36, height: isThread ? 46 : 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isThread ? 18 : 14, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
+          <div style={{ ...t.avatarStyle, width: isThread ? 38 : 36, height: isThread ? 38 : 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isThread ? 15 : 14, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
             {initial}
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ color: isThread ? '#0f1419' : '#fff', fontWeight: 800, fontSize: isThread ? 16 : 14, margin: 0, lineHeight: 1.2, fontFamily: 'system-ui' }}>{nome || nicho}</p>
-            <p style={{ color: isThread ? '#536471' : 'rgba(255,255,255,0.7)', fontSize: isThread ? 14 : 11, margin: '3px 0 0', fontFamily: 'system-ui' }}>@{handle}</p>
+            <p style={{ color: isThread ? '#0f1419' : '#fff', fontWeight: 800, fontSize: isThread ? 14 : 14, margin: 0, lineHeight: 1.2, fontFamily: 'system-ui' }}>{nome || nicho}</p>
+            <p style={{ color: isThread ? '#536471' : 'rgba(255,255,255,0.7)', fontSize: isThread ? 12 : 11, margin: '2px 0 0', fontFamily: 'system-ui' }}>@{handle}</p>
           </div>
           {!isThread && (
             <div style={{ display: 'flex', gap: 3 }}>
@@ -241,18 +266,21 @@ export default function CarrosselPage() {
           )}
         </div>
 
-        {/* Image before text (non-thread themes) */}
-        {!isThread && imageEl}
+        {/* Wikipedia person/brand: shown after header, before text */}
+        {wikiImageEl}
+
+        {/* Non-thread Pexels: shown before text */}
+        {!isThread && pexelsImageEl}
 
         {/* Text body */}
         <div style={{ ...t.bodyStyle, overflow: 'hidden' }}>
           {linhas.map((linha, i) => (
-            <p key={i} style={{ color: t.textColor, fontSize: isThread ? 19 : 15, lineHeight: isThread ? 1.7 : 1.7, margin: 0, fontFamily }}
+            <p key={i} style={{ color: t.textColor, fontSize: isThread ? 15 : 15, lineHeight: isThread ? 1.6 : 1.7, margin: 0, fontFamily }}
               dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${t.textColor};font-weight:800">$1</strong>`) }}
             />
           ))}
-          {/* Image after text (thread only) */}
-          {isThread && imageEl}
+          {/* Thread Pexels: after text */}
+          {isThread && pexelsImageEl}
         </div>
 
         {/* Footer (hidden for thread) */}

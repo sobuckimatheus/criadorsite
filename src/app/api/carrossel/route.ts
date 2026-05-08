@@ -3,6 +3,25 @@ import Anthropic from '@anthropic-ai/sdk'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+async function searchWikipediaImage(name: string): Promise<string | null> {
+  for (const lang of ['pt', 'en']) {
+    try {
+      const url = `https://${lang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages&format=json&pithumbsize=600&redirects=1`
+      const res = await fetch(url, { headers: { 'User-Agent': 'CriadorSite/1.0 (contact@criadorsite.com.br)' } })
+      if (!res.ok) continue
+      const data = await res.json()
+      const pages = data.query?.pages
+      if (!pages) continue
+      const page = Object.values(pages)[0] as Record<string, unknown>
+      const thumb = (page?.thumbnail as Record<string, unknown>)?.source
+      if (thumb && typeof thumb === 'string') return thumb
+    } catch {
+      continue
+    }
+  }
+  return null
+}
+
 async function searchPexelsImage(query: string): Promise<string | null> {
   const key = process.env.PEXELS_API_KEY
   if (!key) return null
@@ -32,8 +51,10 @@ function buildSchema() {
   }
   for (let i = 1; i <= 12; i++) {
     properties[`slide_${i}_texto`]   = { type: 'string', description: `Texto do slide ${i} — use **negrito** para ênfase` }
-    properties[`slide_${i}_imagem`]  = { type: 'string', description: `3-5 palavras em inglês para buscar foto no slide ${i}, ou: sem imagem` }
+    properties[`slide_${i}_imagem`]  = { type: 'string', description: `3-5 palavras em inglês descritivas para buscar foto de CENA/AMBIENTE/OBJETO no slide ${i} (ex: "modern office startup team", "luxury watch close-up"), ou: sem imagem. NUNCA use apenas nomes de marcas ou empresas aqui.` }
     properties[`slide_${i}_destaque`]= { type: 'string', description: `3-6 palavras que resumem o slide ${i}` }
+    properties[`slide_${i}_pessoa`]  = { type: 'string', description: `Nome completo de uma PESSOA FAMOSA real mencionada no slide ${i} (ex: "Elon Musk", "Steve Jobs", "Cristiano Ronaldo"). Deixe vazio se não houver pessoa famosa real.` }
+    properties[`slide_${i}_empresa`] = { type: 'string', description: `Nome oficial de uma EMPRESA ou MARCA mencionada no slide ${i} (ex: "Apple Inc.", "Tesla", "Nike", "Google"). Deixe vazio se não houver empresa/marca.` }
   }
   const required = ['titulo', 'nicho', 'tipo_narrativa', 'legenda', 'hashtags', 'total_slides',
     ...Array.from({length: 8}, (_, i) => [`slide_${i+1}_texto`, `slide_${i+1}_imagem`, `slide_${i+1}_destaque`]).flat()]
@@ -78,7 +99,13 @@ ESTRUTURA DOS SLIDES:
 - Slides 10-11: A resolução e resultado — o que aconteceu depois
 - Slide 12: Frase de impacto isolada + CTA para comentar
 
-Preencha a ferramenta create_carousel com um campo por slide (slide_1_texto, slide_2_texto, etc.).`
+Preencha a ferramenta create_carousel com um campo por slide (slide_1_texto, slide_2_texto, etc.).
+
+REGRAS PARA IMAGENS (muito importante):
+- slide_X_pessoa: preencha com nome completo de pessoa famosa real mencionada (ex: "Elon Musk", "Oprah Winfrey") → buscará foto real do Wikipedia
+- slide_X_empresa: preencha com nome oficial de empresa/marca mencionada (ex: "Apple Inc.", "Tesla", "Google", "Nike") → buscará logo/imagem do Wikipedia
+- slide_X_imagem: use APENAS para fotos de cena/ambiente/objeto. NUNCA use nomes de marcas ou empresas aqui (ex correto: "modern tech office", "electric car highway", "luxury sneakers close-up")
+- Se o slide tiver pessoa famosa OU empresa conhecida, preencha o campo específico e deixe slide_X_imagem como "sem imagem"`
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
@@ -101,14 +128,18 @@ Preencha a ferramenta create_carousel com um campo por slide (slide_1_texto, sli
 
     // Reconstruct slides from flat fields — no JSON parsing needed
     const totalSlides = Math.min(12, Math.max(1, Number(input.total_slides) || 8))
-    const slides: { texto: string; imagem_sugerida: string; destaque: string; imageUrl?: string }[] = []
+    const slides: { texto: string; imagem_sugerida: string; destaque: string; pessoa?: string; empresa?: string; imageUrl?: string; imageType?: 'pessoa' | 'empresa' | 'pexels' }[] = []
     for (let i = 1; i <= totalSlides; i++) {
       const texto = String(input[`slide_${i}_texto`] ?? '').trim()
       if (!texto) continue
+      const pessoa = String(input[`slide_${i}_pessoa`] ?? '').trim()
+      const empresa = String(input[`slide_${i}_empresa`] ?? '').trim()
       slides.push({
         texto,
         imagem_sugerida: String(input[`slide_${i}_imagem`] ?? 'sem imagem'),
         destaque: String(input[`slide_${i}_destaque`] ?? ''),
+        pessoa: pessoa || undefined,
+        empresa: empresa || undefined,
       })
     }
 
@@ -128,12 +159,20 @@ Preencha a ferramenta create_carousel com um campo por slide (slide_1_texto, sli
       slides,
     }
 
-    // Fetch Pexels images in parallel
+    // Fetch images: Wikipedia for people/brands, Pexels for scene/ambient photos
     await Promise.all(
       carrossel.slides.map(async (slide, i) => {
+        if (slide.pessoa) {
+          const url = await searchWikipediaImage(slide.pessoa)
+          if (url) { carrossel.slides[i].imageUrl = url; carrossel.slides[i].imageType = 'pessoa'; return }
+        }
+        if (slide.empresa) {
+          const url = await searchWikipediaImage(slide.empresa)
+          if (url) { carrossel.slides[i].imageUrl = url; carrossel.slides[i].imageType = 'empresa'; return }
+        }
         if (slide.imagem_sugerida && slide.imagem_sugerida !== 'sem imagem') {
           const url = await searchPexelsImage(slide.imagem_sugerida)
-          if (url) carrossel.slides[i].imageUrl = url
+          if (url) { carrossel.slides[i].imageUrl = url; carrossel.slides[i].imageType = 'pexels' }
         }
       })
     )
