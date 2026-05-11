@@ -4,9 +4,10 @@ import Anthropic from '@anthropic-ai/sdk'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 async function searchWikipediaImage(name: string): Promise<string | null> {
-  for (const lang of ['pt', 'en']) {
+  // 1) Wikipedia PT, EN e Commons via pageimages
+  for (const domain of ['pt.wikipedia.org', 'en.wikipedia.org', 'commons.wikimedia.org']) {
     try {
-      const url = `https://${lang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages&format=json&pithumbsize=600&redirects=1`
+      const url = `https://${domain}/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages&format=json&pithumbsize=600&redirects=1`
       const res = await fetch(url, { headers: { 'User-Agent': 'CriadorSite/1.0 (contact@criadorsite.com.br)' } })
       if (!res.ok) continue
       const data = await res.json()
@@ -19,6 +20,23 @@ async function searchWikipediaImage(name: string): Promise<string | null> {
       continue
     }
   }
+
+  // 2) Commons file search — busca arquivos de imagem pelo nome
+  try {
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(name)}&gsrnamespace=6&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&gsrlimit=3`
+    const res = await fetch(url, { headers: { 'User-Agent': 'CriadorSite/1.0 (contact@criadorsite.com.br)' } })
+    if (res.ok) {
+      const data = await res.json()
+      const pages = data.query?.pages
+      if (pages) {
+        for (const page of Object.values(pages) as Record<string, unknown>[]) {
+          const thumb = ((page.imageinfo as Record<string, unknown>[])?.[0])?.thumburl as string | undefined
+          if (thumb && thumb.startsWith('http')) return thumb
+        }
+      }
+    }
+  } catch { /* silent */ }
+
   return null
 }
 
