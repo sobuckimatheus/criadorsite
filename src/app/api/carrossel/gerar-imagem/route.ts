@@ -40,8 +40,9 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
   const temaLC = tema.toLowerCase()
   const conteudo = temaLC + ' ' + textoClean.toLowerCase()
 
-  const isBeautyNiche = /estética|harmoniz|beleza|skincare|facial|pele|cosm|salão|barbearia|odont/i.test(nichoLC)
-  const angle = pickAngle(tema, isBeautyNiche ? PORTRAIT_ANGLES : SCENE_ANGLES)
+  const isBeautyNiche = /saúde.*estética|estética|harmoniz|beleza|skincare|facial|pele|cosm|odontolog|salão/i.test(nichoLC)
+  const isMasculineNiche = /barbearia/i.test(nichoLC)
+  const angle = pickAngle(tema, (isBeautyNiche || isMasculineNiche) ? PORTRAIT_ANGLES : SCENE_ANGLES)
 
   // ── Universal content rules — run FIRST, before any niche logic ──────────
   // These fire based on what the slide is ABOUT, regardless of nicho
@@ -118,65 +119,169 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
     return beauty[hb % beauty.length]
   }
 
-  // ── Other niche fallbacks ─────────────────────────────────────────────────
+  // ── Niche-specific fallbacks (covers all 21 niches in the platform) ─────────
 
-  if (/empreend|negócio|startup|financ|contab|marketing|vendas|liderança|gestão/i.test(nichoLC + ' ' + temaLC)) {
-    const biz = [
-      `confident professional in luxury modern office, ${angle}, dramatic side lighting, dark glass and steel background, premium corporate portrait, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `luxury modern corporate office interior, dark tones, dramatic architectural lighting, premium business environment, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `successful executive in premium suit, ${angle}, dramatic window light, luxury office background, authority and confidence, photorealistic portrait, ${CINEMATIC}, ${BASE_STYLE}`,
+  const h = tema.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 0)
+
+  // Odontologia
+  if (/odontolog/i.test(nichoLC)) {
+    const opts = [
+      `extreme close-up of perfect white teeth and smile, ${angle}, dramatic studio lighting, premium dental aesthetic, dark background, photorealistic dental photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `beautiful person with radiant confident smile, ${angle}, bright clean studio light, premium oral health aesthetic, dark background, photorealistic portrait, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury dental clinic interior, modern equipment, clean white and dark tones, dramatic architectural lighting, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
-    const h = tema.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-    return biz[h % biz.length]
+    return opts[h % opts.length]
   }
 
-  if (/saúde|fitness|academia|treino|corpo|musculaç|esporte|nutriç/i.test(nichoLC + ' ' + temaLC)) {
-    const fit = [
-      `athletic person in premium sportswear, ${angle}, dramatic hard gym lighting, defined physique, dark background, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `athlete in dynamic pose, ${angle}, dramatic low key lighting, intense focused expression, premium fitness photography, dark background, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
-      `close-up athletic hands gripping barbell, dramatic light, dark gym background, photorealistic sports photography, ${CINEMATIC}, ${BASE_STYLE}`,
+  // Barbearia
+  if (/barbearia/i.test(nichoLC)) {
+    const opts = [
+      `handsome man with sharp beard and fresh haircut, ${angle}, dramatic barber studio lighting, dark masculine background, premium grooming portrait, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `close-up straight razor and barber tools on dark marble surface, golden light, premium barbershop aesthetic, photorealistic product photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury barbershop interior, leather chairs, dark wood, dramatic warm lighting, masculine premium atmosphere, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
-    const h = tema.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-    return fit[h % fit.length]
+    return opts[h % opts.length]
   }
 
-  if (/psicolog|mental|ansied|emoç|relacionament|autoestima|terapia/i.test(nichoLC + ' ' + temaLC)) {
-    const psych = [
+  // Psicologia
+  if (/psicolog/i.test(nichoLC)) {
+    const opts = [
       `introspective person in contemplative pose, ${angle}, soft chiaroscuro lighting, psychological depth, dark warm background, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`,
       `person with closed eyes in peaceful moment, ${angle}, single soft light source, intimate atmosphere, premium documentary portrait, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
       `person with thoughtful emotional expression, ${angle}, low key dramatic lighting, honest vulnerable portrait, dark intimate background, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
-    const h = tema.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-    return psych[h % psych.length]
+    return opts[h % opts.length]
   }
 
-  if (/tecnolog|software|digital|ia\b|intelig.*artif|programaç/i.test(nichoLC + ' ' + temaLC)) {
-    const tech = [
-      `person working on futuristic interface, ${angle}, blue and purple neon light, dark background, cinematic tech editorial, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `close-up hands typing on premium laptop, dramatic side light, dark desk, tech aesthetic, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `developer portrait with multiple screens background, ${angle}, dramatic screen light, modern tech environment, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+  // Direito
+  if (/direito/i.test(nichoLC)) {
+    const opts = [
+      `confident lawyer in premium suit, ${angle}, dramatic side lighting, dark wood office background, books and scales of justice, authority and expertise, photorealistic portrait, ${CINEMATIC}, ${BASE_STYLE}`,
+      `scales of justice on dark marble desk, dramatic golden side light, premium legal aesthetic, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury law firm office interior, dark wood bookshelves, dramatic architectural lighting, prestigious atmosphere, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
-    const h = tema.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-    return tech[h % tech.length]
+    return opts[h % opts.length]
   }
 
-  if (/espirit|meditaç|mindful|bem.?estar|yoga/i.test(nichoLC + ' ' + temaLC)) {
-    const spirit = [
-      `woman meditating in serene pose, ${angle}, soft golden candlelight, peaceful expression, luxury wellness setting, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `person in yoga pose, ${angle}, warm ethereal morning light, zen atmosphere, premium wellness aesthetic, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+  // Contabilidade
+  if (/contabil/i.test(nichoLC)) {
+    const opts = [
+      `confident accountant professional portrait, ${angle}, dramatic office lighting, premium business environment, dark background, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `financial charts and documents on premium dark desk, dramatic side light, golden pens, luxury business aesthetic, photorealistic product photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `modern accounting office interior, dramatic architectural lighting, premium corporate atmosphere, dark tones, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
-    const h = tema.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-    return spirit[h % spirit.length]
+    return opts[h % opts.length]
   }
 
-  if (/arquitetura|interior|design|imóv|constru/i.test(nichoLC + ' ' + temaLC))
-    return `luxury interior architecture, dramatic natural lighting through large windows, premium real estate, sophisticated minimal space, photorealistic architectural photography, ${CINEMATIC}, ${BASE_STYLE}`
+  // Empreendedorismo / Posicionamento
+  if (/empreend|posicionamento/i.test(nichoLC)) {
+    const opts = [
+      `confident entrepreneur portrait, ${angle}, dramatic side lighting, dark glass and steel background, premium corporate aesthetic, authority and confidence, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury modern office interior, large windows, dramatic natural light, premium business environment, photorealistic architectural photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `successful professional in premium suit, ${angle}, dramatic window light, luxury office background, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
 
-  if (/roupa|moda|calçad|joia|semi.joia|ótica|fashion/i.test(nichoLC + ' ' + temaLC))
-    return `high fashion model wearing luxury outfit, ${angle}, editorial magazine studio lighting, premium product aesthetic, elegant dark backdrop, photorealistic fashion photography, ${CINEMATIC}, ${BASE_STYLE}`
+  // Infoprodutos / Educação
+  if (/infoproduto|educaç/i.test(nichoLC)) {
+    const opts = [
+      `person confidently working on laptop in premium home office, ${angle}, dramatic side light, dark modern background, aspirational digital lifestyle, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `premium laptop and notepad on dark desk, dramatic golden side light, successful online creator aesthetic, photorealistic product photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `confident content creator recording video, ${angle}, ring light and dark studio background, modern digital creator setup, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
 
-  if (/educaç|infoprodut|curso|aprend/i.test(nichoLC + ' ' + temaLC))
-    return `confident person with aspirational expression, ${angle}, dramatic motivational lighting, sophisticated modern atmosphere, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`
+  // Arquitetura / Design de Interiores
+  if (/arquitetura|design.*interior|interior.*design/i.test(nichoLC)) {
+    const opts = [
+      `luxury interior design living room, dramatic natural light through floor-to-ceiling windows, sophisticated minimal dark tones, photorealistic architectural photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `stunning modern architectural exterior, dramatic golden hour light, premium real estate editorial, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury kitchen or bathroom interior detail, dark marble and gold accents, dramatic accent lighting, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
+
+  // Inteligência Artificial
+  if (/inteligência artificial|intelig.*artif|ia\b/i.test(nichoLC)) {
+    const opts = [
+      `person interacting with futuristic holographic AI interface, ${angle}, blue and purple neon light, dark background, cinematic high-tech, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `abstract neural network visualization with glowing nodes, dark background, sophisticated tech aesthetic, dramatic lighting, photorealistic editorial, ${CINEMATIC}, ${BASE_STYLE}`,
+      `developer portrait with multiple screen data displays background, ${angle}, dramatic screen light, modern tech environment, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
+
+  // Estética Automotiva
+  if (/automotiv/i.test(nichoLC)) {
+    const opts = [
+      `luxury sports car with perfect shine and reflection, dramatic studio lighting, dark background, premium automotive photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `close-up of polished car paint with light reflection, dramatic studio light, premium detailing aesthetic, photorealistic automotive photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury car detailing scene, professional applying ceramic coating, dramatic workshop lighting, premium automotive aesthetic, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
+
+  // Estúdio de Tatuagem
+  if (/tatuagem/i.test(nichoLC)) {
+    const opts = [
+      `dramatic close-up of detailed tattoo art on skin, strong directional light, dark moody background, premium tattoo editorial photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `tattoo artist at work, close-up tattooing hand with needle, dramatic studio lighting, dark artistic atmosphere, photorealistic documentary photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `person showing premium tattoo artwork, ${angle}, dramatic moody lighting, dark background, editorial tattoo photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
+
+  // Joias e Semi-joias
+  if (/joia|semi.?joia/i.test(nichoLC)) {
+    const opts = [
+      `luxury diamond ring or necklace close-up on dark velvet, dramatic golden studio light, premium jewelry photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `elegant woman wearing luxury jewelry, ${angle}, dramatic studio lighting, dark background, high-end jewelry campaign aesthetic, photorealistic portrait, ${CINEMATIC}, ${BASE_STYLE}`,
+      `gemstone close-up with light refraction, macro photography, dark background, luxury jewelry editorial, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
+
+  // Óticas
+  if (/ótica|otica/i.test(nichoLC)) {
+    const opts = [
+      `stylish person wearing premium eyeglasses, ${angle}, dramatic editorial lighting, dark background, luxury eyewear campaign, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury eyeglasses frames close-up on dark surface, dramatic golden light reflection, premium optical product photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `extreme close-up of eye with premium eyeglasses, ${angle}, dramatic studio light, sharp detail, luxury eyewear editorial, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
+
+  // Pet Shop
+  if (/pet/i.test(nichoLC)) {
+    const opts = [
+      `adorable dog or cat with expressive eyes, ${angle}, dramatic warm studio light, dark background, premium pet editorial photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `close-up portrait of beautiful dog or cat, ${angle}, soft dramatic side light, luxury pet campaign aesthetic, dark background, photorealistic animal photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `happy pet owner with dog or cat, ${angle}, warm natural light, authentic emotional moment, premium lifestyle photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
+
+  // E-commerce
+  if (/e.?commerce/i.test(nichoLC)) {
+    const opts = [
+      `premium product packaging on dark surface, dramatic golden side light, luxury e-commerce aesthetic, photorealistic product photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `person unboxing premium product, ${angle}, dramatic lifestyle photography, modern home background, photorealistic editorial, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury product flat lay on dark marble, multiple items styled elegantly, dramatic overhead light, photorealistic product photography, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
+
+  // Roupas e Calçados
+  if (/roupa|calçado/i.test(nichoLC)) {
+    const opts = [
+      `high fashion model wearing premium outfit, ${angle}, editorial magazine studio lighting, elegant dark backdrop, photorealistic fashion photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury sneaker or shoe close-up on dark surface, dramatic golden side light, premium footwear product photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `fashion detail shot of premium clothing texture, dramatic directional light, dark background, luxury fashion editorial, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return opts[h % opts.length]
+  }
 
   // Generic fallback — use tema directly as the image subject
   return `${tema}, photorealistic editorial photography, dramatic cinematic lighting, dark premium background, ${CINEMATIC}, ${BASE_STYLE}`
