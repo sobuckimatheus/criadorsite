@@ -45,34 +45,101 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
   const angle = pickAngle(tema, (isBeautyNiche || isMasculineNiche) ? PORTRAIT_ANGLES : SCENE_ANGLES)
 
   // ── Universal content rules — run FIRST, before any niche logic ──────────
-  // These fire based on what the slide is ABOUT, regardless of nicho
+  // More specific rules come BEFORE broader ones to avoid all slides matching same category
 
-  if (/floresta|amazônia|amazon|selva|mata|bioma|biodiversidade|natureza|ecossistema|savana|cerrado|pantanal|caatinga/i.test(conteudo))
-    return `lush tropical rainforest, dramatic shafts of golden light through dense canopy, rich green vegetation layers, atmospheric depth, photorealistic nature photography, ${CINEMATIC}, ${BASE_STYLE}`
+  // Water / rivers (before generic forest so "Rio Amazonas" slide ≠ forest slide)
+  if (/\brio\b|água doce|hidrografia|afluente|bacia|corredeira|cachoeira|lago\b|inundaç/i.test(conteudo)) {
+    const water = [
+      `mighty river flowing through tropical jungle, aerial cinematic view, golden light on water surface, dramatic nature photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `powerful waterfall in lush tropical rainforest, dramatic mist, rich green surroundings, cinematic nature photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `wide river panorama at golden hour, dramatic sky reflection, atmospheric depth, cinematic landscape photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return water[h % water.length]
+  }
 
-  if (/fauna|animal|jaguar|onça|macaco|tucano|arara|cobra|boto|baleia|peixe|ave|pássaro|inseto|borboleta|espécie/i.test(conteudo))
-    return `${tema}, dramatic wildlife close-up in natural habitat, cinematic nature photography, sharp detail, rich environment, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
+  // Ocean / coast / sea
+  if (/oceano|mar\b|praia|coral|marinho|mangue|litoral|costa/i.test(conteudo)) {
+    const sea = [
+      `dramatic tropical beach at golden hour, waves crashing, cinematic landscape photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `underwater coral reef with vibrant marine life, dramatic light rays through water, photorealistic nature photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `aerial view of turquoise coastline, dramatic contrast between sea and land, cinematic drone photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return sea[h % sea.length]
+  }
 
-  if (/oceano|mar|praia|coral|rio|cachoeira|lago|aquático|marinho|mangue/i.test(conteudo))
-    return `dramatic tropical waterscape, powerful natural light, vivid colors, cinematic landscape photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
+  // Wildlife / animals (before generic forest)
+  if (/jaguar|onça|macaco|tucano|arara|cobra|boto|baleia|peixe\b|pássaro|borboleta|\banimal\b|\bfauna\b/i.test(conteudo)) {
+    const wild = [
+      `dramatic jaguar or tropical animal close-up portrait in natural habitat, cinematic wildlife photography, sharp detail, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `colorful toucan or tropical bird perched in rainforest, dramatic natural light, cinematic wildlife photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `exotic Brazilian wildlife in natural environment, dramatic lighting, cinematic nature documentary photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return wild[h % wild.length]
+  }
 
-  if (/carnaval|festival|samba|dança|música|celebraç|colorido|fantasia|folclore/i.test(conteudo))
-    return `vibrant Brazilian carnival scene, explosion of colors, dramatic festive lighting, cinematic documentary photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
+  // City / urban / historical monuments (before generic forest)
+  if (/cidade|skyline|capital|metrópole|urbano|manaus|teatro amazonas|monumento|cristo redentor|pão de açúcar|colonial|inaugurado|construí/i.test(conteudo)) {
+    const city = [
+      `iconic historic theater or monument in tropical city, dramatic golden hour light, cinematic architectural photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `dramatic city skyline at blue hour, lights reflecting, cinematic urban landscape photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `historic colonial architecture with dramatic side lighting, moody atmospheric documentary photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return city[h % city.length]
+  }
 
-  if (/cidade|skyline|capital|metrópole|urbano|monumento|cristo redentor|pão de açúcar|arquitetura histórica/i.test(conteudo))
-    return `iconic Brazilian city landmark or skyline, dramatic golden hour or blue hour light, cinematic landscape photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
+  // Carnival / culture / music
+  if (/carnaval|festival|samba|dança|música|celebraç|colorido|fantasia|folclore/i.test(conteudo)) {
+    const carnival = [
+      `vibrant carnival parade with colorful costumes, explosion of confetti, dramatic festive lighting, cinematic documentary photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `samba dancer in elaborate costume, dynamic motion, dramatic stage lighting, cinematic editorial photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return carnival[h % carnival.length]
+  }
 
+  // Forest / Amazon / biodiversity — with composition variety
+  if (/floresta|amazônia|amazon|selva|mata|bioma|biodiversidade|natureza|ecossistema|savana|cerrado|pantanal|caatinga|espécie|tribo|indígena/i.test(conteudo)) {
+    const forest = [
+      `lush tropical rainforest floor, dramatic golden light rays through dense canopy, ancient trees with massive roots, atmospheric depth, photorealistic nature photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `aerial drone view of endless Amazon rainforest canopy, vast green sea with river snaking through, cinematic landscape photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `misty tropical jungle at dawn, ethereal fog between ancient trees, dramatic atmospheric lighting, photorealistic nature photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `tropical rainforest understory, shafts of light penetrating dense foliage, rich green layers, cinematic nature photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `giant tropical tree canopy viewed from below, dramatic wide angle, green leaves backlit by sun, photorealistic nature photography, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return forest[h % forest.length]
+  }
+
+  // Food / gastronomy
   if (/gastronomia|culinária|prato|receita|ingrediente|sabor|fruta|alimento|comida/i.test(conteudo))
-    return `${tema}, premium food photography, dramatic side lighting, dark elegant surface, rich textures and colors, photorealistic culinary photography, ${CINEMATIC}, ${BASE_STYLE}`
+    return `${tema}, premium food photography, dramatic side lighting, dark elegant surface, rich textures and vivid colors, photorealistic culinary photography, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/ciência|pesquisa|descoberta|experimento|laboratório|fórmula|elemento|átomo|célula|dna|genética/i.test(conteudo))
-    return `scientific research close-up, laboratory equipment with dramatic lighting, cinematic editorial photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
+  // Science / research
+  if (/ciência|pesquisa|descoberta|experimento|laboratório|fórmula|elemento|átomo|célula|dna|genética/i.test(conteudo)) {
+    const sci = [
+      `scientific laboratory close-up with glowing equipment, dramatic blue lighting, cinematic editorial photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `DNA helix visualization with golden light particles, dark background, cinematic scientific photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `researcher hands working with precision equipment, dramatic side light, premium documentary photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return sci[h % sci.length]
+  }
 
-  if (/espaço|planeta|estrela|galáxia|universo|lua|sol|cosmos|astro/i.test(conteudo))
-    return `dramatic space photography, ${tema}, deep cosmos with stars and nebula, cinematic astrophotography style, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
+  // Space / cosmos
+  if (/espaço|planeta|estrela|galáxia|universo|lua|sol|cosmos|astro/i.test(conteudo)) {
+    const space = [
+      `dramatic nebula and star field in deep space, cinematic astrophotography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `planet surface with dramatic space horizon, cinematic sci-fi photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return space[h % space.length]
+  }
 
-  if (/história|colonial|império|guerra|revolução|descobrimento|período|século|antiguidade|civilizaç/i.test(conteudo))
-    return `dramatic historical monument or ancient architecture, cinematic documentary photography, moody atmospheric light, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
+  // History / colonial / civilization
+  if (/história|colonial|império|guerra|revolução|descobrimento|período|século|antiguidade|civilizaç|borracha|seringueira/i.test(conteudo)) {
+    const hist = [
+      `dramatic historical monument or ancient architecture, moody atmospheric lighting, cinematic documentary photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `antique objects or historical artifacts, dramatic golden side light on dark surface, premium editorial photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `vintage map or historical document on dark surface, dramatic overhead golden light, cinematic editorial photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    return hist[h % hist.length]
+  }
 
   if (/economia|pib|riqueza|mercado|bolsa|dinheiro|ouro|recurso|mineral|petróleo/i.test(conteudo))
     return `dramatic financial or commodity visual, ${tema}, cinematic editorial photography, professional dramatic lighting, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
