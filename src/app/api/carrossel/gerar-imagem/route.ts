@@ -43,6 +43,7 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
   const isBeautyNiche = /saúde.*estética|estética|harmoniz|beleza|skincare|facial|pele|cosm|odontolog|salão/i.test(nichoLC)
   const isMasculineNiche = /barbearia/i.test(nichoLC)
   const angle = pickAngle(tema, (isBeautyNiche || isMasculineNiche) ? PORTRAIT_ANGLES : SCENE_ANGLES)
+  const h = tema.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 0)
 
   // ── Universal content rules — run FIRST, before any niche logic ──────────
   // More specific rules come BEFORE broader ones to avoid all slides matching same category
@@ -182,13 +183,11 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
       `beautiful woman with bold eye makeup, ${angle}, dramatic split studio lighting, dark moody background, luxury fashion week aesthetic, photorealistic portrait, ${CINEMATIC}, ${BASE_STYLE}`,
       `woman's face close-up showing perfect skin texture, ${angle}, soft beauty dish lighting, premium skincare campaign, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
-    const hb = tema.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 0)
-    return beauty[hb % beauty.length]
+    return beauty[h % beauty.length]
   }
 
   // ── Niche-specific fallbacks (covers all 21 niches in the platform) ─────────
 
-  const h = tema.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 0)
 
   // Odontologia
   if (/odontolog/i.test(nichoLC)) {
