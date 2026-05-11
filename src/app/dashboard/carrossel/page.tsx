@@ -474,13 +474,17 @@ export default function CarrosselPage() {
       )
     }
 
-    // ── LUXO+FOTO (dark + dourado + foto lateral com fade) ───────────────
+    // ── LUXO+FOTO (imagem full-bleed + overlay escuro + texto sobreposto) ──
     if (estilo === 'luxofoto') {
-      const hasImage = !!slide.imageUrl
-      const isWikiBrand = slide.imageType === 'empresa'
       const imgSrc = slide.imageUrl
         ? (slide.imageUrl.startsWith('data:') ? slide.imageUrl : `/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`)
         : null
+      const titulo = (slide.destaque || linhas[0] || '').trim().toUpperCase()
+      const palavras = titulo.split(' ')
+      const corte = Math.ceil(palavras.length / 2)
+      const tituloBranco = palavras.slice(0, corte).join(' ')
+      const tituloDourado = palavras.slice(corte).join(' ')
+
       return (
         <div style={{
           background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
@@ -488,58 +492,49 @@ export default function CarrosselPage() {
           fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
           boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
         }}>
-          {/* Imagem lateral direita */}
+
+          {/* Imagem full-bleed cobrindo o slide inteiro */}
           {imgSrc && (
-            <>
-              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '55%', overflow: 'hidden' }}>
-                <img src={imgSrc} alt="" crossOrigin="anonymous"
-                  style={{ width: '100%', height: '100%', objectFit: isWikiBrand ? 'contain' : 'cover', objectPosition: 'center top', display: 'block', background: isWikiBrand ? '#111' : 'transparent' }}
-                />
-              </div>
-              {/* Fade horizontal para blend com fundo */}
-              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '70%', background: 'linear-gradient(90deg,#0a0a0a 25%,rgba(10,10,10,0.65) 55%,transparent 100%)', zIndex: 1, pointerEvents: 'none' }} />
-              {/* Fade vertical no rodapé */}
-              <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '30%', background: 'linear-gradient(0deg,#0a0a0a 30%,transparent 100%)', zIndex: 1, pointerEvents: 'none' }} />
-            </>
+            <img src={imgSrc} alt="" crossOrigin="anonymous" style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'center top', display: 'block',
+            }} />
           )}
 
-          {/* Conteúdo de texto */}
+          {/* Overlay escuro — mais denso na esquerda/baixo onde fica o texto */}
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+            background: imgSrc
+              ? 'linear-gradient(105deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.35) 100%)'
+              : '#0a0a0a',
+          }} />
+          {/* Fade adicional no rodapé */}
+          <div style={{
+            position: 'absolute', left: 0, right: 0, bottom: 0, height: '28%', zIndex: 1, pointerEvents: 'none',
+            background: 'linear-gradient(0deg,rgba(0,0,0,0.95) 0%,transparent 100%)',
+          }} />
+
+          {/* Conteúdo — sobre os overlays */}
           <div style={{
             position: 'relative', zIndex: 2, flex: 1,
             display: 'flex', flexDirection: 'column',
-            padding: '28px 28px 14px',
-            width: hasImage ? '58%' : '100%',
-            overflow: 'hidden',
+            padding: '28px 28px 14px', overflow: 'hidden',
           }}>
-            {/* Número do slide */}
+            {/* Número */}
             <div style={{ color: '#D4AF37', fontSize: 74, fontWeight: 900, lineHeight: 1, marginBottom: 10, fontFamily: 'Georgia,serif', flexShrink: 0 }}>
               {idx + 1}
             </div>
 
-            {/* Título curto — usa destaque (3-6 palavras)
-                Último "bloco" de palavras em dourado, resto em branco */}
-            {(() => {
-              const titulo = (slide.destaque || linhas[0] || '').trim().toUpperCase()
-              const palavras = titulo.split(' ')
-              // ~metade final em dourado, início em branco
-              const corte = Math.ceil(palavras.length / 2)
-              const branco = palavras.slice(0, corte).join(' ')
-              const dourado = palavras.slice(corte).join(' ')
-              return (
-                <div style={{ marginBottom: 18, flexShrink: 0, lineHeight: 1.15 }}>
-                  {branco && <span style={{ display: 'block', color: '#ffffff', fontSize: 30, fontWeight: 900, letterSpacing: '0.03em' }}>{branco}</span>}
-                  {dourado && <span style={{ display: 'block', color: '#D4AF37', fontSize: 30, fontWeight: 900, letterSpacing: '0.03em' }}>{dourado}</span>}
-                </div>
-              )
-            })()}
+            {/* Título dois tons */}
+            <div style={{ marginBottom: 20, flexShrink: 0, lineHeight: 1.15, maxWidth: '70%' }}>
+              {tituloBranco && <span style={{ display: 'block', color: '#ffffff', fontSize: 30, fontWeight: 900, letterSpacing: '0.03em' }}>{tituloBranco}</span>}
+              {tituloDourado && <span style={{ display: 'block', color: '#D4AF37', fontSize: 30, fontWeight: 900, letterSpacing: '0.03em' }}>{tituloDourado}</span>}
+            </div>
 
-            {/* Corpo — texto completo do slide com palavras-chave em dourado */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
+            {/* Corpo */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden', maxWidth: '72%' }}>
               {linhas.map((linha, i) => (
-                <p key={i} style={{
-                  color: 'rgba(255,255,255,0.88)', fontSize: 14, lineHeight: 1.75,
-                  margin: 0, fontWeight: 400,
-                }}
+                <p key={i} style={{ color: 'rgba(255,255,255,0.9)', fontSize: 14, lineHeight: 1.75, margin: 0, fontWeight: 400 }}
                   dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#D4AF37;font-weight:700">$1</strong>') }}
                 />
               ))}
