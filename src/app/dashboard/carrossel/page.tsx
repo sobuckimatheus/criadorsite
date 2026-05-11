@@ -283,6 +283,47 @@ export default function CarrosselPage() {
     setProgressoIA(null)
   }
 
+  // Gera automaticamente com Fal.ai Pro os slides do tema Viral que
+  // não têm foto real de pessoa/marca (mantém Wikipedia, substitui Pexels e vazios)
+  async function autoGerarViralImages(carrosselGerado: Carrossel) {
+    const paraGerar = carrosselGerado.slides
+      .map((s, i) => ({ s, i }))
+      .filter(({ s }) => s.imageType !== 'pessoa' && s.imageType !== 'empresa')
+    if (paraGerar.length === 0) return
+
+    setGerandoTodas(true)
+    setProgressoIA({ atual: 0, total: paraGerar.length })
+
+    for (const { s: slide, i } of paraGerar) {
+      setProgressoIA(prev => prev ? { ...prev, atual: prev.atual + 1 } : null)
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch('/api/carrossel/gerar-imagem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho, estilo: 'viral' }),
+          })
+          const data = await res.json()
+          const url: string | undefined = data.imageUrl ?? data.imageData
+          if (res.ok && url) {
+            setCarrossel(prev => {
+              if (!prev) return prev
+              const slides = [...prev.slides]
+              slides[i] = { ...slides[i], imageUrl: url, imageType: 'pexels' }
+              return { ...prev, slides }
+            })
+            break
+          }
+        } catch {
+          if (attempt === 0) await new Promise(r => setTimeout(r, 2000))
+        }
+      }
+    }
+
+    setGerandoTodas(false)
+    setProgressoIA(null)
+  }
+
   async function gerarCarrossel() {
     if (!nicho || !tipo || !tema.trim()) return
     setLoading(true)
@@ -309,6 +350,8 @@ export default function CarrosselPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar')
       setCarrossel(data.carrossel)
+      // Tema Viral: gera automaticamente com Flux Pro os slides sem foto de famoso/marca
+      if (estilo === 'viral') autoGerarViralImages(data.carrossel)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao gerar carrossel. Tente novamente.')
     } finally {
