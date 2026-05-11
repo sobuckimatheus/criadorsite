@@ -347,7 +347,7 @@ export default function CarrosselPage() {
         <div style={{
           display: 'flex', flexDirection: 'column',
           background: '#ffffff', borderRadius: '16px', overflow: 'hidden',
-          width: '100%', aspectRatio: '1 / 1',
+          width: '100%', aspectRatio: '4 / 5',
           border: '1px solid #e7e7e7', boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
           fontFamily,
         }}>
@@ -411,7 +411,7 @@ export default function CarrosselPage() {
       const bg = BOLD_GRADIENTS[idx % BOLD_GRADIENTS.length]
       return (
         <div style={{
-          background: bg, borderRadius: '16px', width: '100%', aspectRatio: '1/1',
+          background: bg, borderRadius: '16px', width: '100%', aspectRatio: '4/5',
           display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
           fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
           boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
@@ -448,7 +448,7 @@ export default function CarrosselPage() {
       const accent = CLEAN_ACCENTS[idx % CLEAN_ACCENTS.length]
       return (
         <div style={{
-          background: '#ffffff', borderRadius: '16px', width: '100%', aspectRatio: '1/1',
+          background: '#ffffff', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
           border: '1px solid #e5e7eb', boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
           fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
@@ -483,7 +483,7 @@ export default function CarrosselPage() {
         : null
       return (
         <div style={{
-          background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '1/1',
+          background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
           position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column',
           fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
           boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
@@ -563,7 +563,7 @@ export default function CarrosselPage() {
     if (estilo === 'luxury') {
       return (
         <div style={{
-          background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '1/1',
+          background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
           display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
           fontFamily: 'Georgia,"Times New Roman",serif',
           boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
@@ -613,7 +613,7 @@ export default function CarrosselPage() {
     ) : null
 
     return (
-      <div style={{ ...t.cardStyle, width: '100%', aspectRatio: '1 / 1', display: 'flex', flexDirection: 'column', fontFamily, overflow: 'hidden' }}>
+      <div style={{ ...t.cardStyle, width: '100%', aspectRatio: '4 / 5', display: 'flex', flexDirection: 'column', fontFamily, overflow: 'hidden' }}>
 
         {/* Header */}
         <div style={t.headerStyle}>

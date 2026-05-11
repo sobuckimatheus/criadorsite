@@ -10,7 +10,7 @@ function buildPrompt(destaque: string, texto: string, nicho: string): string {
   const ctx = String(texto ?? '').replace(/\*\*/g, '').substring(0, 120)
   const combined = (nicho ?? '') + ' ' + ctx
 
-  const baseQuality = 'ultra realistic, photorealistic 8k, sharp focus, no text, no watermarks, no logos, square 1:1'
+  const baseQuality = 'ultra realistic, photorealistic 8k, sharp focus, no text, no watermarks, no logos, vertical 4:5 portrait'
 
   if (/estética|harmoniz|saúde|odont|salão|barbearia|beleza|skincare|facial|pele|cosm/i.test(combined)) {
     return `${tema}, luxury beauty portrait photography, dramatic cinematic studio lighting, dark elegant background, flawless skin, premium beauty campaign aesthetic, black and gold color palette, ${baseQuality}`
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         prompt,
-        image_size: 'square_hd',
+        image_size: { width: 1080, height: 1350 },
         num_inference_steps: 28,
         guidance_scale: 3.5,
         num_images: 1,
