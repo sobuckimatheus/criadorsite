@@ -43,67 +43,98 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
   const isBeautyNiche = /estética|harmoniz|beleza|skincare|facial|pele|cosm|salão|barbearia|odont/i.test(nichoLC)
   const angle = pickAngle(tema, isBeautyNiche ? PORTRAIT_ANGLES : SCENE_ANGLES)
 
-  // ── Content-specific rules — always use a real subject, never abstract ────
+  // ── Universal content rules — run FIRST, before any niche logic ──────────
+  // These fire based on what the slide is ABOUT, regardless of nicho
 
-  if (/transform|antes.*depois|progressiv|evoluç|colágeno|estímul/i.test(conteudo))
-    return `beautiful woman showing radiant glowing skin transformation, ${angle}, warm golden light, luminous complexion, dark studio background, photorealistic beauty photography, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/floresta|amazônia|amazon|selva|mata|bioma|biodiversidade|natureza|ecossistema|savana|cerrado|pantanal|caatinga/i.test(conteudo))
+    return `lush tropical rainforest, dramatic shafts of golden light through dense canopy, rich green vegetation layers, atmospheric depth, photorealistic nature photography, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/autoestim|confianç|poder|empoderamento|se sentir/i.test(conteudo))
-    return `confident beautiful woman looking directly into camera, ${angle}, strong dramatic overhead studio light, subtle empowered smile, dark background, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/fauna|animal|jaguar|onça|macaco|tucano|arara|cobra|boto|baleia|peixe|ave|pássaro|inseto|borboleta|espécie/i.test(conteudo))
+    return `${tema}, dramatic wildlife close-up in natural habitat, cinematic nature photography, sharp detail, rich environment, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/expressão|natural|sutil|discreto|suave|preserv|autentic/i.test(conteudo))
-    return `beautiful woman with natural relaxed expression, ${angle}, soft diffused warm lighting, minimal makeup, genuine authentic look, dark warm background, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/oceano|mar|praia|coral|rio|cachoeira|lago|aquático|marinho|mangue/i.test(conteudo))
+    return `dramatic tropical waterscape, powerful natural light, vivid colors, cinematic landscape photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/recuper|cicatriz|curar|tratamento|pouco tempo|retorno imediato/i.test(conteudo))
-    return `serene beautiful woman with eyes gently closed, peaceful expression, ${angle}, warm soft golden light, luxury spa setting, dark background, photorealistic beauty photography, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/carnaval|festival|samba|dança|música|celebraç|colorido|fantasia|folclore/i.test(conteudo))
+    return `vibrant Brazilian carnival scene, explosion of colors, dramatic festive lighting, cinematic documentary photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/jovem|juventude|envelhecimento|tempo|anos|idade|anti.?aging/i.test(conteudo))
-    return `beautiful woman with flawless luminous skin, ${angle}, golden warm studio light highlighting smooth skin texture, timeless beauty, dark background, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/cidade|skyline|capital|metrópole|urbano|monumento|cristo redentor|pão de açúcar|arquitetura histórica/i.test(conteudo))
+    return `iconic Brazilian city landmark or skyline, dramatic golden hour or blue hour light, cinematic landscape photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/procedimento|técnica|injeção|ácido hialurônico|toxina|botox|fio|protocolo/i.test(conteudo))
-    return `luxury aesthetic medicine serum vials and syringe on dark marble surface, golden light reflection, premium medical products close-up, photorealistic product photography, dark elegant background, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/gastronomia|culinária|prato|receita|ingrediente|sabor|fruta|alimento|comida/i.test(conteudo))
+    return `${tema}, premium food photography, dramatic side lighting, dark elegant surface, rich textures and colors, photorealistic culinary photography, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/mito|verdade|mentira|origem|história|descobriu|nasceu|hospital|cirúrg/i.test(conteudo))
-    return `beautiful woman with thoughtful knowing expression, ${angle}, single dramatic side light, dark studio background, editorial fashion photography, photorealistic portrait, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/ciência|pesquisa|descoberta|experimento|laboratório|fórmula|elemento|átomo|célula|dna|genética/i.test(conteudo))
+    return `scientific research close-up, laboratory equipment with dramatic lighting, cinematic editorial photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/matemática|proporção|áurea|simetria|rosto|medida|mapa/i.test(conteudo))
-    return `beautiful woman face with subtle golden geometric proportion lines, ${angle}, dramatic studio lighting, symmetrical elegant portrait, dark background, photorealistic beauty photography, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/espaço|planeta|estrela|galáxia|universo|lua|sol|cosmos|astro/i.test(conteudo))
+    return `dramatic space photography, ${tema}, deep cosmos with stars and nebula, cinematic astrophotography style, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/resultado|antes|depois|caso|cliente|funciona|diferença/i.test(conteudo))
-    return `stunning woman with perfect glowing skin, ${angle}, premium beauty lighting, flawless complexion, luxury editorial photography, dark sophisticated background, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/história|colonial|império|guerra|revolução|descobrimento|período|século|antiguidade|civilizaç/i.test(conteudo))
+    return `dramatic historical monument or ancient architecture, cinematic documentary photography, moody atmospheric light, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
 
-  if (/cuidado|atenção|escolha|profissional|qualificado|risco|seguro/i.test(conteudo))
-    return `professional female aesthetician in modern luxury clinic, ${angle}, clean white and gold clinical setting, confident expert expression, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`
+  if (/economia|pib|riqueza|mercado|bolsa|dinheiro|ouro|recurso|mineral|petróleo/i.test(conteudo))
+    return `dramatic financial or commodity visual, ${tema}, cinematic editorial photography, professional dramatic lighting, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
 
-  // ── Niche fallbacks — always anchored in a real subject ───────────────────
-
-  if (/empreend|negócio|startup|financ|contab|marketing|vendas|liderança|gestão/i.test(nichoLC + ' ' + temaLC)) {
-    const biz = [
-      `confident professional woman in luxury modern office, ${angle}, dramatic side lighting, dark glass and steel background, premium corporate portrait, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `successful businessman in premium suit, ${angle}, dramatic window light, luxury office background, authority and confidence, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `luxury modern corporate office interior, dark tones, dramatic architectural lighting, premium business environment, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
-    ]
-    const h = tema.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-    return biz[h % biz.length]
-  }
+  // ── Beauty-niche content rules (only fire when nicho is beauty) ───────────
 
   if (isBeautyNiche) {
+    if (/transform|antes.*depois|progressiv|evoluç|colágeno|estímul/i.test(conteudo))
+      return `beautiful woman showing radiant glowing skin, ${angle}, warm golden light, luminous complexion, dark studio background, photorealistic beauty photography, ${CINEMATIC}, ${BASE_STYLE}`
+
+    if (/autoestim|confianç|poder|empoderamento|se sentir/i.test(conteudo))
+      return `confident beautiful woman looking directly into camera, ${angle}, strong dramatic overhead studio light, subtle empowered smile, dark background, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`
+
+    if (/expressão|natural|sutil|discreto|suave|preserv|autentic/i.test(conteudo))
+      return `beautiful woman with natural relaxed expression, ${angle}, soft diffused warm lighting, minimal makeup, genuine authentic look, dark warm background, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`
+
+    if (/recuper|cicatriz|curar|tratamento|pouco tempo|retorno imediato/i.test(conteudo))
+      return `serene beautiful woman with eyes gently closed, peaceful expression, ${angle}, warm soft golden light, luxury spa setting, dark background, photorealistic beauty photography, ${CINEMATIC}, ${BASE_STYLE}`
+
+    if (/jovem|juventude|envelhecimento|tempo|anos|idade|anti.?aging/i.test(conteudo))
+      return `beautiful woman with flawless luminous skin, ${angle}, golden warm studio light highlighting smooth skin texture, dark background, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`
+
+    if (/procedimento|técnica|injeção|ácido hialurônico|toxina|botox|fio|protocolo/i.test(conteudo))
+      return `luxury aesthetic medicine serum vials and syringe on dark marble surface, golden light reflection, premium medical products close-up, photorealistic product photography, ${CINEMATIC}, ${BASE_STYLE}`
+
+    if (/matemática|proporção|áurea|simetria|medida|mapa/i.test(conteudo))
+      return `beautiful woman face with subtle golden geometric proportion lines, ${angle}, dramatic studio lighting, symmetrical elegant portrait, dark background, photorealistic beauty photography, ${CINEMATIC}, ${BASE_STYLE}`
+
+    if (/resultado|antes|depois|caso|cliente|funciona|diferença/i.test(conteudo))
+      return `stunning woman with perfect glowing skin, ${angle}, premium beauty lighting, flawless complexion, luxury editorial photography, dark sophisticated background, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`
+
+    if (/cuidado|atenção|escolha|profissional|qualificado|risco|seguro|mito|verdade|origem/i.test(conteudo))
+      return `professional female aesthetician in modern luxury clinic, ${angle}, clean clinical setting, confident expert expression, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`
+
+    // Beauty generic fallback
     const beauty = [
-      `beautiful woman portrait, ${angle}, dramatic studio lighting, flawless skin, luxury beauty campaign aesthetic, dark background, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `beautiful woman portrait, ${angle}, dramatic studio lighting, flawless skin, luxury beauty campaign, dark background, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
       `close-up woman face, ${angle}, warm golden rim light on cheekbone, dewy luminous skin, dark studio, premium editorial beauty photography, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
       `elegant woman side profile, ${angle}, strong contour lighting, silk against dark background, high fashion beauty editorial, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
       `beautiful woman with bold eye makeup, ${angle}, dramatic split studio lighting, dark moody background, luxury fashion week aesthetic, photorealistic portrait, ${CINEMATIC}, ${BASE_STYLE}`,
       `woman's face close-up showing perfect skin texture, ${angle}, soft beauty dish lighting, premium skincare campaign, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
-    const h = tema.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 0)
-    return beauty[h % beauty.length]
+    const hb = tema.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 0)
+    return beauty[hb % beauty.length]
+  }
+
+  // ── Other niche fallbacks ─────────────────────────────────────────────────
+
+  if (/empreend|negócio|startup|financ|contab|marketing|vendas|liderança|gestão/i.test(nichoLC + ' ' + temaLC)) {
+    const biz = [
+      `confident professional in luxury modern office, ${angle}, dramatic side lighting, dark glass and steel background, premium corporate portrait, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `luxury modern corporate office interior, dark tones, dramatic architectural lighting, premium business environment, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `successful executive in premium suit, ${angle}, dramatic window light, luxury office background, authority and confidence, photorealistic portrait, ${CINEMATIC}, ${BASE_STYLE}`,
+    ]
+    const h = tema.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+    return biz[h % biz.length]
   }
 
   if (/saúde|fitness|academia|treino|corpo|musculaç|esporte|nutriç/i.test(nichoLC + ' ' + temaLC)) {
     const fit = [
-      `athletic woman in premium sportswear, ${angle}, dramatic hard gym lighting, defined physique, dark background, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `fit man with defined muscles, ${angle}, single strong spotlight, dark gym background, powerful physique, premium sports editorial, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `athletic person in premium sportswear, ${angle}, dramatic hard gym lighting, defined physique, dark background, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`,
       `athlete in dynamic pose, ${angle}, dramatic low key lighting, intense focused expression, premium fitness photography, dark background, photorealistic, ${CINEMATIC}, ${BASE_STYLE}`,
+      `close-up athletic hands gripping barbell, dramatic light, dark gym background, photorealistic sports photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
     const h = tema.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
     return fit[h % fit.length]
@@ -111,9 +142,9 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
 
   if (/psicolog|mental|ansied|emoç|relacionament|autoestima|terapia/i.test(nichoLC + ' ' + temaLC)) {
     const psych = [
-      `introspective woman in contemplative pose, ${angle}, soft chiaroscuro lighting, psychological depth, dark warm background, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `introspective person in contemplative pose, ${angle}, soft chiaroscuro lighting, psychological depth, dark warm background, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`,
       `person with closed eyes in peaceful moment, ${angle}, single soft light source, intimate atmosphere, premium documentary portrait, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
-      `woman with raw emotional expression, ${angle}, low key dramatic lighting, honest vulnerable portrait, dark intimate background, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `person with thoughtful emotional expression, ${angle}, low key dramatic lighting, honest vulnerable portrait, dark intimate background, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
     const h = tema.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
     return psych[h % psych.length]
@@ -121,7 +152,7 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
 
   if (/tecnolog|software|digital|ia\b|intelig.*artif|programaç/i.test(nichoLC + ' ' + temaLC)) {
     const tech = [
-      `person working on futuristic holographic interface, ${angle}, blue and purple neon light, dark background, cinematic tech editorial, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
+      `person working on futuristic interface, ${angle}, blue and purple neon light, dark background, cinematic tech editorial, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
       `close-up hands typing on premium laptop, dramatic side light, dark desk, tech aesthetic, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
       `developer portrait with multiple screens background, ${angle}, dramatic screen light, modern tech environment, photorealistic photography, ${CINEMATIC}, ${BASE_STYLE}`,
     ]
@@ -139,7 +170,7 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
   }
 
   if (/arquitetura|interior|design|imóv|constru/i.test(nichoLC + ' ' + temaLC))
-    return `luxury interior architecture, dramatic natural lighting through large windows, premium real estate, sophisticated minimal dark space, photorealistic architectural photography, ${CINEMATIC}, ${BASE_STYLE}`
+    return `luxury interior architecture, dramatic natural lighting through large windows, premium real estate, sophisticated minimal space, photorealistic architectural photography, ${CINEMATIC}, ${BASE_STYLE}`
 
   if (/roupa|moda|calçad|joia|semi.joia|ótica|fashion/i.test(nichoLC + ' ' + temaLC))
     return `high fashion model wearing luxury outfit, ${angle}, editorial magazine studio lighting, premium product aesthetic, elegant dark backdrop, photorealistic fashion photography, ${CINEMATIC}, ${BASE_STYLE}`
@@ -147,7 +178,8 @@ function buildViralPrompt(destaque: string, texto: string, nicho: string): strin
   if (/educaç|infoprodut|curso|aprend/i.test(nichoLC + ' ' + temaLC))
     return `confident person with aspirational expression, ${angle}, dramatic motivational lighting, sophisticated modern atmosphere, photorealistic portrait photography, ${CINEMATIC}, ${BASE_STYLE}`
 
-  return `${tema}, ${angle}, dramatic professional studio lighting, dark premium background, photorealistic editorial photography, ${CINEMATIC}, ${BASE_STYLE}`
+  // Generic fallback — use tema directly as the image subject
+  return `${tema}, photorealistic editorial photography, dramatic cinematic lighting, dark premium background, ${CINEMATIC}, ${BASE_STYLE}`
 }
 
 // ── Prompts padrão (Flux Dev) ────────────────────────────────────────────────
