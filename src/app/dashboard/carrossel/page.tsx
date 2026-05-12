@@ -46,7 +46,7 @@ const TONS = [
   { id: 'provocativo', label: '😤 Provocativo', desc: 'Questiona e desafia' },
 ]
 
-type ThemeId = 'thread' | 'roxo' | 'dark' | 'gradiente' | 'minimal' | 'bold' | 'clean' | 'luxury' | 'luxofoto' | 'viral'
+type ThemeId = 'thread' | 'roxo' | 'dark' | 'gradiente' | 'minimal' | 'bold' | 'clean' | 'luxury' | 'luxofoto' | 'viral' | 'gpt'
 
 interface ThemeDef {
   label: string
@@ -181,6 +181,18 @@ const THEMES: Record<ThemeId, ThemeDef> = {
     mutedColor: 'rgba(212,175,55,0.7)',
     accentColor: '#D4AF37',
     avatarStyle: { background: 'rgba(212,175,55,0.15)', color: '#D4AF37' },
+  },
+  gpt: {
+    label: 'GPT',
+    swatch: 'linear-gradient(135deg,#0a0a0a 55%,#10a37f 55%)',
+    cardStyle: { borderRadius: '16px', overflow: 'hidden', background: '#0d0d0d' },
+    headerStyle: {},
+    bodyStyle: {},
+    footerStyle: {},
+    textColor: '#ffffff',
+    mutedColor: 'rgba(255,255,255,0.55)',
+    accentColor: '#10a37f',
+    avatarStyle: { background: 'rgba(16,163,127,0.15)', color: '#10a37f' },
   },
 }
 
@@ -362,7 +374,8 @@ export default function CarrosselPage() {
     }, 2200)
 
     try {
-      const res = await fetch('/api/carrossel', {
+      const endpoint = estilo === 'gpt' ? '/api/carrossel/gpt' : '/api/carrossel'
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nicho, nome, tipo, tipoLabel: tipoObj?.label, tipoDesc: tipoObj?.desc, tom, tomLabel: tomObj?.label, tomDesc: tomObj?.desc, tema }),
@@ -370,7 +383,6 @@ export default function CarrosselPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar')
       setCarrossel(data.carrossel)
-      // Tema Viral: gera automaticamente com Flux Pro os slides sem foto de famoso/marca
       if (estilo === 'viral') autoGerarViralImages(data.carrossel)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao gerar carrossel. Tente novamente.')
@@ -700,6 +712,86 @@ export default function CarrosselPage() {
               <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                 {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
                   <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? ACCENT : 'rgba(255,255,255,0.2)' }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // ── GPT (foto topo + painel escuro baixo + verde OpenAI) ─────────────
+    if (estilo === 'gpt') {
+      const ACCENT = '#10a37f'
+      const imgSrc = slide.imageUrl
+        ? (slide.imageUrl.startsWith('data:') ? slide.imageUrl : `/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`)
+        : null
+      const titulo = (slide.destaque || linhas[0] || '').trim().toUpperCase()
+      const palavras = titulo.split(' ')
+      const corte = Math.ceil(palavras.length / 2)
+      const tL1 = palavras.slice(0, corte).join(' ')
+      const tL2 = palavras.slice(corte).join(' ')
+
+      return (
+        <div style={{
+          background: '#0d0d0d', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
+          fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.7)',
+        }}>
+          {/* Foto — ocupa os 58% superiores */}
+          <div style={{ position: 'relative', height: '58%', flexShrink: 0, overflow: 'hidden', background: '#1a1a1a' }}>
+            {imgSrc && (
+              <img src={imgSrc} alt="" crossOrigin="anonymous" style={{
+                width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block',
+              }} />
+            )}
+            {/* Fade na base da foto para transitar suavemente */}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%', pointerEvents: 'none',
+              background: 'linear-gradient(0deg,#0d0d0d 0%,transparent 100%)',
+            }} />
+            {/* Número no canto superior esquerdo */}
+            <div style={{
+              position: 'absolute', top: 16, left: 20, zIndex: 2,
+              color: '#ffffff', fontSize: 42, fontWeight: 900, lineHeight: 1, opacity: 0.9,
+              textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+            }}>
+              {idx + 1}
+            </div>
+            {/* Linha verde no topo */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: ACCENT }} />
+          </div>
+
+          {/* Painel de texto — 42% inferiores */}
+          <div style={{
+            flex: 1, display: 'flex', flexDirection: 'column',
+            padding: '10px 24px 16px', overflow: 'hidden', background: '#0d0d0d',
+          }}>
+            {/* Título dois tons */}
+            <div style={{ marginBottom: 10, flexShrink: 0, lineHeight: 1.2 }}>
+              {tL1 && <span style={{ display: 'block', color: '#ffffff', fontSize: 22, fontWeight: 900, letterSpacing: '0.02em' }}>{tL1}</span>}
+              {tL2 && <span style={{ display: 'block', color: ACCENT, fontSize: 22, fontWeight: 900, letterSpacing: '0.02em' }}>{tL2}</span>}
+            </div>
+
+            {/* Separador */}
+            <div style={{ width: 28, height: 2, background: ACCENT, borderRadius: 1, marginBottom: 10, flexShrink: 0 }} />
+
+            {/* Corpo */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7, overflow: 'hidden' }}>
+              {linhas.map((linha, i) => (
+                <p key={i} style={{ color: 'rgba(255,255,255,0.82)', fontSize: 13, lineHeight: 1.65, margin: 0 }}
+                  dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${ACCENT};font-weight:700">$1</strong>`) }}
+                />
+              ))}
+            </div>
+
+            {/* Rodapé */}
+            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{nome || nicho}</span>
+              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
+                  <div key={i} style={{ width: i === idx ? 14 : 4, height: 4, borderRadius: 2, background: i === idx ? ACCENT : 'rgba(255,255,255,0.18)' }} />
                 ))}
               </div>
             </div>
