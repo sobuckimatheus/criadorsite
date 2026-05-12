@@ -768,144 +768,166 @@ export default function CarrosselPage() {
         boxShadow: '0 8px 40px rgba(0,0,0,0.8)',
       }
 
-      // ── impact_cover: headline gigante centrado sobre a foto ──────────────
+      const dotsRow = (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <span style={{ color: `rgba(201,168,76,0.4)`, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{nome || nicho}</span>
+          <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+            {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
+              <div key={i} style={{ width: i === idx ? 20 : 5, height: 5, borderRadius: 3, background: i === idx ? GOLD : 'rgba(201,168,76,0.22)' }} />
+            ))}
+          </div>
+        </div>
+      )
+
+      // ── impact_cover: headline dramática, foto full-bleed escurecida ───────
       if (layoutStyle === 'impact_cover') {
         return (
           <div style={cardBase}>
             {imgSrc && <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }} />}
-            {/* Overlay escuro total */}
-            <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: imgSrc ? 'rgba(0,0,0,0.62)' : '#0a0a0a' }} />
+            {/* Overlay com vinheta nas bordas e escurecimento geral */}
+            <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: imgSrc ? 'linear-gradient(160deg,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.45) 50%,rgba(0,0,0,0.75) 100%)' : '#0a0a0a' }} />
             {/* Linha dourada topo */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${GOLD},transparent)`, zIndex: 2 }} />
-            {/* Linha dourada base */}
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${GOLD},transparent)`, zIndex: 2 }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${GOLD},transparent)`, zIndex: 3 }} />
+            {/* Número marca d'água */}
+            <div style={{ position: 'absolute', right: 20, bottom: 60, zIndex: 1, fontSize: 180, fontWeight: 900, color: 'rgba(201,168,76,0.1)', lineHeight: 1, userSelect: 'none', fontFamily: 'Georgia,serif' }}>
+              {idx + 1}
+            </div>
 
-            <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', padding: '28px 30px' }}>
-              {/* Número pequeno */}
-              <div style={{ color: GOLD, fontSize: 13, fontWeight: 700, letterSpacing: '0.2em', marginBottom: 20, opacity: 0.8 }}>
+            <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', padding: '30px 30px 0' }}>
+              {/* Badge número */}
+              <div style={{ alignSelf: 'flex-start', background: GOLD, color: '#0a0a0a', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', padding: '4px 10px', borderRadius: 4, flexShrink: 0 }}>
                 {String(idx + 1).padStart(2, '0')}
               </div>
-              {/* Headline gigante dois tons */}
-              <div style={{ lineHeight: 1.1, marginBottom: 20 }}>
-                <span style={{ display: 'block', color: '#ffffff', fontSize: 34, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL1}</span>
-                {hL2 && <span style={{ display: 'block', color: GOLD, fontSize: 34, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL2}</span>}
+
+              {/* Espaçador */}
+              <div style={{ flex: 1 }} />
+
+              {/* Headline enorme */}
+              <div style={{ lineHeight: 1.08, marginBottom: 18 }}>
+                <span style={{ display: 'block', color: '#ffffff', fontSize: 38, fontWeight: 900, letterSpacing: '-0.02em' }}>{hL1}</span>
+                {hL2 && <span style={{ display: 'block', color: GOLD, fontSize: 38, fontWeight: 900, letterSpacing: '-0.02em' }}>{hL2}</span>}
               </div>
+
               {/* Divisor */}
-              <div style={{ width: 40, height: 2, background: GOLD, borderRadius: 1, marginBottom: 16 }} />
-              {/* Body curto */}
-              {bodyLinhas.slice(0, 2).map((l, i) => (
-                <p key={i} style={{ color: 'rgba(255,255,255,0.82)', fontSize: 14, lineHeight: 1.65, margin: '0 0 8px' }}
+              <div style={{ width: 44, height: 2, background: GOLD, borderRadius: 1, marginBottom: 18 }} />
+
+              {/* Body — até 3 linhas */}
+              {bodyLinhas.slice(0, 3).map((l, i) => (
+                <p key={i} style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14.5, lineHeight: 1.7, margin: '0 0 10px' }}
                   dangerouslySetInnerHTML={{ __html: applyHL(l) }} />
               ))}
+
               {/* CTA */}
               {ctaText && (
-                <div style={{ marginTop: 20, color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>{ctaText}</span>
-                  <span style={{ fontSize: 16 }}>›</span>
+                <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 7, color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: '0.07em' }}>
+                  {ctaText} <span style={{ fontSize: 18, lineHeight: 1 }}>›</span>
                 </div>
               )}
             </div>
-            {/* Rodapé */}
-            <div style={{ position: 'relative', zIndex: 2, padding: '0 30px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ color: `rgba(201,168,76,0.45)`, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{nome || nicho}</span>
-              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
-                  <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? GOLD : 'rgba(201,168,76,0.2)' }} />
-                ))}
-              </div>
+
+            <div style={{ position: 'relative', zIndex: 2, padding: '14px 30px 18px' }}>
+              {dotsRow}
             </div>
           </div>
         )
       }
 
-      // ── text_focus: fundo sólido escuro, tipografia limpa, sem foto ────────
+      // ── text_focus: tipografia clean, sem foto, muito espaço em branco ─────
       if (layoutStyle === 'text_focus') {
         return (
           <div style={{ ...cardBase, background: '#0a0a0a' }}>
-            {/* Ornamento dourado central sutil */}
-            <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontSize: 220, fontWeight: 900, color: 'rgba(201,168,76,0.04)', lineHeight: 1, userSelect: 'none', fontFamily: 'Georgia,serif' }}>
+            {/* Número ornamental */}
+            <div style={{ position: 'absolute', left: '50%', top: '38%', transform: 'translate(-50%,-50%)', fontSize: 260, fontWeight: 900, color: 'rgba(201,168,76,0.05)', lineHeight: 1, userSelect: 'none', fontFamily: 'Georgia,serif', whiteSpace: 'nowrap' }}>
               {idx + 1}
             </div>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
 
-            <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '36px 32px' }}>
-              <div style={{ width: 36, height: 2, background: GOLD, marginBottom: 24, borderRadius: 1 }} />
-              {/* Headline dois tons grande */}
-              <div style={{ lineHeight: 1.15, marginBottom: 22 }}>
-                <span style={{ display: 'block', color: '#ffffff', fontSize: 28, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL1}</span>
-                {hL2 && <span style={{ display: 'block', color: GOLD, fontSize: 28, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL2}</span>}
+            <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', padding: '44px 34px 0' }}>
+              {/* Linha dourada + número pequeno */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 36, flexShrink: 0 }}>
+                <div style={{ width: 32, height: 2, background: GOLD, borderRadius: 1 }} />
+                <span style={{ color: GOLD, fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', opacity: 0.8 }}>{String(idx + 1).padStart(2, '0')}</span>
               </div>
-              {/* Body */}
-              {bodyLinhas.map((l, i) => (
-                <p key={i} style={{ color: 'rgba(255,255,255,0.78)', fontSize: 14, lineHeight: 1.75, margin: '0 0 10px' }}
-                  dangerouslySetInnerHTML={{ __html: applyHL(l) }} />
-              ))}
-              {/* CTA box */}
-              {ctaText && (
-                <div style={{ marginTop: 24, padding: '10px 18px', border: `1px solid rgba(201,168,76,0.4)`, borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 8, alignSelf: 'flex-start' }}>
-                  <span style={{ color: GOLD, fontSize: 13, fontWeight: 700 }}>{ctaText}</span>
-                </div>
-              )}
-            </div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
-            <div style={{ position: 'relative', zIndex: 1, padding: '0 32px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ color: `rgba(201,168,76,0.4)`, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{nome || nicho}</span>
-              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
-                  <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? GOLD : 'rgba(201,168,76,0.2)' }} />
+
+              {/* Headline grande */}
+              <div style={{ lineHeight: 1.12, marginBottom: 26 }}>
+                <span style={{ display: 'block', color: '#ffffff', fontSize: 30, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL1}</span>
+                {hL2 && <span style={{ display: 'block', color: GOLD, fontSize: 30, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL2}</span>}
+              </div>
+
+              {/* Body com espaço generoso */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+                {bodyLinhas.map((l, i) => (
+                  <p key={i} style={{ color: 'rgba(255,255,255,0.78)', fontSize: 15, lineHeight: 1.8, margin: 0 }}
+                    dangerouslySetInnerHTML={{ __html: applyHL(l) }} />
                 ))}
               </div>
+
+              {/* CTA com borda */}
+              {ctaText && (
+                <div style={{ marginTop: 30, padding: '12px 20px', border: `1px solid rgba(201,168,76,0.45)`, borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 10, alignSelf: 'flex-start', flexShrink: 0 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD }} />
+                  <span style={{ color: GOLD, fontSize: 13, fontWeight: 700, letterSpacing: '0.04em' }}>{ctaText}</span>
+                </div>
+              )}
+
+              <div style={{ flex: 1 }} />
+            </div>
+
+            <div style={{ position: 'relative', zIndex: 1, padding: '0 34px 18px' }}>
+              {dotsRow}
             </div>
           </div>
         )
       }
 
-      // ── full_dark (padrão): foto full-bleed, gradiente bottom-up ──────────
+      // ── full_dark (padrão): foto full-bleed, conteúdo usa toda a altura ───
       return (
         <div style={cardBase}>
           {imgSrc && <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', background: imgSrc ? 'linear-gradient(0deg,#0a0a0a 0%,#0a0a0a 28%,rgba(10,10,10,0.88) 48%,rgba(10,10,10,0.15) 70%,transparent 100%)' : '#0a0a0a' }} />
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '22%', zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(180deg,rgba(0,0,0,0.45) 0%,transparent 100%)' }} />
+          {/* Gradiente: foto visível no topo, escuro no meio/fundo para texto */}
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', background: imgSrc ? 'linear-gradient(0deg,#0a0a0a 0%,#0a0a0a 38%,rgba(10,10,10,0.92) 52%,rgba(10,10,10,0.5) 65%,rgba(10,10,10,0.1) 80%,transparent 100%)' : '#0a0a0a' }} />
+          {/* Vinheta topo */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '18%', zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(180deg,rgba(0,0,0,0.4) 0%,transparent 100%)' }} />
 
-          <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', padding: '22px 26px 0' }}>
-            {/* Número top-left dourado */}
-            <div style={{ color: GOLD, fontSize: 60, fontWeight: 900, lineHeight: 1, flexShrink: 0, fontFamily: 'Georgia,serif', textShadow: `0 0 40px rgba(201,168,76,0.4)` }}>
-              {idx + 1}
+          {/* Coluna única, altura total */}
+          <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', padding: '22px 28px 18px' }}>
+            {/* Número pequeno no topo */}
+            <div style={{ color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: '0.2em', opacity: 0.75, flexShrink: 0 }}>
+              {String(idx + 1).padStart(2, '0')}
             </div>
+
+            {/* Espaçador — foto aparece aqui */}
             <div style={{ flex: 1 }} />
-          </div>
 
-          {/* Área de texto na base */}
-          <div style={{ position: 'relative', zIndex: 2, padding: '0 26px 18px' }}>
             {/* Headline dois tons */}
-            <div style={{ marginBottom: 12, lineHeight: 1.15 }}>
-              <span style={{ display: 'block', color: '#ffffff', fontSize: 24, fontWeight: 900, letterSpacing: '0.02em' }}>{hL1}</span>
-              {hL2 && <span style={{ display: 'block', color: GOLD, fontSize: 24, fontWeight: 900, letterSpacing: '0.02em' }}>{hL2}</span>}
+            <div style={{ lineHeight: 1.12, marginBottom: 14 }}>
+              <span style={{ display: 'block', color: '#ffffff', fontSize: 27, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL1}</span>
+              {hL2 && <span style={{ display: 'block', color: GOLD, fontSize: 27, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL2}</span>}
             </div>
 
-            {/* Body */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, overflow: 'hidden', maxHeight: '30%' }}>
+            {/* Divisor */}
+            <div style={{ width: 36, height: 2, background: GOLD, borderRadius: 1, marginBottom: 16 }} />
+
+            {/* Body — sem maxHeight, texto completo */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {bodyLinhas.map((l, i) => (
-                <p key={i} style={{ color: 'rgba(255,255,255,0.83)', fontSize: 13, lineHeight: 1.7, margin: 0 }}
+                <p key={i} style={{ color: 'rgba(255,255,255,0.83)', fontSize: 14, lineHeight: 1.75, margin: 0 }}
                   dangerouslySetInnerHTML={{ __html: applyHL(l) }} />
               ))}
             </div>
 
-            {/* CTA inline */}
+            {/* CTA */}
             {ctaText && (
-              <div style={{ marginTop: 10, color: GOLD, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', opacity: 0.9 }}>
+              <div style={{ marginTop: 14, color: GOLD, fontSize: 11.5, fontWeight: 700, letterSpacing: '0.07em' }}>
                 {ctaText} ›
               </div>
             )}
 
             {/* Rodapé */}
-            <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ color: `rgba(201,168,76,0.45)`, fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{nome || nicho}</span>
-              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
-                  <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? GOLD : 'rgba(201,168,76,0.25)' }} />
-                ))}
-              </div>
+            <div style={{ marginTop: 16 }}>
+              {dotsRow}
             </div>
           </div>
         </div>
