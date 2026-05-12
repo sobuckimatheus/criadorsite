@@ -146,79 +146,141 @@ export async function POST(req: NextRequest) {
 
     const visualAdapt = nichoVisual[nicho] ?? 'premium professional environment, cinematic atmosphere'
 
-    const prompt = `Você é um diretor criativo e estrategista especialista em criar carrosséis virais premium para Instagram em QUALQUER NICHO.
+    const systemPrompt = `Você é o melhor copywriter de carrosséis virais do Brasil.
+Seu trabalho é criado por grandes agências de conteúdo premium, creators com milhões de seguidores e marcas de luxo.
+Você pensa como um diretor criativo: cada slide é uma cena cinematográfica com emoção, tensão e progressão.
+Você nunca escreve conteúdo genérico. Cada palavra tem peso. Cada frase tem propósito.`
 
-Sua função é gerar carrosséis COMPLETOS e PROFISSIONAIS que pareçam criados por grandes creators, agências premium e ferramentas SaaS de alto nível.
+    const userPrompt = `Crie um carrossel viral e PROFISSIONAL para Instagram com os dados abaixo.
 
-==================================================
-DADOS DO PROFISSIONAL
-==================================================
+DADOS:
 - Nicho: ${nicho}
 - Nome/Negócio: ${nome || 'o profissional'}
-- Tipo de carrossel: ${tipoLabel} — ${tipoDesc}
+- Tipo: ${tipoLabel} — ${tipoDesc}
 - Tom: ${tomLabel} — ${tomDesc}
-- Tema/Assunto: ${tema}
+- Tema: ${tema}
 
-==================================================
-OBJETIVO
-==================================================
-Criar slides extremamente profissionais, cinematográficos, emocionalmente envolventes, modernos e visualmente premium. Feitos para prender atenção e gerar retenção total.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FÓRMULAS DE HEADLINE QUE FUNCIONAM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Use UMA dessas fórmulas para cada headline (máx 9 palavras):
 
-==================================================
-REGRAS DE HEADLINE
-==================================================
-- Máx 8 palavras
-- Forte, viral, escaneável
-- Gera curiosidade imediata
-- Em português brasileiro
+• CONTRASTE: "De [situação ruim] a [resultado incrível] em [tempo]"
+  Ex: "De R$200 no vermelho a R$50 mil em 8 meses"
 
-==================================================
-REGRAS DO BODY TEXT
-==================================================
-- 2 a 4 frases curtas
-- Máx 15 palavras por frase
-- Uma ideia por frase
-- Ritmo rápido, retentivo
-- Gera cliffhanger pro próximo slide
-- Usa números, datas, nomes quando possível
-- Em português brasileiro
+• SEGREDO REVELADO: "O que [grupo] não quer que você saiba sobre [tema]"
+  Ex: "O que seu banco não quer que você saiba"
 
-==================================================
-ESTRUTURA DOS SLIDES
-==================================================
-- Slide 1: Gancho de contraste — resultado surpreendente ANTES de explicar. Layout: impact_cover
-- Slides 2-3: Contexto/origem — quem é, de onde veio. Layout: full_dark
-- Slides 4-6: Ascensão ou problema — virada, números concretos. Layout: full_dark
-- Slides 7-9: Conflito ou aprendizado — a parte que ninguém conta. Layout: full_dark
-- Slides 10-11: Resolução e resultado. Layout: full_dark
-- Slide final: Frase de impacto + CTA para comentar. Layout: text_focus
+• NÚMERO ESPECÍFICO: "[N] [coisas] que [resultado surpreendente]"
+  Ex: "7 erros que destroem seu resultado sem você perceber"
 
-==================================================
-ESTRATÉGIA DE RETENÇÃO
-==================================================
-- Crie curiosidade progressiva
-- Use cliffhangers sutis em cada slide
-- Mantenha ritmo rápido e viciante
-- Incentive compartilhamento no slide final
+• PERGUNTA DISRUPTIVA: "E se [crença comum] for mentira?"
+  Ex: "E se trabalhar mais for o seu maior erro?"
 
-==================================================
-REGRAS PARA IMAGE PROMPT (em inglês)
-==================================================
-Adapte ao nicho: ${visualAdapt}
+• AFIRMAÇÃO PROVOCADORA: "[Verdade chocante] sobre [tema]"
+  Ex: "Você está perdendo dinheiro todo mês sem saber"
+
+• PROMESSA ESPECÍFICA: "Como [resultado concreto] em [tempo real]"
+  Ex: "Como dobrei meu faturamento sem gastar mais"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGRAS DO BODY TEXT (OBRIGATÓRIAS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DEVE ter:
+✓ 3 a 5 frases curtas (máx 12 palavras cada)
+✓ Números reais, datas, porcentagens, nomes (especificidade = credibilidade)
+✓ Uma frase de gancho no FINAL que force o próximo slide
+✓ Variação de ritmo: frase longa → frase impactante curta
+✓ Linguagem direta, sem rodeios — como se fosse um amigo contando algo urgente
+
+PROIBIDO:
+✗ Adjetivos vagos: "incrível", "fantástico", "maravilhoso", "excelente"
+✗ Clichês: "se você quer mudar de vida", "chegou a hora", "não perca essa chance"
+✗ Frases genéricas que poderiam ir em qualquer slide de qualquer nicho
+✗ Conclusões no meio — cada slide deve terminar com tensão
+
+EXEMPLO BOM (slide sobre fracasso antes do sucesso):
+"Em 2019, ele perdeu R$180 mil em 3 meses.
+A empresa foi à falência. Os sócios sumiram.
+Só sobrou uma coisa.
+E foi exatamente ela que mudou tudo."
+
+EXEMPLO RUIM:
+"Todo empreendedor passa por momentos difíceis.
+É importante não desistir e continuar tentando.
+Com dedicação, os resultados aparecem."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ARCO EMOCIONAL DOS SLIDES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SLIDE 1 — GANCHO (layout: impact_cover)
+Mostre o resultado final ANTES da história. Crie dissonância cognitiva.
+O leitor deve pensar: "Como isso foi possível?"
+Headline: use fórmula CONTRASTE ou AFIRMAÇÃO PROVOCADORA
+CTA: "A história começa no próximo slide"
+
+SLIDES 2-3 — CONTEXTO (layout: full_dark)
+Quem é essa pessoa/marca? Qual era a realidade anterior?
+Use detalhes sensoriais: lugar, ano, situação concreta.
+Termine com: apresente o problema principal que vai ser resolvido.
+
+SLIDES 4-6 — ESCALADA (layout: full_dark)
+O momento de virada. Decisões arriscadas. Números concretos.
+Mostre o que aconteceu — não o que "poderia" acontecer.
+Use datas reais: "Em março de 2022...", "Após 47 dias..."
+Cada slide deve aumentar a tensão.
+
+SLIDES 7-9 — CONFLITO / REVELAÇÃO (layout: full_dark)
+O que ninguém conta. A parte que a maioria pula.
+Quebre uma crença do nicho. Revele um erro comum.
+Este é o momento mais retentivo — o leitor PRECISA ver o próximo.
+
+SLIDES 10-11 — RESOLUÇÃO (layout: full_dark)
+O que aconteceu depois. Resultados com números.
+Mostre a transformação com especificidade: não "cresceu muito", mas "cresceu 340% em 6 meses".
+
+SLIDE FINAL — IMPACTO + CTA (layout: text_focus)
+Uma frase de impacto que resuma a lição maior.
+CTA direto: peça para comentar, salvar ou marcar alguém.
+Ex: "Qual dessas lições você precisava ouvir hoje? Comenta aqui."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGRAS PARA IMAGE PROMPT (INGLÊS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Visual base do nicho: ${visualAdapt}
+
+Cada slide deve ter um image_prompt DIFERENTE e ESPECÍFICO para aquele conteúdo.
+NÃO repita o mesmo conceito visual em slides diferentes.
+
+Varie entre:
+- Close-up de detalhe (mãos, objeto, textura)
+- Ambiente wide (escritório, clínica, estúdio, paisagem)
+- Retrato ambiental (pessoa em contexto, sem nome)
+- Objeto simbólico (contrato, produto, equipamento)
+- Cena emocional (conquista, tensão, reflexão)
 
 Formato obrigatório:
-[assunto visual concreto], cinematic lighting, ultra realistic, premium aesthetic, editorial photography, instagram viral style, [${visualAdapt}], high contrast, dramatic atmosphere, professional photography, empty space for text, depth of field, modern branding aesthetic, visually striking, ultra detailed
+[cena/objeto específico], [emoção/atmosfera], cinematic lighting, ultra realistic, premium editorial photography, ${visualAdapt}, high contrast, dramatic shadows, empty space for text overlay, depth of field, instagram premium aesthetic
+
+EXEMPLOS por tipo:
+Slide de fracasso → "businessman sitting alone in empty office late night, cinematic blue light, dramatic shadows, ultra realistic, empty space for text"
+Slide de virada → "single bright light at end of dark corridor, cinematic dramatic, editorial photography, high contrast, depth of field"
+Slide de resultado → "luxury penthouse view at golden hour, aspirational atmosphere, premium editorial, empty space for text, cinematic lighting"
+Slide de aprendizado → "open book on dark wooden desk with single lamp, intimate atmosphere, cinematic warm light, depth of field"
 
 NUNCA use nomes de pessoas ou marcas no image_prompt.
-Se o slide mencionar pessoa famosa → preencha slide_X_pessoa com o nome completo.
-Se o slide mencionar empresa/marca → preencha slide_X_empresa com o nome oficial.
-Nesses casos escreva "sem imagem" em slide_X_image_prompt.
+Se o slide citar pessoa famosa → slide_X_pessoa com nome completo.
+Se o slide citar empresa/marca → slide_X_empresa com nome oficial.
+Nesses casos: "sem imagem" em image_prompt.
 
-Mínimo 8 slides, máximo 12.`
+Gere entre 9 e 12 slides.`
 
     const response = await client.chat.completions.create({
       model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
       tools: [{
         type: 'function',
         function: {
