@@ -222,7 +222,9 @@ export default function CarrosselPage() {
       const res = await fetch('/api/carrossel/gerar-imagem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho, estilo }),
+        body: estilo === 'viral'
+          ? JSON.stringify({ useStock: true, query: slide.imagem_sugerida, destaque: slide.destaque, nicho })
+          : JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho, estilo }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar imagem')
@@ -301,7 +303,12 @@ export default function CarrosselPage() {
           const res = await fetch('/api/carrossel/gerar-imagem', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho, estilo: 'viral' }),
+            body: JSON.stringify({
+              useStock: true,
+              query: slide.imagem_sugerida,
+              destaque: slide.destaque,
+              nicho,
+            }),
           })
           const data = await res.json()
           const url: string | undefined = data.imageUrl ?? data.imageData

@@ -380,14 +380,43 @@ function buildPrompt(destaque: string, texto: string, nicho: string): string {
   return `${tema}, ${ctx.substring(0, 80)}, professional editorial photography for Instagram carousel, cinematic dramatic lighting, high contrast, premium aesthetic, ${baseQuality}`
 }
 
-export async function POST(req: NextRequest) {
-  const apiKey = process.env.FAL_KEY
-  if (!apiKey) {
-    return NextResponse.json({ error: 'FAL_KEY não configurada' }, { status: 500 })
-  }
-
+async function searchPexels(query: string): Promise<string | null> {
+  const key = process.env.PEXELS_API_KEY
+  if (!key || !query || query === 'sem imagem') return null
   try {
-    const { destaque, texto, nicho, estilo } = await req.json()
+    const res = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=5&orientation=portrait`,
+      { headers: { Authorization: key } }
+    )
+    if (!res.ok) return null
+    const data = await res.json() as { photos?: { src: Record<string, string> }[] }
+    return data.photos?.[0]?.src?.portrait ?? data.photos?.[0]?.src?.large ?? null
+  } catch { return null }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const { destaque, texto, nicho, estilo, useStock, query } = await req.json()
+
+    // ── Stock photo mode (Pexels) — no AI generation cost ──────────────────
+    if (useStock) {
+      const primaryQuery = (query && query !== 'sem imagem') ? query : null
+      const fallbackQuery = `${nicho ?? ''} ${destaque ?? ''}`.trim()
+
+      const imageUrl = (primaryQuery ? await searchPexels(primaryQuery) : null)
+        ?? await searchPexels(fallbackQuery)
+        ?? await searchPexels(nicho ?? 'nature')
+
+      if (!imageUrl) return NextResponse.json({ error: 'Nenhuma imagem encontrada no Pexels' }, { status: 404 })
+      return NextResponse.json({ imageUrl })
+    }
+
+    // ── AI generation mode (Fal.ai) ─────────────────────────────────────────
+    const apiKey = process.env.FAL_KEY
+    if (!apiKey) {
+      return NextResponse.json({ error: 'FAL_KEY não configurada' }, { status: 500 })
+    }
+
     const isViral = estilo === 'viral'
 
     const prompt = isViral
