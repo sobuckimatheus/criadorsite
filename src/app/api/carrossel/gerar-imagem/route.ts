@@ -380,55 +380,55 @@ function buildPrompt(destaque: string, texto: string, nicho: string): string {
   return `${tema}, ${ctx.substring(0, 80)}, professional editorial photography for Instagram carousel, cinematic dramatic lighting, high contrast, premium aesthetic, ${baseQuality}`
 }
 
-async function searchPexels(query: string): Promise<string | null> {
+async function searchPexels(query: string, page = 1): Promise<string | null> {
   const key = process.env.PEXELS_API_KEY
   if (!key || !query || query === 'sem imagem') return null
   try {
     const res = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&orientation=portrait`,
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=5&page=${page}&orientation=portrait`,
       { headers: { Authorization: key } }
     )
     if (!res.ok) return null
     const data = await res.json() as { photos?: { src: Record<string, string> }[] }
     if (!data.photos?.length) return null
-    // Pick a random photo from the first results so the same query doesn't always return the same image
-    const pick = data.photos[Math.floor(Math.random() * Math.min(5, data.photos.length))]
+    const pick = data.photos[Math.floor(Math.random() * data.photos.length)]
     return pick.src.portrait ?? pick.src.large ?? null
   } catch { return null }
 }
 
-async function searchUnsplash(query: string): Promise<string | null> {
+async function searchUnsplash(query: string, page = 1): Promise<string | null> {
   const key = process.env.UNSPLASH_ACCESS_KEY
   if (!key || !query || query === 'sem imagem') return null
   try {
     const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&orientation=portrait`,
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=5&page=${page}&orientation=portrait`,
       { headers: { Authorization: `Client-ID ${key}` } }
     )
     if (!res.ok) return null
     const data = await res.json() as { results?: { urls: Record<string, string> }[] }
     if (!data.results?.length) return null
-    const pick = data.results[Math.floor(Math.random() * Math.min(5, data.results.length))]
+    const pick = data.results[Math.floor(Math.random() * data.results.length)]
     return pick.urls.regular ?? pick.urls.full ?? null
   } catch { return null }
 }
 
-async function searchStock(query: string): Promise<string | null> {
-  return (await searchPexels(query)) ?? (await searchUnsplash(query))
+async function searchStock(query: string, page = 1): Promise<string | null> {
+  return (await searchPexels(query, page)) ?? (await searchUnsplash(query, page))
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { destaque, texto, nicho, estilo, useStock, query } = await req.json()
+    const { destaque, texto, nicho, estilo, useStock, query, page } = await req.json()
+    const stockPage = Math.max(1, Number(page) || 1)
 
-    // ── Stock photo mode (Pexels) — no AI generation cost ──────────────────
+    // ── Stock photo mode (Pexels + Unsplash) — no AI generation cost ────────
     if (useStock) {
       const primaryQuery = (query && query !== 'sem imagem') ? query : null
       const fallbackQuery = `${nicho ?? ''} ${destaque ?? ''}`.trim()
 
-      const imageUrl = (primaryQuery ? await searchStock(primaryQuery) : null)
-        ?? await searchStock(fallbackQuery)
-        ?? await searchStock(nicho ?? 'nature')
+      const imageUrl = (primaryQuery ? await searchStock(primaryQuery, stockPage) : null)
+        ?? await searchStock(fallbackQuery, stockPage)
+        ?? await searchStock(nicho ?? 'nature', 1)
 
       if (!imageUrl) return NextResponse.json({ error: 'Nenhuma imagem encontrada no Pexels' }, { status: 404 })
       return NextResponse.json({ imageUrl })

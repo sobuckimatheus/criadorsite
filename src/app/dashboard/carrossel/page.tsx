@@ -202,6 +202,7 @@ export default function CarrosselPage() {
   const [gerandoImagem, setGerandoImagem] = useState(false)
   const [gerandoTodas, setGerandoTodas] = useState(false)
   const [progressoIA, setProgressoIA] = useState<{ atual: number; total: number } | null>(null)
+  const [paginaBusca, setPaginaBusca] = useState<Record<number, number>>({})
   const [error, setError] = useState('')
   const slideRef = useRef<HTMLDivElement>(null)
   const isVisualTheme = estilo === 'bold' || estilo === 'clean' || estilo === 'luxury'
@@ -214,20 +215,26 @@ export default function CarrosselPage() {
     '🚀 Finalizando sua copy...',
   ]
 
-  async function gerarImagemIA() {
+  async function procurarImagem() {
     if (!carrossel || gerandoImagem) return
     const slide = carrossel.slides[slideAtivo]
+    const pagina = (paginaBusca[slideAtivo] ?? 0) + 1
+    setPaginaBusca(prev => ({ ...prev, [slideAtivo]: pagina }))
     setGerandoImagem(true)
     try {
       const res = await fetch('/api/carrossel/gerar-imagem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: estilo === 'viral'
-          ? JSON.stringify({ useStock: true, query: slide.imagem_sugerida, destaque: slide.destaque, nicho })
-          : JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho, estilo }),
+        body: JSON.stringify({
+          useStock: true,
+          query: slide.imagem_sugerida,
+          destaque: slide.destaque,
+          nicho,
+          page: pagina,
+        }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar imagem')
+      if (!res.ok) throw new Error(data.error ?? 'Nenhuma imagem encontrada')
       const url: string = data.imageUrl ?? data.imageData
       setCarrossel(prev => {
         if (!prev) return prev
@@ -236,7 +243,7 @@ export default function CarrosselPage() {
         return { ...prev, slides }
       })
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Erro ao gerar imagem')
+      alert(e instanceof Error ? e.message : 'Erro ao buscar imagem')
     } finally {
       setGerandoImagem(false)
     }
@@ -262,7 +269,13 @@ export default function CarrosselPage() {
           const res = await fetch('/api/carrossel/gerar-imagem', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ destaque: slide.destaque, texto: slide.texto, nicho, estilo }),
+            body: JSON.stringify({
+              useStock: true,
+              query: slide.imagem_sugerida,
+              destaque: slide.destaque,
+              nicho,
+              page: 1,
+            }),
           })
           const data = await res.json()
           const url: string | undefined = data.imageUrl ?? data.imageData
@@ -963,9 +976,9 @@ export default function CarrosselPage() {
                 ) : (
                   <>
                     <div className="grid grid-cols-2 gap-2">
-                      <button onClick={gerarImagemIA} disabled={gerandoImagem || gerandoTodas}
+                      <button onClick={procurarImagem} disabled={gerandoImagem || gerandoTodas}
                         className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                        {gerandoImagem ? '⏳ Gerando...' : '✨ Imagem com IA'}
+                        {gerandoImagem ? '⏳ Buscando...' : '🔍 Procurar Imagem'}
                       </button>
                       <button onClick={exportarSlide} disabled={exportando}
                         className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
@@ -975,8 +988,8 @@ export default function CarrosselPage() {
                     <button onClick={gerarTodasImagensIA} disabled={gerandoTodas || gerandoImagem}
                       className="w-full py-3 rounded-xl text-sm font-semibold border-2 border-violet-400 text-violet-700 bg-violet-50 hover:bg-violet-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
                       {gerandoTodas && progressoIA
-                        ? `⏳ Gerando imagens... ${progressoIA.atual} / ${progressoIA.total}`
-                        : `🎨 Gerar imagens sem foto com IA${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} slides)` : ''}`}
+                        ? `⏳ Buscando imagens... ${progressoIA.atual} / ${progressoIA.total}`
+                        : `🔍 Buscar imagens para todos os slides${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} sem foto)` : ''}`}
                     </button>
                   </>
                 )}
