@@ -32,12 +32,12 @@ async function searchWikipediaImage(name: string): Promise<string | null> {
   return null
 }
 
-async function searchPexelsImage(query: string): Promise<string | null> {
+async function searchPexelsImage(query: string, page = 1): Promise<string | null> {
   const key = process.env.PEXELS_API_KEY
   if (!key) return null
   try {
     const res = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=5&orientation=portrait`,
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=5&page=${page}&orientation=portrait`,
       { headers: { Authorization: key } }
     )
     if (!res.ok) return null
@@ -49,22 +49,60 @@ async function searchPexelsImage(query: string): Promise<string | null> {
 
 function buildSchema() {
   const properties: Record<string, unknown> = {
-    titulo:         { type: 'string' },
-    nicho:          { type: 'string' },
-    tipo_narrativa: { type: 'string' },
-    legenda:        { type: 'string' },
-    hashtags:       { type: 'string', description: 'Hashtags separadas por vírgula, sem o símbolo #' },
-    total_slides:   { type: 'integer', description: 'Número total de slides (entre 8 e 12)' },
+    carousel_theme:  { type: 'string', description: 'Tema geral do carrossel em 3-5 palavras' },
+    visual_style:    { type: 'string', description: 'Estilo visual em inglês (ex: "dark luxury cinematic premium")' },
+    titulo:          { type: 'string', description: 'Título do carrossel' },
+    nicho:           { type: 'string' },
+    legenda:         { type: 'string', description: 'Legenda completa para o post no Instagram em PT-BR, com emojis e CTA final' },
+    hashtags:        { type: 'string', description: 'Hashtags separadas por vírgula, sem o símbolo #' },
+    total_slides:    { type: 'integer', description: 'Número total de slides (entre 8 e 12)' },
   }
+
   for (let i = 1; i <= 12; i++) {
-    properties[`slide_${i}_texto`]    = { type: 'string', description: `Texto do slide ${i} — use **negrito** para ênfase` }
-    properties[`slide_${i}_imagem`]   = { type: 'string', description: `3-6 palavras em inglês para buscar foto de stock para o slide ${i}. Descreva a cena/objeto/ambiente visual. Ex: "amazon rainforest golden light rays", "luxury dental clinic modern interior". Se o slide tiver pessoa famosa ou empresa, escreva: sem imagem.` }
-    properties[`slide_${i}_destaque`] = { type: 'string', description: `3-6 palavras que resumem o slide ${i}` }
-    properties[`slide_${i}_pessoa`]   = { type: 'string', description: `Nome completo de pessoa famosa real no slide ${i} (ex: "Elon Musk"). Deixe vazio se não houver.` }
-    properties[`slide_${i}_empresa`]  = { type: 'string', description: `Nome oficial de empresa/marca no slide ${i} (ex: "Apple Inc."). Deixe vazio se não houver.` }
+    properties[`slide_${i}_headline`] = {
+      type: 'string',
+      description: `Headline do slide ${i} — curta (máx 8 palavras), forte, impactante, viral, em PT-BR`,
+    }
+    properties[`slide_${i}_body`] = {
+      type: 'string',
+      description: `Corpo do slide ${i} — 2 a 4 frases curtas (máx 15 palavras cada), retentivas, emocionais, em PT-BR. Use \\n entre parágrafos.`,
+    }
+    properties[`slide_${i}_highlight_words`] = {
+      type: 'string',
+      description: `Palavras-chave do slide ${i} para destacar em negrito dourado, separadas por vírgula (ex: "produtividade,hábitos,resultados"). Máx 4 palavras.`,
+    }
+    properties[`slide_${i}_cta`] = {
+      type: 'string',
+      description: `CTA sutil do slide ${i} — frase curta que convida continuar (ex: "Arraste →", "Continua no próximo", "Você não vai acreditar"). Vazio se não precisar.`,
+    }
+    properties[`slide_${i}_image_prompt`] = {
+      type: 'string',
+      description: `Prompt cinematográfico em INGLÊS para buscar foto de stock no Pexels. Formato: [assunto visual concreto], cinematic lighting, ultra realistic, premium aesthetic, editorial photography, [estilo do nicho], high contrast, dramatic atmosphere, professional photography, empty space for text, depth of field. NUNCA use nomes de pessoas/marcas. Se houver pessoa famosa ou empresa no slide, escreva: sem imagem.`,
+    }
+    properties[`slide_${i}_layout_style`] = {
+      type: 'string',
+      enum: ['full_dark', 'impact_cover', 'text_focus'],
+      description: `Layout do slide ${i}: full_dark=foto full-bleed com overlay escuro e texto embaixo (padrão), impact_cover=headline enorme sobre a foto (use no slide 1 e slides de impacto), text_focus=fundo sólido escuro sem foto (use no slide final/CTA)`,
+    }
+    properties[`slide_${i}_pessoa`] = {
+      type: 'string',
+      description: `Nome completo de pessoa famosa real mencionada no slide ${i} (ex: "Elon Musk"). Vazio se não houver.`,
+    }
+    properties[`slide_${i}_empresa`] = {
+      type: 'string',
+      description: `Nome oficial de empresa/marca mencionada no slide ${i} (ex: "Apple Inc."). Vazio se não houver.`,
+    }
   }
-  const required = ['titulo', 'nicho', 'tipo_narrativa', 'legenda', 'hashtags', 'total_slides',
-    ...Array.from({ length: 8 }, (_, i) => [`slide_${i + 1}_texto`, `slide_${i + 1}_imagem`, `slide_${i + 1}_destaque`]).flat()]
+
+  const required = [
+    'carousel_theme', 'visual_style', 'titulo', 'nicho', 'legenda', 'hashtags', 'total_slides',
+    ...Array.from({ length: 8 }, (_, i) => [
+      `slide_${i + 1}_headline`,
+      `slide_${i + 1}_body`,
+      `slide_${i + 1}_image_prompt`,
+    ]).flat(),
+  ]
+
   return { type: 'object' as const, properties, required }
 }
 
@@ -82,40 +120,101 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Campos obrigatórios ausentes' }, { status: 400 })
     }
 
-    const prompt = `Você é um especialista em copywriting viral para Instagram, com domínio absoluto do estilo de thread narrativa que para o scroll.
+    const nichoVisual: Record<string, string> = {
+      'Negócios': 'luxury office environment, executive power, aspirational atmosphere',
+      'Empreendedorismo': 'luxury office environment, executive power, aspirational atmosphere',
+      'Infoprodutos': 'modern laptop workspace, digital success, clean minimal desk',
+      'Fitness': 'dynamic athletic movement, dramatic gym lighting, strength and power',
+      'Saúde e Estética': 'luxury medical clinic, pristine white interior, modern aesthetic',
+      'Odontologia': 'luxury dental clinic, white modern interior, professional healthcare',
+      'Psicologia': 'introspective emotional atmosphere, warm cinematic light, depth',
+      'Relacionamentos': 'emotional intimacy, warm bokeh light, authentic connection',
+      'Motivação': 'epic dramatic landscape, sunrise achievement, cinematic sky',
+      'Espiritualidade': 'soft mystical light, ethereal peaceful atmosphere, divine glow',
+      'Marketing': 'modern digital workspace, sleek tech environment, branding premium',
+      'Inteligência Artificial': 'futuristic neon elegant, high-tech digital environment',
+      'Arquitetura': 'luxury interior design, dramatic architectural lines, premium space',
+      'Design de Interiores': 'luxury interior design, dramatic architectural lines, premium space',
+      'Barbearia': 'premium barbershop, masculine dark aesthetic, professional grooming',
+      'Salão de Beleza': 'luxury beauty salon, elegant feminine aesthetic, premium glow',
+      'Joias e Semi-joias': 'luxury jewelry macro, elegant dark background, diamond sparkle',
+      'Direito': 'prestigious law office, professional dark wood, authoritative atmosphere',
+      'Contabilidade': 'modern corporate office, professional business aesthetic',
+      'Pet Shop': 'adorable pets, warm natural light, cozy loving atmosphere',
+      'Educação': 'modern learning environment, books and knowledge, inspirational study',
+    }
 
-Crie um carrossel viral completo para Instagram seguindo RIGOROSAMENTE a estrutura abaixo.
+    const visualAdapt = nichoVisual[nicho] ?? 'premium professional environment, cinematic atmosphere'
 
-DADOS DO PROFISSIONAL:
+    const prompt = `Você é um diretor criativo e estrategista especialista em criar carrosséis virais premium para Instagram em QUALQUER NICHO.
+
+Sua função é gerar carrosséis COMPLETOS e PROFISSIONAIS que pareçam criados por grandes creators, agências premium e ferramentas SaaS de alto nível.
+
+==================================================
+DADOS DO PROFISSIONAL
+==================================================
 - Nicho: ${nicho}
 - Nome/Negócio: ${nome || 'o profissional'}
 - Tipo de carrossel: ${tipoLabel} — ${tipoDesc}
 - Tom: ${tomLabel} — ${tomDesc}
 - Tema/Assunto: ${tema}
 
-REGRAS OBRIGATÓRIAS DE ESTILO:
-1. Frases CURTAS — máximo 15 palavras por frase
-2. Uma ideia por parágrafo — nunca agrupe dois pensamentos
-3. Use NEGRITO nas palavras de maior impacto (números, nomes, viradas)
-4. Termine cada slide com uma frase que OBRIGA o leitor a passar pro próximo
-5. Use datas, números reais e nomes quando possível
-6. O slide 1 deve apresentar o resultado/surpresa ANTES de contar a história
-7. Máximo 12 slides, mínimo 8
-8. NUNCA coloque um ponto ( . ) sozinho em uma linha
+==================================================
+OBJETIVO
+==================================================
+Criar slides extremamente profissionais, cinematográficos, emocionalmente envolventes, modernos e visualmente premium. Feitos para prender atenção e gerar retenção total.
 
-ESTRUTURA DOS SLIDES:
-- Slide 1: Gancho de contraste — mostre o resultado surpreendente antes de explicar
-- Slides 2-3: Contexto/origem — quem é, de onde veio, o que tornava diferente
-- Slides 4-6: A ascensão ou o problema — o momento de virada, números concretos
-- Slides 7-9: O conflito ou aprendizado — a parte que ninguém conta
-- Slides 10-11: A resolução e resultado — o que aconteceu depois
-- Slide 12: Frase de impacto isolada + CTA para comentar
+==================================================
+REGRAS DE HEADLINE
+==================================================
+- Máx 8 palavras
+- Forte, viral, escaneável
+- Gera curiosidade imediata
+- Em português brasileiro
 
-REGRAS PARA IMAGENS:
-- slide_X_pessoa: nome completo de pessoa famosa real mencionada → foto Wikipedia
-- slide_X_empresa: nome oficial de empresa/marca mencionada → imagem Wikipedia
-- slide_X_imagem: query em inglês para Pexels/Unsplash. Seja VISUAL e ESPECÍFICO. Pense: "o que eu procuraria no Google Imagens para ilustrar esse slide?"
-- Se tiver pessoa famosa OU empresa, deixe slide_X_imagem como "sem imagem"`
+==================================================
+REGRAS DO BODY TEXT
+==================================================
+- 2 a 4 frases curtas
+- Máx 15 palavras por frase
+- Uma ideia por frase
+- Ritmo rápido, retentivo
+- Gera cliffhanger pro próximo slide
+- Usa números, datas, nomes quando possível
+- Em português brasileiro
+
+==================================================
+ESTRUTURA DOS SLIDES
+==================================================
+- Slide 1: Gancho de contraste — resultado surpreendente ANTES de explicar. Layout: impact_cover
+- Slides 2-3: Contexto/origem — quem é, de onde veio. Layout: full_dark
+- Slides 4-6: Ascensão ou problema — virada, números concretos. Layout: full_dark
+- Slides 7-9: Conflito ou aprendizado — a parte que ninguém conta. Layout: full_dark
+- Slides 10-11: Resolução e resultado. Layout: full_dark
+- Slide final: Frase de impacto + CTA para comentar. Layout: text_focus
+
+==================================================
+ESTRATÉGIA DE RETENÇÃO
+==================================================
+- Crie curiosidade progressiva
+- Use cliffhangers sutis em cada slide
+- Mantenha ritmo rápido e viciante
+- Incentive compartilhamento no slide final
+
+==================================================
+REGRAS PARA IMAGE PROMPT (em inglês)
+==================================================
+Adapte ao nicho: ${visualAdapt}
+
+Formato obrigatório:
+[assunto visual concreto], cinematic lighting, ultra realistic, premium aesthetic, editorial photography, instagram viral style, [${visualAdapt}], high contrast, dramatic atmosphere, professional photography, empty space for text, depth of field, modern branding aesthetic, visually striking, ultra detailed
+
+NUNCA use nomes de pessoas ou marcas no image_prompt.
+Se o slide mencionar pessoa famosa → preencha slide_X_pessoa com o nome completo.
+Se o slide mencionar empresa/marca → preencha slide_X_empresa com o nome oficial.
+Nesses casos escreva "sem imagem" em slide_X_image_prompt.
+
+Mínimo 8 slides, máximo 12.`
 
     const response = await client.chat.completions.create({
       model: 'gpt-4o',
@@ -124,7 +223,7 @@ REGRAS PARA IMAGENS:
         type: 'function',
         function: {
           name: 'create_carousel',
-          description: 'Cria o carrossel viral para Instagram',
+          description: 'Cria o carrossel viral premium para Instagram',
           parameters: buildSchema(),
         },
       }],
@@ -142,25 +241,48 @@ REGRAS PARA IMAGENS:
     }
 
     const input = JSON.parse(toolCall.function.arguments) as Record<string, unknown>
-
     const totalSlides = Math.min(12, Math.max(1, Number(input.total_slides) || 8))
+
     const slides: {
-      texto: string; imagem_sugerida: string; destaque: string
-      pessoa?: string; empresa?: string; imageUrl?: string
+      texto: string
+      imagem_sugerida: string
+      destaque: string
+      pessoa?: string
+      empresa?: string
+      imageUrl?: string
       imageType?: 'pessoa' | 'empresa' | 'pexels'
+      headline?: string
+      body?: string
+      highlight_words?: string[]
+      cta?: string
+      layout_style?: string
     }[] = []
 
     for (let i = 1; i <= totalSlides; i++) {
-      const texto = String(input[`slide_${i}_texto`] ?? '').trim()
-      if (!texto) continue
+      const headline = String(input[`slide_${i}_headline`] ?? '').trim()
+      const body = String(input[`slide_${i}_body`] ?? '').trim()
+      if (!headline && !body) continue
+
+      const highlightRaw = String(input[`slide_${i}_highlight_words`] ?? '')
+      const highlight_words = highlightRaw.split(/[,،]+/).map(w => w.trim()).filter(Boolean)
+
       const pessoa = String(input[`slide_${i}_pessoa`] ?? '').trim()
       const empresa = String(input[`slide_${i}_empresa`] ?? '').trim()
+      const imagePrompt = String(input[`slide_${i}_image_prompt`] ?? 'sem imagem').trim()
+      const layoutStyle = String(input[`slide_${i}_layout_style`] ?? 'full_dark').trim()
+      const cta = String(input[`slide_${i}_cta`] ?? '').trim()
+
       slides.push({
-        texto,
-        imagem_sugerida: String(input[`slide_${i}_imagem`] ?? 'sem imagem'),
-        destaque: String(input[`slide_${i}_destaque`] ?? ''),
+        texto: [headline, body].filter(Boolean).join('\n\n'),
+        imagem_sugerida: imagePrompt,
+        destaque: headline,
         pessoa: pessoa || undefined,
         empresa: empresa || undefined,
+        headline,
+        body,
+        highlight_words,
+        cta: cta || undefined,
+        layout_style: layoutStyle,
       })
     }
 
@@ -173,8 +295,8 @@ REGRAS PARA IMAGENS:
 
     const carrossel = {
       titulo: String(input.titulo ?? ''),
-      nicho: String(input.nicho ?? ''),
-      tipo_narrativa: String(input.tipo_narrativa ?? ''),
+      nicho: String(input.nicho ?? nicho),
+      tipo_narrativa: String(input.carousel_theme ?? ''),
       legenda: String(input.legenda ?? ''),
       hashtags,
       slides,
@@ -194,6 +316,8 @@ REGRAS PARA IMAGENS:
 
     for (let i = 0; i < carrossel.slides.length; i++) {
       const slide = carrossel.slides[i]
+      if (slide.layout_style === 'text_focus') continue
+
       if (slide.pessoa) {
         const url = await searchWikipediaImage(slide.pessoa)
         if (url && !usedUrls.has(url)) {
