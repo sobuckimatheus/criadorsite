@@ -52,7 +52,7 @@ const TONS = [
   { id: 'provocativo', label: '😤 Provocativo', desc: 'Questiona e desafia' },
 ]
 
-type ThemeId = 'thread' | 'roxo' | 'dark' | 'gradiente' | 'minimal' | 'bold' | 'clean' | 'luxury' | 'luxofoto' | 'viral' | 'gpt'
+type ThemeId = 'thread' | 'viral'
 
 interface ThemeDef {
   label: string
@@ -80,90 +80,6 @@ const THEMES: Record<ThemeId, ThemeDef> = {
     accentColor: '#1d9bf0',
     avatarStyle: { background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff' },
   },
-  roxo: {
-    label: 'Roxo',
-    swatch: 'linear-gradient(135deg,#7c3aed,#ec4899)',
-    cardStyle: { background: '#ffffff', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.10)' },
-    headerStyle: { background: 'linear-gradient(135deg,#7c3aed,#ec4899)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' },
-    bodyStyle: { background: '#ffffff', flex: 1, padding: '24px 24px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' },
-    footerStyle: { background: '#ffffff', borderTop: '1px solid #f3f4f6', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-    textColor: '#111827',
-    mutedColor: '#9333ea',
-    accentColor: '#7c3aed',
-    avatarStyle: { background: 'rgba(255,255,255,0.25)', color: '#fff' },
-  },
-  dark: {
-    label: 'Dark',
-    swatch: 'linear-gradient(135deg,#1e1b4b,#4c1d95)',
-    cardStyle: { background: '#0f0f1a', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' },
-    headerStyle: { background: 'linear-gradient(135deg,#1e1b4b,#312e81)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' },
-    bodyStyle: { background: '#0f0f1a', flex: 1, padding: '24px 24px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' },
-    footerStyle: { background: '#0f0f1a', borderTop: '1px solid #1e1b4b', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-    textColor: '#e2e8f0',
-    mutedColor: '#a78bfa',
-    accentColor: '#a78bfa',
-    avatarStyle: { background: 'rgba(139,92,246,0.3)', color: '#c4b5fd' },
-  },
-  gradiente: {
-    label: 'Grad.',
-    swatch: 'linear-gradient(135deg,#7c3aed,#a21caf,#ec4899)',
-    cardStyle: { background: 'linear-gradient(135deg,#6d28d9,#a21caf,#db2777)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(124,58,237,0.4)' },
-    headerStyle: { background: 'rgba(0,0,0,0.25)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' },
-    bodyStyle: { flex: 1, padding: '24px 24px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' },
-    footerStyle: { borderTop: '1px solid rgba(255,255,255,0.2)', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-    textColor: '#ffffff',
-    mutedColor: 'rgba(255,255,255,0.75)',
-    accentColor: 'rgba(255,255,255,0.9)',
-    avatarStyle: { background: 'rgba(255,255,255,0.2)', color: '#fff' },
-  },
-  minimal: {
-    label: 'Minimal',
-    swatch: 'linear-gradient(135deg,#111827,#374151)',
-    cardStyle: { background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' },
-    headerStyle: { background: '#111827', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' },
-    bodyStyle: { background: '#f9fafb', flex: 1, padding: '24px 24px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' },
-    footerStyle: { background: '#f9fafb', borderTop: '1px solid #e5e7eb', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-    textColor: '#111827',
-    mutedColor: '#6b7280',
-    accentColor: '#374151',
-    avatarStyle: { background: 'rgba(255,255,255,0.15)', color: '#fff' },
-  },
-  bold: {
-    label: 'Bold',
-    swatch: 'linear-gradient(135deg,#7C3AED,#EC4899)',
-    cardStyle: { borderRadius: '16px', overflow: 'hidden' },
-    headerStyle: {},
-    bodyStyle: {},
-    footerStyle: {},
-    textColor: '#ffffff',
-    mutedColor: 'rgba(255,255,255,0.7)',
-    accentColor: '#ffffff',
-    avatarStyle: { background: 'rgba(255,255,255,0.2)', color: '#fff' },
-  },
-  clean: {
-    label: 'Clean',
-    swatch: 'linear-gradient(135deg,#f0f4ff 50%,#7C3AED 50%)',
-    cardStyle: { borderRadius: '16px', overflow: 'hidden', background: '#ffffff', border: '1px solid #e5e7eb' },
-    headerStyle: {},
-    bodyStyle: {},
-    footerStyle: {},
-    textColor: '#111827',
-    mutedColor: '#6b7280',
-    accentColor: '#7C3AED',
-    avatarStyle: { background: '#7C3AED', color: '#fff' },
-  },
-  luxofoto: {
-    label: 'Luxo+',
-    swatch: 'linear-gradient(135deg,#0a0a0a,#D4AF37)',
-    cardStyle: { borderRadius: '16px', overflow: 'hidden', background: '#0a0a0a' },
-    headerStyle: {},
-    bodyStyle: {},
-    footerStyle: {},
-    textColor: '#ffffff',
-    mutedColor: 'rgba(212,175,55,0.7)',
-    accentColor: '#D4AF37',
-    avatarStyle: { background: 'rgba(212,175,55,0.15)', color: '#D4AF37' },
-  },
   viral: {
     label: 'Viral',
     swatch: 'linear-gradient(135deg,#0d0d0d 35%,#001a2e 65%,#00CFFF)',
@@ -175,30 +91,6 @@ const THEMES: Record<ThemeId, ThemeDef> = {
     mutedColor: 'rgba(255,255,255,0.6)',
     accentColor: '#00CFFF',
     avatarStyle: { background: 'rgba(0,207,255,0.15)', color: '#00CFFF' },
-  },
-  luxury: {
-    label: 'Luxury',
-    swatch: 'linear-gradient(135deg,#0a0a0a 65%,#D4AF37 65%)',
-    cardStyle: { borderRadius: '16px', overflow: 'hidden', background: '#0a0a0a' },
-    headerStyle: {},
-    bodyStyle: {},
-    footerStyle: {},
-    textColor: '#e5e5e5',
-    mutedColor: 'rgba(212,175,55,0.7)',
-    accentColor: '#D4AF37',
-    avatarStyle: { background: 'rgba(212,175,55,0.15)', color: '#D4AF37' },
-  },
-  gpt: {
-    label: 'GPT',
-    swatch: 'linear-gradient(135deg,#0a0a0a 55%,#C9A84C 55%)',
-    cardStyle: { borderRadius: '16px', overflow: 'hidden', background: '#0a0a0a' },
-    headerStyle: {},
-    bodyStyle: {},
-    footerStyle: {},
-    textColor: '#ffffff',
-    mutedColor: 'rgba(201,168,76,0.7)',
-    accentColor: '#C9A84C',
-    avatarStyle: { background: 'rgba(201,168,76,0.15)', color: '#C9A84C' },
   },
 }
 
@@ -223,7 +115,6 @@ export default function CarrosselPage() {
   const [paginaBusca, setPaginaBusca] = useState<Record<number, number>>({})
   const [error, setError] = useState('')
   const slideRef = useRef<HTMLDivElement>(null)
-  const isVisualTheme = estilo === 'bold' || estilo === 'clean' || estilo === 'luxury'
 
   const msgs = [
     '✍️ Construindo o gancho perfeito...',
@@ -380,8 +271,7 @@ export default function CarrosselPage() {
     }, 2200)
 
     try {
-      const endpoint = estilo === 'gpt' ? '/api/carrossel/gpt' : '/api/carrossel'
-      const res = await fetch(endpoint, {
+      const res = await fetch('/api/carrossel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nicho, nome, tipo, tipoLabel: tipoObj?.label, tipoDesc: tipoObj?.desc, tom, tomLabel: tomObj?.label, tomDesc: tomObj?.desc, tema }),
@@ -485,168 +375,6 @@ export default function CarrosselPage() {
       )
     }
 
-    // ── BOLD (tipografia + cores vibrantes) ──────────────────────────────
-    if (estilo === 'bold') {
-      const BOLD_GRADIENTS = [
-        'linear-gradient(135deg,#7C3AED 0%,#4F46E5 100%)',
-        'linear-gradient(135deg,#EC4899 0%,#EF4444 100%)',
-        'linear-gradient(135deg,#F59E0B 0%,#EF4444 100%)',
-        'linear-gradient(135deg,#10B981 0%,#059669 100%)',
-        'linear-gradient(135deg,#6366F1 0%,#8B5CF6 100%)',
-        'linear-gradient(135deg,#0EA5E9 0%,#6366F1 100%)',
-        'linear-gradient(135deg,#EC4899 0%,#8B5CF6 100%)',
-        'linear-gradient(135deg,#F59E0B 0%,#10B981 100%)',
-        'linear-gradient(135deg,#EF4444 0%,#F97316 100%)',
-        'linear-gradient(135deg,#3B82F6 0%,#06B6D4 100%)',
-        'linear-gradient(135deg,#8B5CF6 0%,#EC4899 100%)',
-        'linear-gradient(135deg,#14B8A6 0%,#3B82F6 100%)',
-      ]
-      const bg = BOLD_GRADIENTS[idx % BOLD_GRADIENTS.length]
-      return (
-        <div style={{
-          background: bg, borderRadius: '16px', width: '100%', aspectRatio: '4/5',
-          display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
-          fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
-        }}>
-          <div style={{
-            position: 'absolute', right: 16, top: 8, fontSize: 130, fontWeight: 900,
-            color: 'rgba(255,255,255,0.10)', lineHeight: 1, userSelect: 'none', fontFamily: 'Georgia,serif',
-          }}>{idx + 1}</div>
-          <div style={{
-            flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
-            padding: '36px 32px 16px', position: 'relative', zIndex: 1, overflow: 'hidden',
-          }}>
-            {linhas.map((linha, i) => (
-              <p key={i} style={{ color: '#fff', fontSize: i === 0 ? 19 : 15, lineHeight: 1.6, margin: '0 0 10px', fontWeight: i === 0 ? 800 : 400 }}
-                dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#fff;font-weight:900">$1</strong>') }}
-              />
-            ))}
-          </div>
-          <div style={{ padding: '0 32px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
-            <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: 600 }}>@{handle}</span>
-            <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-              {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
-                <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? '#fff' : 'rgba(255,255,255,0.35)' }} />
-              ))}
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    // ── CLEAN (tipografia limpa + acento colorido) ────────────────────────
-    if (estilo === 'clean') {
-      const CLEAN_ACCENTS = ['#7C3AED','#EC4899','#F59E0B','#10B981','#6366F1','#0EA5E9','#EF4444','#8B5CF6','#F97316','#06B6D4','#84CC16','#14B8A6']
-      const accent = CLEAN_ACCENTS[idx % CLEAN_ACCENTS.length]
-      return (
-        <div style={{
-          background: '#ffffff', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
-          display: 'flex', flexDirection: 'column', overflow: 'hidden',
-          border: '1px solid #e5e7eb', boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
-          fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-        }}>
-          <div style={{ height: 5, background: accent, flexShrink: 0 }} />
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 30px 12px', overflow: 'hidden' }}>
-            <div style={{ fontSize: 72, fontWeight: 900, lineHeight: 1, marginBottom: 12, color: accent, opacity: 0.1, fontFamily: 'Georgia,serif' }}>
-              {String(idx + 1).padStart(2, '0')}
-            </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, overflow: 'hidden' }}>
-              {linhas.map((linha, i) => (
-                <p key={i} style={{ color: '#111827', fontSize: i === 0 ? 17 : 14, lineHeight: 1.65, margin: 0, fontWeight: i === 0 ? 700 : 400 }}
-                  dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${accent};font-weight:800">$1</strong>`) }}
-                />
-              ))}
-            </div>
-          </div>
-          <div style={{ padding: '10px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `2px solid ${accent}` }}>
-            <span style={{ color: '#9ca3af', fontSize: 11, fontWeight: 600 }}>@{handle}</span>
-            <span style={{ color: accent, fontSize: 11, fontWeight: 700 }}>{idx + 1} / {carrossel?.slides.length}</span>
-          </div>
-        </div>
-      )
-    }
-
-    // ── LUXO+FOTO (imagem full-bleed + overlay escuro + texto sobreposto) ──
-    if (estilo === 'luxofoto') {
-      const imgSrc = slide.imageUrl
-        ? (slide.imageUrl.startsWith('data:') ? slide.imageUrl : `/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`)
-        : null
-      const titulo = (slide.destaque || linhas[0] || '').trim().toUpperCase()
-      const palavras = titulo.split(' ')
-      const corte = Math.ceil(palavras.length / 2)
-      const tituloBranco = palavras.slice(0, corte).join(' ')
-      const tituloDourado = palavras.slice(corte).join(' ')
-
-      return (
-        <div style={{
-          background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
-          position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-          fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-          boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
-        }}>
-
-          {/* Imagem full-bleed cobrindo o slide inteiro */}
-          {imgSrc && (
-            <img src={imgSrc} alt="" crossOrigin="anonymous" style={{
-              position: 'absolute', inset: 0, width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'center top', display: 'block',
-            }} />
-          )}
-
-          {/* Overlay escuro — mais denso na esquerda/baixo onde fica o texto */}
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-            background: imgSrc
-              ? 'linear-gradient(105deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.35) 100%)'
-              : '#0a0a0a',
-          }} />
-          {/* Fade adicional no rodapé */}
-          <div style={{
-            position: 'absolute', left: 0, right: 0, bottom: 0, height: '28%', zIndex: 1, pointerEvents: 'none',
-            background: 'linear-gradient(0deg,rgba(0,0,0,0.95) 0%,transparent 100%)',
-          }} />
-
-          {/* Conteúdo — sobre os overlays */}
-          <div style={{
-            position: 'relative', zIndex: 2, flex: 1,
-            display: 'flex', flexDirection: 'column',
-            padding: '28px 28px 14px', overflow: 'hidden',
-          }}>
-            {/* Número */}
-            <div style={{ color: '#D4AF37', fontSize: 74, fontWeight: 900, lineHeight: 1, marginBottom: 10, fontFamily: 'Georgia,serif', flexShrink: 0 }}>
-              {idx + 1}
-            </div>
-
-            {/* Título dois tons */}
-            <div style={{ marginBottom: 20, flexShrink: 0, lineHeight: 1.15, maxWidth: '70%' }}>
-              {tituloBranco && <span style={{ display: 'block', color: '#ffffff', fontSize: 30, fontWeight: 900, letterSpacing: '0.03em' }}>{tituloBranco}</span>}
-              {tituloDourado && <span style={{ display: 'block', color: '#D4AF37', fontSize: 30, fontWeight: 900, letterSpacing: '0.03em' }}>{tituloDourado}</span>}
-            </div>
-
-            {/* Corpo */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden', maxWidth: '72%' }}>
-              {linhas.map((linha, i) => (
-                <p key={i} style={{ color: 'rgba(255,255,255,0.9)', fontSize: 14, lineHeight: 1.75, margin: 0, fontWeight: 400 }}
-                  dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#D4AF37;font-weight:700">$1</strong>') }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Rodapé */}
-          <div style={{ position: 'relative', zIndex: 2, padding: '0 28px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ color: 'rgba(212,175,55,0.65)', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase' }}>{nome || nicho}</span>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
-                <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: i === idx ? '#D4AF37' : 'rgba(212,175,55,0.3)', border: i === idx ? 'none' : '1px solid rgba(212,175,55,0.4)' }} />
-              ))}
-            </div>
-          </div>
-        </div>
-      )
-    }
-
     // ── VIRAL (full-bleed, gradiente bottom-up, azul elétrico) ───────────
     if (estilo === 'viral') {
       const ACCENT = '#00CFFF'
@@ -726,310 +454,9 @@ export default function CarrosselPage() {
       )
     }
 
-    // ── GPT (dark gold premium — full_dark / impact_cover / text_focus) ─────
-    if (estilo === 'gpt') {
-      const GOLD = '#C9A84C'
-      const imgSrc = slide.imageUrl
-        ? (slide.imageUrl.startsWith('data:') ? slide.imageUrl : `/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`)
-        : null
-
-      // Prefer GPT-specific fields when available
-      const headlineText = slide.headline || slide.destaque || linhas[0] || ''
-      const bodyText = slide.body || ''
-      const bodyLinhas = bodyText
-        ? bodyText.split(/\n+/).map(l => l.trim()).filter(Boolean)
-        : linhas.slice(1)
-      const highlights = slide.highlight_words ?? []
-      const layoutStyle = slide.layout_style ?? 'full_dark'
-      const ctaText = slide.cta ?? ''
-
-      // Bold highlight_words in gold
-      function applyHL(text: string) {
-        let html = text
-        for (const w of highlights) {
-          const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-          html = html.replace(new RegExp(`\\b(${esc})\\b`, 'gi'), `<strong style="color:${GOLD};font-weight:700">$1</strong>`)
-        }
-        // also support **markdown** bold
-        html = html.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${GOLD};font-weight:700">$1</strong>`)
-        return html
-      }
-
-      // Split headline into two lines for two-tone effect
-      const hWords = headlineText.split(' ')
-      const hCut = Math.ceil(hWords.length / 2)
-      const hL1 = hWords.slice(0, hCut).join(' ')
-      const hL2 = hWords.slice(hCut).join(' ')
-
-      const cardBase: React.CSSProperties = {
-        background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
-        position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-        fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-        boxShadow: '0 8px 40px rgba(0,0,0,0.8)',
-      }
-
-      const dotsRow = (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <span style={{ color: `rgba(201,168,76,0.4)`, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{nome || nicho}</span>
-          <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-            {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
-              <div key={i} style={{ width: i === idx ? 20 : 5, height: 5, borderRadius: 3, background: i === idx ? GOLD : 'rgba(201,168,76,0.22)' }} />
-            ))}
-          </div>
-        </div>
-      )
-
-      // ── impact_cover: headline dramática, foto full-bleed escurecida ───────
-      if (layoutStyle === 'impact_cover') {
-        return (
-          <div style={cardBase}>
-            {imgSrc && <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }} />}
-            {/* Overlay com vinheta nas bordas e escurecimento geral */}
-            <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: imgSrc ? 'linear-gradient(160deg,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.45) 50%,rgba(0,0,0,0.75) 100%)' : '#0a0a0a' }} />
-            {/* Linha dourada topo */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${GOLD},transparent)`, zIndex: 3 }} />
-            {/* Número marca d'água */}
-            <div style={{ position: 'absolute', right: 20, bottom: 60, zIndex: 1, fontSize: 180, fontWeight: 900, color: 'rgba(201,168,76,0.1)', lineHeight: 1, userSelect: 'none', fontFamily: 'Georgia,serif' }}>
-              {idx + 1}
-            </div>
-
-            <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', padding: '30px 30px 0' }}>
-              {/* Badge número */}
-              <div style={{ alignSelf: 'flex-start', background: GOLD, color: '#0a0a0a', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', padding: '4px 10px', borderRadius: 4, flexShrink: 0 }}>
-                {String(idx + 1).padStart(2, '0')}
-              </div>
-
-              {/* Espaçador */}
-              <div style={{ flex: 1 }} />
-
-              {/* Headline enorme */}
-              <div style={{ lineHeight: 1.08, marginBottom: 18 }}>
-                <span style={{ display: 'block', color: '#ffffff', fontSize: 38, fontWeight: 900, letterSpacing: '-0.02em' }}>{hL1}</span>
-                {hL2 && <span style={{ display: 'block', color: GOLD, fontSize: 38, fontWeight: 900, letterSpacing: '-0.02em' }}>{hL2}</span>}
-              </div>
-
-              {/* Divisor */}
-              <div style={{ width: 44, height: 2, background: GOLD, borderRadius: 1, marginBottom: 18 }} />
-
-              {/* Body — até 3 linhas */}
-              {bodyLinhas.slice(0, 3).map((l, i) => (
-                <p key={i} style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14.5, lineHeight: 1.7, margin: '0 0 10px' }}
-                  dangerouslySetInnerHTML={{ __html: applyHL(l) }} />
-              ))}
-
-              {/* CTA */}
-              {ctaText && (
-                <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 7, color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: '0.07em' }}>
-                  {ctaText} <span style={{ fontSize: 18, lineHeight: 1 }}>›</span>
-                </div>
-              )}
-            </div>
-
-            <div style={{ position: 'relative', zIndex: 2, padding: '14px 30px 18px' }}>
-              {dotsRow}
-            </div>
-          </div>
-        )
-      }
-
-      // ── text_focus: tipografia clean, sem foto, muito espaço em branco ─────
-      if (layoutStyle === 'text_focus') {
-        return (
-          <div style={{ ...cardBase, background: '#0a0a0a' }}>
-            {/* Número ornamental */}
-            <div style={{ position: 'absolute', left: '50%', top: '38%', transform: 'translate(-50%,-50%)', fontSize: 260, fontWeight: 900, color: 'rgba(201,168,76,0.05)', lineHeight: 1, userSelect: 'none', fontFamily: 'Georgia,serif', whiteSpace: 'nowrap' }}>
-              {idx + 1}
-            </div>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,transparent,${GOLD},transparent)` }} />
-
-            <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', padding: '44px 34px 0' }}>
-              {/* Linha dourada + número pequeno */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 36, flexShrink: 0 }}>
-                <div style={{ width: 32, height: 2, background: GOLD, borderRadius: 1 }} />
-                <span style={{ color: GOLD, fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', opacity: 0.8 }}>{String(idx + 1).padStart(2, '0')}</span>
-              </div>
-
-              {/* Headline grande */}
-              <div style={{ lineHeight: 1.12, marginBottom: 26 }}>
-                <span style={{ display: 'block', color: '#ffffff', fontSize: 30, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL1}</span>
-                {hL2 && <span style={{ display: 'block', color: GOLD, fontSize: 30, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL2}</span>}
-              </div>
-
-              {/* Body com espaço generoso */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
-                {bodyLinhas.map((l, i) => (
-                  <p key={i} style={{ color: 'rgba(255,255,255,0.78)', fontSize: 15, lineHeight: 1.8, margin: 0 }}
-                    dangerouslySetInnerHTML={{ __html: applyHL(l) }} />
-                ))}
-              </div>
-
-              {/* CTA com borda */}
-              {ctaText && (
-                <div style={{ marginTop: 30, padding: '12px 20px', border: `1px solid rgba(201,168,76,0.45)`, borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 10, alignSelf: 'flex-start', flexShrink: 0 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: GOLD }} />
-                  <span style={{ color: GOLD, fontSize: 13, fontWeight: 700, letterSpacing: '0.04em' }}>{ctaText}</span>
-                </div>
-              )}
-
-              <div style={{ flex: 1 }} />
-            </div>
-
-            <div style={{ position: 'relative', zIndex: 1, padding: '0 34px 18px' }}>
-              {dotsRow}
-            </div>
-          </div>
-        )
-      }
-
-      // ── full_dark (padrão): foto full-bleed, conteúdo usa toda a altura ───
-      return (
-        <div style={cardBase}>
-          {imgSrc && <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />}
-          {/* Gradiente: foto visível no topo, escuro no meio/fundo para texto */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', background: imgSrc ? 'linear-gradient(0deg,#0a0a0a 0%,#0a0a0a 38%,rgba(10,10,10,0.92) 52%,rgba(10,10,10,0.5) 65%,rgba(10,10,10,0.1) 80%,transparent 100%)' : '#0a0a0a' }} />
-          {/* Vinheta topo */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '18%', zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(180deg,rgba(0,0,0,0.4) 0%,transparent 100%)' }} />
-
-          {/* Coluna única, altura total */}
-          <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', padding: '22px 28px 18px' }}>
-            {/* Número pequeno no topo */}
-            <div style={{ color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: '0.2em', opacity: 0.75, flexShrink: 0 }}>
-              {String(idx + 1).padStart(2, '0')}
-            </div>
-
-            {/* Espaçador — foto aparece aqui */}
-            <div style={{ flex: 1 }} />
-
-            {/* Headline dois tons */}
-            <div style={{ lineHeight: 1.12, marginBottom: 14 }}>
-              <span style={{ display: 'block', color: '#ffffff', fontSize: 27, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL1}</span>
-              {hL2 && <span style={{ display: 'block', color: GOLD, fontSize: 27, fontWeight: 900, letterSpacing: '-0.01em' }}>{hL2}</span>}
-            </div>
-
-            {/* Divisor */}
-            <div style={{ width: 36, height: 2, background: GOLD, borderRadius: 1, marginBottom: 16 }} />
-
-            {/* Body — sem maxHeight, texto completo */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {bodyLinhas.map((l, i) => (
-                <p key={i} style={{ color: 'rgba(255,255,255,0.83)', fontSize: 14, lineHeight: 1.75, margin: 0 }}
-                  dangerouslySetInnerHTML={{ __html: applyHL(l) }} />
-              ))}
-            </div>
-
-            {/* CTA */}
-            {ctaText && (
-              <div style={{ marginTop: 14, color: GOLD, fontSize: 11.5, fontWeight: 700, letterSpacing: '0.07em' }}>
-                {ctaText} ›
-              </div>
-            )}
-
-            {/* Rodapé */}
-            <div style={{ marginTop: 16 }}>
-              {dotsRow}
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    // ── LUXURY (dark + tipografia serifada + dourado) ─────────────────────
-    if (estilo === 'luxury') {
-      return (
-        <div style={{
-          background: '#0a0a0a', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
-          display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
-          fontFamily: 'Georgia,"Times New Roman",serif',
-          boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
-        }}>
-          <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,#D4AF37,transparent)', flexShrink: 0 }} />
-          <div style={{
-            position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)',
-            fontSize: 200, fontWeight: 900, color: 'rgba(212,175,55,0.04)', lineHeight: 1,
-            userSelect: 'none', fontFamily: 'Georgia,serif',
-          }}>{idx + 1}</div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '36px', position: 'relative', zIndex: 1, overflow: 'hidden' }}>
-            <div style={{ width: 36, height: 1, background: '#D4AF37', marginBottom: 24 }} />
-            {linhas.map((linha, i) => (
-              <p key={i} style={{ color: '#e2e2e2', fontSize: 15, lineHeight: 1.8, margin: '0 0 10px', fontStyle: i === 0 ? 'italic' : 'normal', fontWeight: i === 0 ? 400 : 300, letterSpacing: '0.01em' }}
-                dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#D4AF37;font-weight:600;font-style:normal">$1</strong>') }}
-              />
-            ))}
-          </div>
-          <div style={{ padding: '0 36px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
-            <span style={{ color: 'rgba(212,175,55,0.6)', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: '-apple-system,sans-serif' }}>{nome || nicho}</span>
-            <span style={{ color: 'rgba(212,175,55,0.4)', fontSize: 10, letterSpacing: '0.08em', fontFamily: '-apple-system,sans-serif' }}>{idx + 1} / {carrossel?.slides.length}</span>
-          </div>
-          <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,#D4AF37,transparent)', flexShrink: 0 }} />
-        </div>
-      )
-    }
-
-    // ── OUTROS TEMAS ──────────────────────────────────────────────────────
-    const isWikipediaPerson = slide.imageType === 'pessoa'
-    const isWikipedia = isWikipediaPerson || isWikipediaBrand
-    const isPexels = slide.imageType === 'pexels'
-
-    const nonThreadWikiEl = isWikipedia && slide.imageUrl ? (
-      <div style={{ width: '100%', height: isWikipediaBrand ? '80px' : '160px', overflow: 'hidden', flexShrink: 0, background: isWikipediaBrand ? '#fff' : 'transparent' }}>
-        <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
-          alt="" crossOrigin="anonymous"
-          style={{ width: '100%', height: '100%', objectFit: isWikipediaBrand ? 'contain' : 'cover', objectPosition: 'center top' }} />
-      </div>
-    ) : null
-
-    const nonThreadPexelsEl = isPexels && slide.imageUrl ? (
-      <div style={{ width: '100%', height: '140px', overflow: 'hidden', flexShrink: 0 }}>
-        <img src={`/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
-          alt="" crossOrigin="anonymous"
-          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
-      </div>
-    ) : null
-
-    return (
-      <div style={{ ...t.cardStyle, width: '100%', aspectRatio: '4 / 5', display: 'flex', flexDirection: 'column', fontFamily, overflow: 'hidden' }}>
-
-        {/* Header */}
-        <div style={t.headerStyle}>
-          <div style={{ ...t.avatarStyle, width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
-            {initial}
-          </div>
-          <div style={{ flex: 1 }}>
-            <p style={{ color: '#fff', fontWeight: 800, fontSize: 14, margin: 0, lineHeight: 1.2, fontFamily: 'system-ui' }}>{nome || nicho}</p>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, margin: '2px 0 0', fontFamily: 'system-ui' }}>@{handle}</p>
-          </div>
-          <div style={{ display: 'flex', gap: 3 }}>
-            {[0,1,2].map(i => <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.5)' }} />)}
-          </div>
-        </div>
-
-        {nonThreadWikiEl}
-        {nonThreadPexelsEl}
-
-        {/* Text body */}
-        <div style={{ ...t.bodyStyle, overflow: 'hidden' }}>
-          {linhas.map((linha, i) => (
-            <p key={i} style={{ color: t.textColor, fontSize: 15, lineHeight: 1.7, margin: 0, fontFamily }}
-              dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${t.textColor};font-weight:800">$1</strong>`) }}
-            />
-          ))}
-        </div>
-
-        {/* Footer (hidden for thread) */}
-        {!isThread && (
-          <div style={t.footerStyle}>
-            <span style={{ color: t.accentColor, fontSize: 11, fontWeight: 700, fontFamily: 'system-ui' }}>
-              {idx + 1} / {carrossel?.slides.length}
-            </span>
-            <span style={{ color: t.mutedColor, fontSize: 11, fontStyle: 'italic', fontFamily: 'system-ui' }}>
-              {slide.destaque}
-            </span>
-          </div>
-        )}
-      </div>
-    )
+    return null
   }
+
 
   return (
     <div className="py-8 px-6">
@@ -1194,13 +621,7 @@ export default function CarrosselPage() {
                 </div>
 
                 {/* Ações do slide */}
-                {isVisualTheme ? (
-                  <button onClick={exportarSlide} disabled={exportando}
-                    className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                    {exportando ? '⏳ Exportando...' : '⬇️ Baixar PNG'}
-                  </button>
-                ) : (
-                  <>
+                <>
                     <div className="grid grid-cols-2 gap-2">
                       <button onClick={procurarImagem} disabled={gerandoImagem || gerandoTodas}
                         className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
@@ -1218,7 +639,6 @@ export default function CarrosselPage() {
                         : `🔍 Buscar imagens para todos os slides${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} sem foto)` : ''}`}
                     </button>
                   </>
-                )}
 
                 {/* Lista de slides */}
                 <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
