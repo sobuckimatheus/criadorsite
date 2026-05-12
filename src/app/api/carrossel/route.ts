@@ -69,7 +69,7 @@ function buildSchema() {
   }
   for (let i = 1; i <= 12; i++) {
     properties[`slide_${i}_texto`]   = { type: 'string', description: `Texto do slide ${i} — use **negrito** para ênfase` }
-    properties[`slide_${i}_imagem`]  = { type: 'string', description: `3-5 palavras em inglês descritivas para buscar foto de CENA/AMBIENTE/OBJETO no slide ${i} (ex: "modern office startup team", "luxury watch close-up"), ou: sem imagem. NUNCA use apenas nomes de marcas ou empresas aqui.` }
+    properties[`slide_${i}_imagem`]  = { type: 'string', description: `3-6 palavras em inglês para buscar foto de stock no Pexels/Unsplash para o slide ${i}. Descreva a CENA ou OBJETO visual que melhor representa o conteúdo. Seja específico: inclua adjetivos de ambiente, luz e estilo. Ex: "luxury modern office window light", "close-up hands holding coffee cup", "amazon rainforest golden light rays", "confident woman portrait dark background", "dental clinic white modern interior", "vintage map old paper texture". NUNCA use nomes de pessoas, marcas ou empresas aqui. Se o slide tem pessoa famosa ou empresa no campo específico, escreva: sem imagem.` }
     properties[`slide_${i}_destaque`]= { type: 'string', description: `3-6 palavras que resumem o slide ${i}` }
     properties[`slide_${i}_pessoa`]  = { type: 'string', description: `Nome completo de uma PESSOA FAMOSA real mencionada no slide ${i} (ex: "Elon Musk", "Steve Jobs", "Cristiano Ronaldo"). Deixe vazio se não houver pessoa famosa real.` }
     properties[`slide_${i}_empresa`] = { type: 'string', description: `Nome oficial de uma EMPRESA ou MARCA mencionada no slide ${i} (ex: "Apple Inc.", "Tesla", "Nike", "Google"). Deixe vazio se não houver empresa/marca.` }
@@ -122,7 +122,12 @@ Preencha a ferramenta create_carousel com um campo por slide (slide_1_texto, sli
 REGRAS PARA IMAGENS (muito importante):
 - slide_X_pessoa: preencha com nome completo de pessoa famosa real mencionada (ex: "Elon Musk", "Oprah Winfrey") → buscará foto real do Wikipedia
 - slide_X_empresa: preencha com nome oficial de empresa/marca mencionada (ex: "Apple Inc.", "Tesla", "Google", "Nike") → buscará logo/imagem do Wikipedia
-- slide_X_imagem: use APENAS para fotos de cena/ambiente/objeto. NUNCA use nomes de marcas ou empresas aqui (ex correto: "modern tech office", "electric car highway", "luxury sneakers close-up")
+- slide_X_imagem: query em inglês para buscar foto de stock. Seja VISUAL e ESPECÍFICO — descreva a cena, o ambiente, a emoção, a textura. Quanto mais descritivo, melhor o resultado. Pense: "o que eu procuraria no Google Imagens para ilustrar esse slide?"
+  - Slide sobre autoestima → "confident smiling woman mirror reflection"
+  - Slide sobre floresta amazônica → "amazon rainforest aerial view mist"
+  - Slide sobre procedimento estético → "luxury medical clinic interior clean"
+  - Slide sobre crescimento financeiro → "business growth chart upward arrow"
+  - Slide sobre recuperação → "woman relaxing spa peaceful eyes closed"
 - Se o slide tiver pessoa famosa OU empresa conhecida, preencha o campo específico e deixe slide_X_imagem como "sem imagem"`
 
     const message = await client.messages.create({
