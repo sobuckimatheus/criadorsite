@@ -61,7 +61,7 @@ function buildSchema() {
   for (let i = 1; i <= 12; i++) {
     properties[`slide_${i}_headline`] = {
       type: 'string',
-      description: `Headline do slide ${i} — curta (máx 8 palavras), forte, impactante, viral, em PT-BR`,
+      description: `Headline do slide ${i} — curta (máx 8 palavras), forte, impactante, viral, em PT-BR. NUNCA use as palavras "CTA", "call to action" ou equivalentes na headline.`,
     }
     properties[`slide_${i}_body`] = {
       type: 'string',
@@ -240,9 +240,10 @@ O que aconteceu depois. Resultados com números.
 Mostre a transformação com especificidade: não "cresceu muito", mas "cresceu 340% em 6 meses".
 
 SLIDE FINAL — IMPACTO + CTA (layout: text_focus)
-Uma frase de impacto que resuma a lição maior.
-CTA direto: peça para comentar, salvar ou marcar alguém.
-Ex: "Qual dessas lições você precisava ouvir hoje? Comenta aqui."
+Uma frase de impacto que resuma a lição maior. NUNCA escreva "CTA" na headline — escreva a frase diretamente.
+No body, peça para comentar, salvar ou marcar alguém de forma natural.
+Ex headline: "Qual dessas lições você precisava ouvir?"
+Ex body: "Comenta aqui qual te surpreendeu mais.\nSalva esse post — ele pode mudar sua próxima decisão."
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 REGRAS PARA IMAGE PROMPT (INGLÊS)
