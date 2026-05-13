@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 interface Slide {
   texto: string
@@ -10,6 +10,9 @@ interface Slide {
   empresa?: string
   imageType?: 'pessoa' | 'empresa' | 'pexels'
   imageUrl?: string
+  imagePosition?: { x: number; y: number }
+  fontSize?: number
+  headlineSize?: number
   // GPT premium fields
   headline?: string
   body?: string
@@ -113,8 +116,33 @@ export default function CarrosselPage() {
   const [gerandoTodas, setGerandoTodas] = useState(false)
   const [progressoIA, setProgressoIA] = useState<{ atual: number; total: number } | null>(null)
   const [paginaBusca, setPaginaBusca] = useState<Record<number, number>>({})
+  const [editingSlide, setEditingSlide] = useState(false)
+  const [editFields, setEditFields] = useState({ destaque: '', texto: '', fontSize: 0, headlineSize: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const dragRef = useRef<{ slideIdx: number; startX: number; startY: number; startPosX: number; startPosY: number; containerW: number; containerH: number } | null>(null)
   const [error, setError] = useState('')
   const slideRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onMove(e: MouseEvent) {
+      if (!dragRef.current) return
+      const { slideIdx, startX, startY, startPosX, startPosY, containerW, containerH } = dragRef.current
+      const dx = ((e.clientX - startX) / containerW) * 100
+      const dy = ((e.clientY - startY) / containerH) * 100
+      const newX = Math.max(0, Math.min(100, startPosX - dx))
+      const newY = Math.max(0, Math.min(100, startPosY - dy))
+      setCarrossel(prev => {
+        if (!prev) return prev
+        const slides = [...prev.slides]
+        slides[slideIdx] = { ...slides[slideIdx], imagePosition: { x: newX, y: newY } }
+        return { ...prev, slides }
+      })
+    }
+    function onUp() { dragRef.current = null; setIsDragging(false) }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+    return () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp) }
+  }, [])
 
   const msgs = [
     '✍️ Construindo o gancho perfeito...',
@@ -304,6 +332,37 @@ export default function CarrosselPage() {
     }
   }
 
+  function startEdit() {
+    if (!carrossel) return
+    const slide = carrossel.slides[slideAtivo]
+    setEditFields({ destaque: slide.destaque || '', texto: slide.texto || '', fontSize: slide.fontSize ?? 0, headlineSize: slide.headlineSize ?? 0 })
+    setEditingSlide(true)
+  }
+
+  function saveEdit() {
+    setCarrossel(prev => {
+      if (!prev) return prev
+      const slides = [...prev.slides]
+      slides[slideAtivo] = {
+        ...slides[slideAtivo],
+        destaque: editFields.destaque,
+        texto: editFields.texto,
+        ...(editFields.fontSize > 0 && { fontSize: editFields.fontSize }),
+        ...(editFields.headlineSize > 0 && { headlineSize: editFields.headlineSize }),
+      }
+      return { ...prev, slides }
+    })
+    setEditingSlide(false)
+  }
+
+  function handleImgMouseDown(e: React.MouseEvent<HTMLDivElement>, idx: number) {
+    e.preventDefault()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const pos = carrossel?.slides[idx].imagePosition ?? { x: 50, y: 50 }
+    dragRef.current = { slideIdx: idx, startX: e.clientX, startY: e.clientY, startPosX: pos.x, startPosY: pos.y, containerW: rect.width, containerH: rect.height }
+    setIsDragging(true)
+  }
+
   function copiarLegenda() {
     if (!carrossel) return
     const texto = `${carrossel.legenda}\n\n${(carrossel.hashtags ?? []).map(h => `#${h.replace('#', '')}`).join(' ')}`
@@ -345,18 +404,21 @@ export default function CarrosselPage() {
             </div>
           </div>
 
-          {/* Texto — não cresce; quem cresce é a imagem */}
-          <div style={{ padding: '16px 20px 0', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px', ...(slide.imageUrl ? {} : { flex: 1 }) }}>
+          {/* Texto */}
+          <div style={{ position: 'relative', padding: '16px 20px 0', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px', ...(slide.imageUrl ? {} : { flex: 1 }) }}>
             {linhas.map((linha, i) => (
-              <p key={i} style={{ color: '#0f1419', fontSize: 15, lineHeight: 1.6, margin: 0, fontFamily }}
+              <p key={i} style={{ color: '#0f1419', fontSize: slide.fontSize ?? 15, lineHeight: 1.6, margin: 0, fontFamily }}
                 dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#0f1419;font-weight:800">$1</strong>') }}
               />
             ))}
+            <button data-html2canvas-ignore="true" onClick={startEdit} style={{ position: 'absolute', top: 8, right: 20, width: 26, height: 26, borderRadius: '50%', background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)', color: '#9333ea', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>✏️</button>
           </div>
 
-          {/* Imagem — alinhada com o texto (mesma margem lateral), cresce para preencher espaço restante */}
+          {/* Imagem */}
           {slide.imageUrl && (
-            <div style={{ flex: 1, marginTop: '14px', marginBottom: '16px', marginLeft: '20px', marginRight: '20px', minHeight: '80px', overflow: 'hidden', borderRadius: '10px' }}>
+            <div
+              onMouseDown={e => handleImgMouseDown(e, idx)}
+              style={{ position: 'relative', flex: 1, marginTop: '14px', marginBottom: '16px', marginLeft: '20px', marginRight: '20px', minHeight: '80px', overflow: 'hidden', borderRadius: '10px', cursor: isDragging ? 'grabbing' : 'grab' }}>
               <img
                 src={slide.imageUrl.startsWith('data:') ? slide.imageUrl : `/api/proxy-image?url=${encodeURIComponent(slide.imageUrl)}`}
                 alt="" crossOrigin="anonymous"
@@ -365,17 +427,19 @@ export default function CarrosselPage() {
                   height: '100%',
                   display: 'block',
                   objectFit: isWikipediaBrand ? 'contain' : 'cover',
-                  objectPosition: 'center top',
+                  objectPosition: isWikipediaBrand ? 'center' : `${slide.imagePosition?.x ?? 50}% ${slide.imagePosition?.y ?? 30}%`,
                   background: isWikipediaBrand ? '#f5f5f5' : 'transparent',
+                  pointerEvents: 'none',
                 }}
               />
+              <button data-html2canvas-ignore="true" onMouseDown={e => e.stopPropagation()} onClick={procurarImagem} style={{ position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>✏️</button>
             </div>
           )}
         </div>
       )
     }
 
-    // ── VIRAL (full-bleed, gradiente bottom-up, azul elétrico) ───────────
+    // ── VIRAL (copy acima, imagem abaixo com overlay escuro) ────────────
     if (estilo === 'viral') {
       const ACCENT = '#00CFFF'
       const imgSrc = slide.imageUrl
@@ -390,58 +454,44 @@ export default function CarrosselPage() {
       return (
         <div style={{
           background: '#0d0d0d', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
-          position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
           fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
           boxShadow: '0 8px 40px rgba(0,0,0,0.8)',
         }}>
-          {/* Full-bleed image */}
-          {imgSrc && (
-            <img src={imgSrc} alt="" crossOrigin="anonymous" style={{
-              position: 'absolute', inset: 0, width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'center', display: 'block',
-            }} />
-          )}
-
-          {/* Gradiente bottom-up — imagem visível no topo, escuro embaixo para texto */}
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-            background: imgSrc
-              ? 'linear-gradient(0deg,#0d0d0d 0%,#0d0d0d 28%,rgba(13,13,13,0.82) 48%,rgba(13,13,13,0.25) 70%,transparent 100%)'
-              : '#0d0d0d',
-          }} />
-          {/* Vinheta no topo */}
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: '18%', zIndex: 1, pointerEvents: 'none',
-            background: 'linear-gradient(180deg,rgba(0,0,0,0.55) 0%,transparent 100%)',
-          }} />
-
-          {/* Conteúdo */}
-          <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', padding: '20px 24px 20px' }}>
-            {/* Número topo-esquerda */}
-            <div style={{ color: '#ffffff', fontSize: 52, fontWeight: 900, lineHeight: 1, flexShrink: 0, opacity: 0.92 }}>
+          {/* Seção de texto (topo) */}
+          <div style={{ position: 'relative', flex: '0 0 58%', display: 'flex', flexDirection: 'column', padding: '20px 24px 16px', background: '#0d0d0d' }}>
+            <div style={{ color: '#ffffff', fontSize: 50, fontWeight: 900, lineHeight: 1, flexShrink: 0, opacity: 0.92 }}>
               {idx + 1}
             </div>
-
-            {/* Espaçador — empurra título para a zona de transição do gradiente */}
             <div style={{ flex: 1 }} />
-
-            {/* Título dois tons */}
-            <div style={{ marginBottom: 16, flexShrink: 0 }}>
-              {tL1 && <span style={{ display: 'block', color: '#ffffff', fontSize: 28, fontWeight: 900, lineHeight: 1.15, letterSpacing: '0.02em' }}>{tL1}</span>}
-              {tL2 && <span style={{ display: 'block', color: ACCENT, fontSize: 28, fontWeight: 900, lineHeight: 1.15, letterSpacing: '0.02em' }}>{tL2}</span>}
+            <div style={{ marginBottom: 14, flexShrink: 0 }}>
+              {tL1 && <span style={{ display: 'block', color: '#ffffff', fontSize: slide.headlineSize ?? 26, fontWeight: 900, lineHeight: 1.15, letterSpacing: '0.02em' }}>{tL1}</span>}
+              {tL2 && <span style={{ display: 'block', color: ACCENT, fontSize: slide.headlineSize ?? 26, fontWeight: 900, lineHeight: 1.15, letterSpacing: '0.02em' }}>{tL2}</span>}
             </div>
-
-            {/* Corpo */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 9, overflow: 'hidden', maxHeight: '34%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflow: 'hidden' }}>
               {linhas.map((linha, i) => (
-                <p key={i} style={{ color: 'rgba(255,255,255,0.83)', fontSize: 13.5, lineHeight: 1.7, margin: 0, fontWeight: 400 }}
+                <p key={i} style={{ color: 'rgba(255,255,255,0.8)', fontSize: slide.fontSize ?? 13, lineHeight: 1.65, margin: 0, fontWeight: 400 }}
                   dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${ACCENT};font-weight:700">$1</strong>`) }}
                 />
               ))}
             </div>
+            {/* Lápis copy */}
+            <button data-html2canvas-ignore="true" onClick={startEdit} style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>✏️</button>
+          </div>
 
+          {/* Seção de imagem (baixo) */}
+          <div
+            onMouseDown={e => handleImgMouseDown(e, idx)}
+            style={{ position: 'relative', flex: '0 0 42%', overflow: 'hidden', cursor: isDragging ? 'grabbing' : 'grab' }}>
+            {imgSrc ? (
+              <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: `${slide.imagePosition?.x ?? 50}% ${slide.imagePosition?.y ?? 50}%`, display: 'block', pointerEvents: 'none' }} />
+            ) : (
+              <div style={{ position: 'absolute', inset: 0, background: '#1a1a1a' }} />
+            )}
+            {/* Overlay escuro */}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(13,13,13,0.6) 0%,transparent 35%,rgba(0,0,0,0.3) 100%)', zIndex: 1, pointerEvents: 'none' }} />
             {/* Rodapé */}
-            <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '10px 24px', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', pointerEvents: 'none' }}>
               <span style={{ color: 'rgba(255,255,255,0.38)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{nome || nicho}</span>
               <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                 {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
@@ -449,6 +499,8 @@ export default function CarrosselPage() {
                 ))}
               </div>
             </div>
+            {/* Lápis imagem */}
+            <button data-html2canvas-ignore="true" onMouseDown={e => e.stopPropagation()} onClick={procurarImagem} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>✏️</button>
           </div>
         </div>
       )
@@ -639,6 +691,46 @@ export default function CarrosselPage() {
                         : `🔍 Buscar imagens para todos os slides${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} sem foto)` : ''}`}
                     </button>
                   </>
+
+                {/* Painel de edição */}
+                {editingSlide && (
+                  <div className="bg-white border border-purple-200 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Editar Slide {slideAtivo + 1}</p>
+                      <button onClick={() => setEditingSlide(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+                    </div>
+                    {estilo === 'viral' && (
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Título</label>
+                        <input value={editFields.destaque} onChange={e => setEditFields(prev => ({ ...prev, destaque: e.target.value }))}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-300" />
+                      </div>
+                    )}
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Texto</label>
+                      <textarea value={editFields.texto} onChange={e => setEditFields(prev => ({ ...prev, texto: e.target.value }))}
+                        rows={4} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-300 resize-none" />
+                    </div>
+                    {estilo === 'viral' && (
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Tamanho do título: {editFields.headlineSize > 0 ? editFields.headlineSize : 26}px</label>
+                        <input type="range" min={16} max={38} value={editFields.headlineSize > 0 ? editFields.headlineSize : 26}
+                          onChange={e => setEditFields(prev => ({ ...prev, headlineSize: Number(e.target.value) }))}
+                          className="w-full accent-purple-600" />
+                      </div>
+                    )}
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Tamanho do texto: {editFields.fontSize > 0 ? editFields.fontSize : (estilo === 'viral' ? 13 : 15)}px</label>
+                      <input type="range" min={10} max={22} value={editFields.fontSize > 0 ? editFields.fontSize : (estilo === 'viral' ? 13 : 15)}
+                        onChange={e => setEditFields(prev => ({ ...prev, fontSize: Number(e.target.value) }))}
+                        className="w-full accent-purple-600" />
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={saveEdit} className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">Salvar</button>
+                      <button onClick={() => setEditingSlide(false)} className="px-4 py-2 rounded-lg text-sm text-gray-500 border border-gray-200 hover:bg-gray-50">Cancelar</button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Lista de slides */}
                 <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
