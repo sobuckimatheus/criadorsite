@@ -65,7 +65,7 @@ export default async function DashboardPage() {
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900">{site.nomeNegocio}</h2>
-                      <p className="text-sm text-gray-500">{site.cidade}, {site.bairro}</p>
+                      <p className="text-sm text-gray-500">{site.cidade} - {site.estado}</p>
                     </div>
                     <StatusBadge status={site.status} />
                   </div>
@@ -173,7 +173,7 @@ export default async function DashboardPage() {
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">{site.nomeNegocio}</h2>
-                  <p className="text-sm text-gray-500">{site.cidade}, {site.bairro}</p>
+                  <p className="text-sm text-gray-500">{site.cidade} - {site.estado}</p>
                 </div>
                 <StatusBadge status={site.status} />
               </div>

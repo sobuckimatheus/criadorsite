@@ -44,7 +44,9 @@ model Site {
   nomeNegocio String
   segmento    String
   cidade      String
-  bairro      String
+  estado      String
+  endereco    String
+  cep         String
   corPaleta   String
   logoUrl     String?
 
@@ -59,7 +61,6 @@ model Site {
   resultadoCliente String
 
   // Público
-  clienteIdeal String
   dorPrincipal String
 
   // Credibilidade

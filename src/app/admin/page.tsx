@@ -101,7 +101,7 @@ export default async function AdminPage({
                 <td className="px-5 py-4">
                   <div>
                     <p className="font-medium text-gray-900">{site.nomeNegocio}</p>
-                    <p className="text-gray-400 text-xs mt-0.5">{site.cidade}, {site.bairro}</p>
+                    <p className="text-gray-400 text-xs mt-0.5">{site.cidade} - {site.estado}</p>
                   </div>
                 </td>
                 <td className="px-5 py-4">

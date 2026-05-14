@@ -4,7 +4,9 @@ export const step1Schema = z.object({
   nomeNegocio: z.string().min(2, 'Nome obrigatório'),
   segmento: z.string().min(2, 'Segmento obrigatório'),
   cidade: z.string().min(2, 'Cidade obrigatória'),
-  bairro: z.string().min(2, 'Bairro obrigatório'),
+  estado: z.string().min(2, 'Estado obrigatório'),
+  endereco: z.string().min(5, 'Endereço obrigatório'),
+  cep: z.string().min(8, 'CEP obrigatório'),
   corPaleta: z.string().min(1, 'Selecione uma paleta'),
   logoUrl: z.string().optional(),
 })
@@ -21,7 +23,6 @@ export const step2Schema = z.object({
 })
 
 export const step3Schema = z.object({
-  clienteIdeal: z.string().min(10, 'Descreva seu cliente ideal'),
   dorPrincipal: z.string().min(10, 'Descreva a principal dor'),
 })
 
@@ -58,9 +59,9 @@ export const formSchema = step1Schema
 export type FormData = z.infer<typeof formSchema>
 
 export const STEP_FIELDS: Record<number, (keyof FormData)[]> = {
-  1: ['nomeNegocio', 'segmento', 'cidade', 'bairro', 'corPaleta'],
+  1: ['nomeNegocio', 'segmento', 'cidade', 'estado', 'endereco', 'cep', 'corPaleta'],
   2: ['servico1Nome', 'servico1Desc', 'servicoDestaque', 'resultadoCliente'],
-  3: ['clienteIdeal', 'dorPrincipal'],
+  3: ['dorPrincipal'],
   4: ['anosNoMercado'],
   5: ['whatsapp', 'whatsappMensagem', 'horarioAtendimento'],
 }

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(DIRECT_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" npx prisma migrate deploy)",
+      "Bash(DIRECT_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" npx prisma db push)",
+      "Bash(DIRECT_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" npx prisma db push --accept-data-loss)",
+      "Bash(DIRECT_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script)"
+    ]
+  }
+}

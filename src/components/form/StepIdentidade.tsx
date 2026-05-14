@@ -164,9 +164,22 @@ export default function StepIdentidade() {
           {errors.cidade && <p className="text-xs text-red-500 mt-1">{errors.cidade.message}</p>}
         </div>
         <div>
-          <Label htmlFor="bairro">Bairro *</Label>
-          <Input id="bairro" {...register('bairro')} className="mt-1.5" placeholder="Centro" />
-          {errors.bairro && <p className="text-xs text-red-500 mt-1">{errors.bairro.message}</p>}
+          <Label htmlFor="estado">Estado *</Label>
+          <Input id="estado" {...register('estado')} className="mt-1.5" placeholder="SP" maxLength={2} />
+          {errors.estado && <p className="text-xs text-red-500 mt-1">{errors.estado.message}</p>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label htmlFor="endereco">Endereço *</Label>
+          <Input id="endereco" {...register('endereco')} className="mt-1.5" placeholder="Rua das Flores, 123" />
+          {errors.endereco && <p className="text-xs text-red-500 mt-1">{errors.endereco.message}</p>}
+        </div>
+        <div>
+          <Label htmlFor="cep">CEP *</Label>
+          <Input id="cep" {...register('cep')} className="mt-1.5" placeholder="00000-000" maxLength={9} />
+          {errors.cep && <p className="text-xs text-red-500 mt-1">{errors.cep.message}</p>}
         </div>
       </div>
 

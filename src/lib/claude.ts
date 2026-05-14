@@ -7,7 +7,9 @@ type SiteData = {
   nomeNegocio: string
   segmento: string
   cidade: string
-  bairro: string
+  estado: string
+  endereco: string
+  cep: string
   corPaleta: string
   logoUrl?: string | null
   servico1Nome: string
@@ -18,7 +20,6 @@ type SiteData = {
   servico3Desc?: string | null
   servicoDestaque: string
   resultadoCliente: string
-  clienteIdeal: string
   dorPrincipal: string
   anosNoMercado: number
   totalClientes?: number | null
@@ -121,7 +122,7 @@ REGRAS ABSOLUTAS:
 NEGÓCIO:
 - Nome: ${data.nomeNegocio}
 - Segmento: ${data.segmento}
-- Localização: ${data.bairro}, ${data.cidade}
+- Localização: ${data.endereco}, ${data.cidade} - ${data.estado}, CEP: ${data.cep}
 - Serviço destaque: ${data.servicoDestaque}
 - Resultado entregue ao cliente: ${data.resultadoCliente}
 
@@ -129,7 +130,6 @@ SERVIÇOS:
 ${services}
 
 PÚBLICO E POSICIONAMENTO:
-- Cliente ideal: ${data.clienteIdeal}
 - Dor principal resolvida: ${data.dorPrincipal}
 
 CREDIBILIDADE:
