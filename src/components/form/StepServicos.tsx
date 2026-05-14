@@ -1,81 +1,66 @@
 'use client'
 
-import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Plus, Trash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { type FormData } from '@/types'
 
-const SERVICOS = [
-  { nome: 'servico1Nome', desc: 'servico1Desc', label: 'Serviço 1' },
-  { nome: 'servico2Nome', desc: 'servico2Desc', label: 'Serviço 2' },
-  { nome: 'servico3Nome', desc: 'servico3Desc', label: 'Serviço 3' },
-] as const
-
 export default function StepServicos() {
-  const { register, setValue, formState: { errors } } = useFormContext<FormData>()
-  const [count, setCount] = useState(1)
-
-  function addServico() {
-    if (count < 3) setCount(c => c + 1)
-  }
-
-  function removeServico(index: number) {
-    setValue(SERVICOS[index].nome as keyof FormData, '')
-    setValue(SERVICOS[index].desc as keyof FormData, '')
-    setCount(c => c - 1)
-  }
+  const { register, control, formState: { errors } } = useFormContext<FormData>()
+  const { fields, append, remove } = useFieldArray({ control, name: 'servicos' })
 
   return (
     <div className="space-y-5">
 
-      {/* Serviços dinâmicos */}
-      <div className="space-y-4">
-        {SERVICOS.slice(0, count).map((s, i) => (
-          <div key={s.nome} className="border border-gray-200 rounded-xl p-4 space-y-3">
+      {/* Lista de serviços */}
+      <div className="space-y-3">
+        {fields.map((field, index) => (
+          <div key={field.id} className="border border-gray-200 rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                {s.label}{i === 0 ? ' *' : ' (opcional)'}
+                Serviço {index + 1}{index === 0 ? ' *' : ''}
               </p>
-              {i > 0 && (
-                <button type="button" onClick={() => removeServico(i)} className="text-gray-400 hover:text-red-500 transition-colors">
+              {index > 0 && (
+                <button type="button" onClick={() => remove(index)} className="text-gray-400 hover:text-red-500 transition-colors">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
             <div>
               <Input
-                {...register(s.nome as keyof FormData)}
+                {...register(`servicos.${index}.nome`)}
                 placeholder="Nome do serviço"
               />
-              {i === 0 && errors.servico1Nome && (
-                <p className="text-xs text-red-500 mt-1">{errors.servico1Nome.message}</p>
+              {errors.servicos?.[index]?.nome && (
+                <p className="text-xs text-red-500 mt-1">{errors.servicos[index]?.nome?.message}</p>
               )}
             </div>
             <div>
               <Input
-                {...register(s.desc as keyof FormData)}
+                {...register(`servicos.${index}.descricao`)}
                 placeholder="Descrição (opcional)"
               />
             </div>
           </div>
         ))}
 
-        {count < 3 && (
-          <button
-            type="button"
-            onClick={addServico}
-            className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-purple-300 hover:text-purple-600 text-sm font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Adicionar serviço
-          </button>
+        {fields.length === 0 && (
+          <p className="text-xs text-red-500 text-center py-2">Adicione ao menos um serviço</p>
         )}
+
+        <button
+          type="button"
+          onClick={() => append({ nome: '', descricao: '' })}
+          className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-purple-300 hover:text-purple-600 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Adicionar serviço
+        </button>
       </div>
 
-      {/* Campos fixos */}
+      {/* Destaque e resultado */}
       <div className="border-t border-gray-100 pt-4 space-y-3">
         <div>
           <Label htmlFor="destaque">Serviço carro-chefe *</Label>

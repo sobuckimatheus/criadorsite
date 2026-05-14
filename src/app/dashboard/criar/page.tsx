@@ -18,12 +18,14 @@ export default async function CriarPage({
 
   const { siteId } = await searchParams
 
+  const include = { depoimentos: true, servicos: { orderBy: { ordem: 'asc' as const } } }
+
   // Admin editing a specific site, or regular user's own site
   const site = siteId
-    ? await prisma.site.findUnique({ where: { id: siteId }, include: { depoimentos: true } })
+    ? await prisma.site.findUnique({ where: { id: siteId }, include })
     : isAdmin
       ? null
-      : await prisma.site.findFirst({ where: { userId: user.id }, include: { depoimentos: true } })
+      : await prisma.site.findFirst({ where: { userId: user.id }, include })
 
   const initialData: Partial<FormData> | null = site
     ? {
@@ -35,12 +37,9 @@ export default async function CriarPage({
         cep: site.cep,
         corPaleta: site.corPaleta,
         logoUrl: site.logoUrl ?? undefined,
-        servico1Nome: site.servico1Nome,
-        servico1Desc: site.servico1Desc ?? undefined,
-        servico2Nome: site.servico2Nome ?? undefined,
-        servico2Desc: site.servico2Desc ?? undefined,
-        servico3Nome: site.servico3Nome ?? undefined,
-        servico3Desc: site.servico3Desc ?? undefined,
+        servicos: site.servicos.length > 0
+          ? site.servicos.map((s) => ({ nome: s.nome, descricao: s.descricao ?? undefined }))
+          : [{ nome: '', descricao: undefined }],
         servicoDestaque: site.servicoDestaque,
         resultadoCliente: site.resultadoCliente,
         dorPrincipal: site.dorPrincipal,
@@ -53,9 +52,7 @@ export default async function CriarPage({
         foto2Url: site.foto2Url ?? undefined,
         foto3Url: site.foto3Url ?? undefined,
         fotoProfissionalUrl: site.fotoProfissionalUrl ?? undefined,
-        depoimentos: site.depoimentos.map((d) => ({
-          imagemUrl: d.imagemUrl,
-        })),
+        depoimentos: site.depoimentos.map((d) => ({ imagemUrl: d.imagemUrl })),
         whatsapp: site.whatsapp,
         whatsappMensagem: site.whatsappMensagem,
         instagram: site.instagram ?? undefined,

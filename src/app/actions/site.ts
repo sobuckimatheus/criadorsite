@@ -37,7 +37,7 @@ export async function saveSite(data: unknown, siteId?: string): Promise<Result<{
   const parsed = formSchema.safeParse(data)
   if (!parsed.success) return { success: false, error: 'Dados do formulário inválidos' }
 
-  const { depoimentos, ...siteFields } = parsed.data
+  const { depoimentos, servicos, ...siteFields } = parsed.data
   const dbUser =
     (await prisma.user.findFirst({ where: { OR: [{ id: user.id }, { email: user.email! }] } })) ??
     (await prisma.user.create({ data: { id: user.id, email: user.email!, name: user.user_metadata?.name || user.email! } }))
@@ -49,9 +49,17 @@ export async function saveSite(data: unknown, siteId?: string): Promise<Result<{
       const existing = await prisma.site.findUnique({ where: { id: siteId } })
       if (existing) {
         await prisma.depoimento.deleteMany({ where: { siteId: existing.id } })
+        await prisma.servico.deleteMany({ where: { siteId: existing.id } })
         await prisma.site.update({
           where: { id: existing.id },
-          data: { ...siteFields, status: 'DRAFT', htmlGerado: null, geracoesCount: 0, depoimentos: { create: depoimentos } },
+          data: {
+            ...siteFields,
+            status: 'DRAFT',
+            htmlGerado: null,
+            geracoesCount: 0,
+            depoimentos: { create: depoimentos },
+            servicos: { create: servicos.map((s, i) => ({ ...s, ordem: i })) },
+          },
         })
         revalidatePath('/dashboard')
         return { success: true, data: { id: existing.id } }
@@ -63,9 +71,17 @@ export async function saveSite(data: unknown, siteId?: string): Promise<Result<{
       const existing = await prisma.site.findFirst({ where: { userId: user.id } })
       if (existing) {
         await prisma.depoimento.deleteMany({ where: { siteId: existing.id } })
+        await prisma.servico.deleteMany({ where: { siteId: existing.id } })
         await prisma.site.update({
           where: { id: existing.id },
-          data: { ...siteFields, status: 'DRAFT', htmlGerado: null, geracoesCount: 0, depoimentos: { create: depoimentos } },
+          data: {
+            ...siteFields,
+            status: 'DRAFT',
+            htmlGerado: null,
+            geracoesCount: 0,
+            depoimentos: { create: depoimentos },
+            servicos: { create: servicos.map((s, i) => ({ ...s, ordem: i })) },
+          },
         })
         revalidatePath('/dashboard')
         return { success: true, data: { id: existing.id } }
@@ -74,7 +90,12 @@ export async function saveSite(data: unknown, siteId?: string): Promise<Result<{
 
     // Admin without siteId, or new regular user: create
     const site = await prisma.site.create({
-      data: { ...siteFields, userId: user.id, depoimentos: { create: depoimentos } },
+      data: {
+        ...siteFields,
+        userId: user.id,
+        depoimentos: { create: depoimentos },
+        servicos: { create: servicos.map((s, i) => ({ ...s, ordem: i })) },
+      },
     })
 
     revalidatePath('/dashboard')
@@ -91,7 +112,7 @@ export async function generateSite(siteId: string): Promise<Result> {
 
   const site = await prisma.site.findUnique({
     where: { id: siteId },
-    include: { depoimentos: true },
+    include: { depoimentos: true, servicos: { orderBy: { ordem: 'asc' } } },
   })
 
   if (!site) return { success: false, error: 'Site não encontrado' }
@@ -107,7 +128,7 @@ export async function generateSite(siteId: string): Promise<Result> {
   await prisma.site.update({ where: { id: siteId }, data: { status: 'GENERATING' } })
 
   try {
-    const html = await generateSiteHTML({ ...site, servico1Desc: site.servico1Desc ?? undefined, depoimentos: site.depoimentos })
+    const html = await generateSiteHTML({ ...site, depoimentos: site.depoimentos, servicos: site.servicos })
 
     await prisma.site.update({
       where: { id: siteId },

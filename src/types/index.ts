@@ -12,12 +12,10 @@ export const step1Schema = z.object({
 })
 
 export const step2Schema = z.object({
-  servico1Nome: z.string().min(2, 'Nome do serviço obrigatório'),
-  servico1Desc: z.string().optional(),
-  servico2Nome: z.string().optional(),
-  servico2Desc: z.string().optional(),
-  servico3Nome: z.string().optional(),
-  servico3Desc: z.string().optional(),
+  servicos: z.array(z.object({
+    nome: z.string().min(2, 'Nome do serviço obrigatório'),
+    descricao: z.string().optional(),
+  })).min(1, 'Adicione ao menos um serviço'),
   servicoDestaque: z.string().min(2, 'Serviço destaque obrigatório'),
   resultadoCliente: z.string().min(10, 'Descreva o resultado para o cliente'),
 })
@@ -66,7 +64,7 @@ export type FormData = z.infer<typeof formSchema>
 
 export const STEP_FIELDS: Record<number, (keyof FormData)[]> = {
   1: ['nomeNegocio', 'segmento', 'cidade', 'estado', 'endereco', 'cep', 'corPaleta'],
-  2: ['servico1Nome', 'servico1Desc', 'servicoDestaque', 'resultadoCliente'],
+  2: ['servicos', 'servicoDestaque', 'resultadoCliente'],
   3: ['dorPrincipal'],
   4: ['anosNoMercado'],
   5: [],

@@ -51,12 +51,7 @@ model Site {
   logoUrl     String?
 
   // Serviços
-  servico1Nome     String
-  servico1Desc     String?
-  servico2Nome     String?
-  servico2Desc     String?
-  servico3Nome     String?
-  servico3Desc     String?
+  servicos         Servico[]
   servicoDestaque  String
   resultadoCliente String
 
@@ -98,6 +93,17 @@ model Site {
   updatedAt DateTime @updatedAt
 
   @@map("sites")
+}
+
+model Servico {
+  id        String  @id @default(uuid())
+  siteId    String
+  site      Site    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  nome      String
+  descricao String?
+  ordem     Int     @default(0)
+
+  @@map("servicos")
 }
 
 model Depoimento {

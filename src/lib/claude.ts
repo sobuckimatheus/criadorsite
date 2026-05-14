@@ -12,12 +12,7 @@ type SiteData = {
   cep: string
   corPaleta: string
   logoUrl?: string | null
-  servico1Nome: string
-  servico1Desc?: string
-  servico2Nome?: string | null
-  servico2Desc?: string | null
-  servico3Nome?: string | null
-  servico3Desc?: string | null
+  servicos: { nome: string; descricao?: string | null }[]
   servicoDestaque: string
   resultadoCliente: string
   dorPrincipal: string
@@ -95,12 +90,8 @@ function getPaleta(corPaleta: string) {
 export async function generateSiteHTML(data: SiteData): Promise<string> {
   const paleta = getPaleta(data.corPaleta)
 
-  const services = [
-    `• ${data.servico1Nome}${data.servico1Desc ? `: ${data.servico1Desc}` : ''}`,
-    data.servico2Nome ? `• ${data.servico2Nome}: ${data.servico2Desc}` : null,
-    data.servico3Nome ? `• ${data.servico3Nome}: ${data.servico3Desc}` : null,
-  ]
-    .filter(Boolean)
+  const services = data.servicos
+    .map((s) => `• ${s.nome}${s.descricao ? `: ${s.descricao}` : ''}`)
     .join('\n')
 
   const depoimentosImagens = data.depoimentos.map(d => d.imagemUrl)
@@ -169,7 +160,7 @@ ESTRUTURA OBRIGATÓRIA (nesta ordem):
 5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — galeria com as fotos do negócio em grid responsivo (use as URLs exatas fornecidas com object-fit:cover, aspect-ratio:4/3, border-radius:12px)` : '<!-- sem galeria de fotos -->'}
 6. ${depoimentosImagens.length > 0 ? `<section id="depoimentos"> — carrossel de imagens de depoimentos. Use as ${depoimentosImagens.length} URLs fornecidas como <img> com object-fit:contain, max-height:320px, border-radius:12px, background:#fff. Adicione setas de navegação prev/next e indicadores de pontos com JavaScript inline. Carrossel responsivo e touch-friendly.` : '<!-- sem depoimentos -->'}
 7. <section id="cta"> — seção CTA final com botão WhatsApp
-8. <footer> — dados de contato, horário, Instagram (se houver), copyright
+8. <footer> — dados de contato, horário, Instagram (se houver), copyright. IMPORTANTE: o footer deve ter padding-top mínimo de 48px para não ficar colado no botão da seção CTA acima
 
 REQUISITOS TÉCNICOS:
 - Mobile-first responsivo (breakpoint principal: 768px)
