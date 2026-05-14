@@ -38,11 +38,9 @@ export async function saveSite(data: unknown, siteId?: string): Promise<Result<{
   if (!parsed.success) return { success: false, error: 'Dados do formulário inválidos' }
 
   const { depoimentos, ...siteFields } = parsed.data
-  const dbUser = await prisma.user.upsert({
-    where: { id: user.id },
-    update: {},
-    create: { id: user.id, email: user.email!, name: user.user_metadata?.name || user.email! },
-  })
+  const dbUser =
+    (await prisma.user.findFirst({ where: { OR: [{ id: user.id }, { email: user.email! }] } })) ??
+    (await prisma.user.create({ data: { id: user.id, email: user.email!, name: user.user_metadata?.name || user.email! } }))
   const isAdmin = dbUser?.role === 'ADMIN'
 
   try {
