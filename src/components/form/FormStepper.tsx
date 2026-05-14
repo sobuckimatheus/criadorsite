@@ -14,12 +14,14 @@ import StepServicos from './StepServicos'
 import StepPublico from './StepPublico'
 import StepCredibilidade from './StepCredibilidade'
 import StepContato from './StepContato'
+import StepHero from './StepHero'
 
 const STEPS = [
   { label: 'Identidade', component: StepIdentidade },
   { label: 'Serviços', component: StepServicos },
   { label: 'Público', component: StepPublico },
   { label: 'Credibilidade', component: StepCredibilidade },
+  { label: 'Hero', component: StepHero },
   { label: 'Contato', component: StepContato },
 ]
 

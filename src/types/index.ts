@@ -13,7 +13,7 @@ export const step1Schema = z.object({
 
 export const step2Schema = z.object({
   servico1Nome: z.string().min(2, 'Nome do serviço obrigatório'),
-  servico1Desc: z.string().min(10, 'Descrição obrigatória'),
+  servico1Desc: z.string().optional(),
   servico2Nome: z.string().optional(),
   servico2Desc: z.string().optional(),
   servico3Nome: z.string().optional(),
@@ -44,6 +44,11 @@ export const step4Schema = z.object({
 })
 
 export const step5Schema = z.object({
+  headline: z.string().optional(),
+  subheadline: z.string().optional(),
+})
+
+export const step6Schema = z.object({
   whatsapp: z.string().min(10, 'WhatsApp obrigatório'),
   whatsappMensagem: z.string().min(10, 'Mensagem obrigatória'),
   instagram: z.string().optional(),
@@ -55,6 +60,7 @@ export const formSchema = step1Schema
   .merge(step3Schema)
   .merge(step4Schema)
   .merge(step5Schema)
+  .merge(step6Schema)
 
 export type FormData = z.infer<typeof formSchema>
 
@@ -63,7 +69,8 @@ export const STEP_FIELDS: Record<number, (keyof FormData)[]> = {
   2: ['servico1Nome', 'servico1Desc', 'servicoDestaque', 'resultadoCliente'],
   3: ['dorPrincipal'],
   4: ['anosNoMercado'],
-  5: ['whatsapp', 'whatsappMensagem', 'horarioAtendimento'],
+  5: [],
+  6: ['whatsapp', 'whatsappMensagem', 'horarioAtendimento'],
 }
 
 export const PALETAS = [

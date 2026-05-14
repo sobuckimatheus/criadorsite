@@ -8,7 +8,7 @@ async function searchWikipediaImage(name: string): Promise<string | null> {
   for (const domain of ['pt.wikipedia.org', 'en.wikipedia.org', 'commons.wikimedia.org']) {
     try {
       const url = `https://${domain}/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages&format=json&pithumbsize=600&redirects=1`
-      const res = await fetch(url, { headers: { 'User-Agent': 'CriadorSite/1.0 (contact@criadorsite.com.br)' } })
+      const res = await fetch(url, { headers: { 'User-Agent': 'BethelMarketing/1.0' } })
       if (!res.ok) continue
       const data = await res.json()
       const pages = data.query?.pages
@@ -24,7 +24,7 @@ async function searchWikipediaImage(name: string): Promise<string | null> {
   // 2) Commons file search — busca arquivos de imagem pelo nome
   try {
     const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(name)}&gsrnamespace=6&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&gsrlimit=3`
-    const res = await fetch(url, { headers: { 'User-Agent': 'CriadorSite/1.0 (contact@criadorsite.com.br)' } })
+    const res = await fetch(url, { headers: { 'User-Agent': 'BethelMarketing/1.0' } })
     if (res.ok) {
       const data = await res.json()
       const pages = data.query?.pages

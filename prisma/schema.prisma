@@ -52,7 +52,7 @@ model Site {
 
   // Serviços
   servico1Nome     String
-  servico1Desc     String
+  servico1Desc     String?
   servico2Nome     String?
   servico2Desc     String?
   servico3Nome     String?
@@ -62,6 +62,10 @@ model Site {
 
   // Público
   dorPrincipal String
+
+  // Hero
+  headline    String?
+  subheadline String?
 
   // Credibilidade
   anosNoMercado  Int

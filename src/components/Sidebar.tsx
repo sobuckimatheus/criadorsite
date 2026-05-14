@@ -19,7 +19,7 @@ export function Sidebar({ userName, userEmail, isAdmin }: Props) {
   return (
     <aside className="w-56 bg-white border-r border-gray-200 flex flex-col min-h-screen flex-shrink-0">
       <div className="px-5 py-5 border-b border-gray-100">
-        <span className="text-lg font-bold text-gray-900">CriadorSite</span>
+        <span className="text-lg font-bold text-gray-900">Bethel Marketing</span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">

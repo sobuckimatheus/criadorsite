@@ -107,7 +107,7 @@ export async function generateSite(siteId: string): Promise<Result> {
   await prisma.site.update({ where: { id: siteId }, data: { status: 'GENERATING' } })
 
   try {
-    const html = await generateSiteHTML({ ...site, depoimentos: site.depoimentos })
+    const html = await generateSiteHTML({ ...site, servico1Desc: site.servico1Desc ?? undefined, depoimentos: site.depoimentos })
 
     await prisma.site.update({
       where: { id: siteId },

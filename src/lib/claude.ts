@@ -13,7 +13,7 @@ type SiteData = {
   corPaleta: string
   logoUrl?: string | null
   servico1Nome: string
-  servico1Desc: string
+  servico1Desc?: string
   servico2Nome?: string | null
   servico2Desc?: string | null
   servico3Nome?: string | null
@@ -33,6 +33,8 @@ type SiteData = {
   whatsappMensagem: string
   instagram?: string | null
   horarioAtendimento: string
+  headline?: string | null
+  subheadline?: string | null
 }
 
 function hexToHsl(hex: string): [number, number, number] {
@@ -94,7 +96,7 @@ export async function generateSiteHTML(data: SiteData): Promise<string> {
   const paleta = getPaleta(data.corPaleta)
 
   const services = [
-    `• ${data.servico1Nome}: ${data.servico1Desc}`,
+    `• ${data.servico1Nome}${data.servico1Desc ? `: ${data.servico1Desc}` : ''}`,
     data.servico2Nome ? `• ${data.servico2Nome}: ${data.servico2Desc}` : null,
     data.servico3Nome ? `• ${data.servico3Nome}: ${data.servico3Desc}` : null,
   ]
@@ -161,7 +163,7 @@ ${data.logoUrl ? `- Logo: ${data.logoUrl}` : ''}
 
 ESTRUTURA OBRIGATÓRIA (nesta ordem):
 1. <header> — nome do negócio, menu âncora (Serviços, Sobre, Espaço, Contato)${data.logoUrl ? ', logo' : ''}
-2. <section id="hero"> — headline impactante baseada na dor+resultado, subheadline, botão WhatsApp CTA grande
+2. <section id="hero"> — ${data.headline ? `use EXATAMENTE esta headline: "${data.headline}"` : 'headline impactante baseada na dor+resultado'}${data.subheadline ? ` e EXATAMENTE esta subheadline: "${data.subheadline}"` : ', subheadline'}, botão WhatsApp CTA grande
 3. <section id="servicos"> — cards dos serviços com ícone emoji, título e descrição
 4. <section id="sobre"> — números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}${data.fotoProfissionalUrl ? `, foto do profissional em destaque com object-fit:cover border-radius:12px` : ''}
 5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — galeria com as fotos do negócio em grid responsivo (use as URLs exatas fornecidas com object-fit:cover, aspect-ratio:4/3, border-radius:12px)` : '<!-- sem galeria de fotos -->'}
