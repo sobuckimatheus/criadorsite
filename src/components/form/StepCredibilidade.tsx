@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Plus, Trash2, Upload, Loader2, X, ImageIcon, User } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { type FormData } from '@/types'
@@ -62,6 +61,46 @@ function FotoUpload({
       }
       <span className="text-xs text-gray-400 text-center px-1 leading-tight">
         {uploading ? 'Enviando...' : label}
+      </span>
+      <input type="file" accept="image/*" className="hidden" onChange={handleChange} disabled={uploading} />
+    </label>
+  )
+}
+
+function DepoimentoUpload({ index, onRemove }: { index: number; onRemove: () => void }) {
+  const { watch, setValue } = useFormContext<FormData>()
+  const [uploading, setUploading] = useState(false)
+  const url = watch(`depoimentos.${index}.imagemUrl`)
+
+  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const uploaded = await uploadFoto(file)
+    if (uploaded) setValue(`depoimentos.${index}.imagemUrl`, uploaded)
+    setUploading(false)
+  }
+
+  if (url) {
+    return (
+      <div className="relative group rounded-lg overflow-hidden border border-gray-200 aspect-square bg-gray-50">
+        <img src={url} alt={`Depoimento ${index + 1}`} className="w-full h-full object-cover" />
+        <button type="button" onClick={onRemove}
+          className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <label className="flex flex-col items-center justify-center gap-1.5 cursor-pointer border-2 border-dashed border-gray-200 rounded-lg aspect-square bg-gray-50 hover:bg-gray-100 transition-colors">
+      {uploading
+        ? <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+        : <ImageIcon className="w-5 h-5 text-gray-300" />
+      }
+      <span className="text-xs text-gray-400 text-center px-1 leading-tight">
+        {uploading ? 'Enviando...' : `Print ${index + 1}`}
       </span>
       <input type="file" accept="image/*" className="hidden" onChange={handleChange} disabled={uploading} />
     </label>
@@ -148,14 +187,14 @@ export default function StepCredibilidade() {
 
       {/* Depoimentos */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <Label>Depoimentos (até 3)</Label>
-          {fields.length < 3 && (
+        <div className="flex items-center justify-between mb-1">
+          <Label>Depoimentos em imagem (até 5)</Label>
+          {fields.length < 5 && (
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => append({ nomeCliente: '', texto: '' })}
+              onClick={() => append({ imagemUrl: '' })}
               className="text-blue-600 hover:text-blue-700 h-auto py-0 px-0 text-xs"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -163,25 +202,20 @@ export default function StepCredibilidade() {
             </Button>
           )}
         </div>
+        <p className="text-xs text-gray-400 mb-3">Print de WhatsApp, Google, Instagram, etc. Serão exibidos em carrossel no site.</p>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-2">
           {fields.map((field, index) => (
-            <div key={field.id} className="border border-gray-200 rounded-lg p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-gray-500">Depoimento {index + 1}</span>
-                <button type="button" onClick={() => remove(index)} className="text-gray-400 hover:text-red-500">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <Input {...register(`depoimentos.${index}.nomeCliente`)} placeholder="Nome do cliente" />
-              <Textarea {...register(`depoimentos.${index}.texto`)} rows={2} placeholder="O que o cliente disse sobre você..." />
-            </div>
+            <DepoimentoUpload
+              key={field.id}
+              index={index}
+              onRemove={() => remove(index)}
+            />
           ))}
-
           {fields.length === 0 && (
-            <p className="text-xs text-gray-400 text-center py-3 border border-dashed border-gray-200 rounded-lg">
+            <div className="col-span-3 text-xs text-gray-400 text-center py-4 border border-dashed border-gray-200 rounded-lg">
               Clique em &quot;Adicionar&quot; para incluir depoimentos
-            </p>
+            </div>
           )}
         </div>
       </div>

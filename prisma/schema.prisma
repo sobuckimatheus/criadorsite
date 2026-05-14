@@ -96,11 +96,10 @@ model Site {
 }
 
 model Depoimento {
-  id          String @id @default(uuid())
-  siteId      String
-  site        Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  nomeCliente String
-  texto       String
+  id        String @id @default(uuid())
+  siteId    String
+  site      Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  imagemUrl String
 
   @@map("depoimentos")
 }

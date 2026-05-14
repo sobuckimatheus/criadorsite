@@ -27,7 +27,7 @@ type SiteData = {
   foto2Url?: string | null
   foto3Url?: string | null
   fotoProfissionalUrl?: string | null
-  depoimentos: { nomeCliente: string; texto: string }[]
+  depoimentos: { imagemUrl: string }[]
   whatsapp: string
   whatsappMensagem: string
   instagram?: string | null
@@ -100,12 +100,7 @@ export async function generateSiteHTML(data: SiteData): Promise<string> {
     .filter(Boolean)
     .join('\n')
 
-  const depoimentosList =
-    data.depoimentos.length > 0
-      ? data.depoimentos
-          .map((d) => `• "${d.texto}" — ${d.nomeCliente}`)
-          .join('\n')
-      : 'Nenhum depoimento fornecido'
+  const depoimentosImagens = data.depoimentos.map(d => d.imagemUrl)
 
   const whatsappNum = data.whatsapp.replace(/\D/g, '')
   const whatsappLink = `https://wa.me/55${whatsappNum}?text=${encodeURIComponent(data.whatsappMensagem)}`
@@ -148,8 +143,8 @@ ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0
   ? [data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).map((url, i) => `- Foto ${i + 1}: ${url}`).join('\n')
   : '- Nenhuma foto fornecida'}
 
-DEPOIMENTOS:
-${depoimentosList}
+${depoimentosImagens.length > 0 ? `DEPOIMENTOS (imagens — use as URLs exatamente):
+${depoimentosImagens.map((url, i) => `• Depoimento ${i + 1}: ${url}`).join('\n')}` : ''}
 
 CONTATO:
 - WhatsApp: ${data.whatsapp} | Link: ${whatsappLink}
@@ -170,7 +165,7 @@ ESTRUTURA OBRIGATÓRIA (nesta ordem):
 3. <section id="servicos"> — cards dos serviços com ícone emoji, título e descrição
 4. <section id="sobre"> — números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}${data.fotoProfissionalUrl ? `, foto do profissional em destaque com object-fit:cover border-radius:12px` : ''}
 5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — galeria com as fotos do negócio em grid responsivo (use as URLs exatas fornecidas com object-fit:cover, aspect-ratio:4/3, border-radius:12px)` : '<!-- sem galeria de fotos -->'}
-6. ${data.depoimentos.length > 0 ? '<section id="depoimentos"> — cards de depoimentos com nome e texto' : '<!-- sem depoimentos -->'}
+6. ${depoimentosImagens.length > 0 ? `<section id="depoimentos"> — carrossel de imagens de depoimentos. Use as ${depoimentosImagens.length} URLs fornecidas como <img> com object-fit:contain, max-height:320px, border-radius:12px, background:#fff. Adicione setas de navegação prev/next e indicadores de pontos com JavaScript inline. Carrossel responsivo e touch-friendly.` : '<!-- sem depoimentos -->'}
 7. <section id="cta"> — seção CTA final com botão WhatsApp
 8. <footer> — dados de contato, horário, Instagram (se houver), copyright
 

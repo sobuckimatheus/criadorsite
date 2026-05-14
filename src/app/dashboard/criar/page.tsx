@@ -51,8 +51,7 @@ export default async function CriarPage({
         foto3Url: site.foto3Url ?? undefined,
         fotoProfissionalUrl: site.fotoProfissionalUrl ?? undefined,
         depoimentos: site.depoimentos.map((d) => ({
-          nomeCliente: d.nomeCliente,
-          texto: d.texto,
+          imagemUrl: d.imagemUrl,
         })),
         whatsapp: site.whatsapp,
         whatsappMensagem: site.whatsappMensagem,

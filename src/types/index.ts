@@ -36,8 +36,7 @@ export const step4Schema = z.object({
   depoimentos: z
     .array(
       z.object({
-        nomeCliente: z.string().min(2, 'Nome obrigatório'),
-        texto: z.string().min(10, 'Depoimento obrigatório'),
+        imagemUrl: z.string().min(1, 'Imagem obrigatória'),
       })
     )
     .default([]),
