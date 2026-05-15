@@ -155,7 +155,17 @@ ${data.logoUrl ? `- Logo: ${data.logoUrl}` : ''}
 
 ESTRUTURA OBRIGATÓRIA (nesta ordem):
 1. <header> — nome do negócio, menu âncora (Serviços, Sobre, Espaço, Contato)${data.logoUrl ? ', logo' : ''}
-2. <section id="hero"> — ${data.heroFotoUrl ? `PRIMEIRO elemento da seção: imagem de destaque <img src="${data.heroFotoUrl}"> com width:100%, max-height:480px, object-fit:cover, border-radius:12px, margin-bottom:32px. DEPOIS da imagem vem a headline.` : 'A headline deve ser o PRIMEIRO elemento visível da seção, sem nada acima dela.'} ${data.headline ? `Use EXATAMENTE esta headline: "${data.headline}"` : 'Headline impactante baseada na dor+resultado'}${data.subheadline ? `. Use EXATAMENTE esta subheadline: "${data.subheadline}"` : ', subheadline abaixo'}. Botão WhatsApp CTA grande. PROIBIDO colocar qualquer texto, badge ou emoji acima da foto (se houver) ou acima da headline (se não houver foto).
+2. <section id="hero"> — ${data.heroFotoUrl
+  ? `LAYOUT COM FOTO — implemente com CSS responsivo:
+  MOBILE (padrão, sem @media): section#hero { position:relative; min-height:100svh; overflow:hidden; padding:0; display:flex; align-items:flex-end }
+  A foto ocupa TODO o bloco no mobile: .hero-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top center }
+  O texto fica sobre a foto na metade inferior: .hero-content { position:relative; z-index:2; width:100%; padding:40px 24px 48px; background:linear-gradient(transparent,rgba(0,0,0,0.75) 35%); color:#fff }
+  DESKTOP (@media(min-width:768px)): section#hero { display:flex; align-items:center; gap:48px; padding:80px 48px; min-height:auto; background:var(--color-light) }
+  A foto fica vertical ao lado do texto: .hero-img { position:static; width:340px; height:520px; flex-shrink:0; object-fit:cover; object-position:top center; border-radius:16px }
+  O texto fica ao lado: .hero-content { position:static; background:none; color:var(--color-dark); flex:1; padding:0 }
+  Headline e subheadline no .hero-content com cor adequada para cada breakpoint. URL da foto: ${data.heroFotoUrl}`
+  : 'A headline deve ser o PRIMEIRO elemento visível da seção, sem nada acima dela.'}
+  ${data.headline ? `Use EXATAMENTE esta headline: "${data.headline}"` : 'Headline impactante baseada na dor+resultado'}${data.subheadline ? `. Use EXATAMENTE esta subheadline: "${data.subheadline}"` : ', subheadline abaixo'}. Botão WhatsApp CTA grande. PROIBIDO colocar qualquer texto, badge ou emoji acima da foto ou acima da headline.
 3. <section id="servicos"> — título e subtítulo da seção CENTRALIZADOS (text-align:center), cards dos serviços com ícone emoji, título e descrição, ícones dos cards também CENTRALIZADOS
 4. <section id="sobre"> — título e subtítulo CENTRALIZADOS, números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}${data.fotoProfissionalUrl ? `, foto do profissional em destaque com object-fit:cover; object-position:top center; border-radius:12px` : ''}
 5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — título e subtítulo CENTRALIZADOS, galeria com as fotos do negócio em grid responsivo (use as URLs exatas fornecidas com object-fit:cover, aspect-ratio:4/3, border-radius:12px)` : '<!-- sem galeria de fotos -->'}
