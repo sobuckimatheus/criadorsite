@@ -75,8 +75,8 @@ export default function StepHero() {
         <Label>Foto de destaque do hero</Label>
         <p className="text-xs text-gray-400 mb-2 mt-0.5">Aparecerá em primeiro, acima da headline. Use uma imagem impactante do negócio ou do profissional.</p>
         {heroFotoUrl ? (
-          <div className="relative group rounded-xl overflow-hidden border border-gray-200 aspect-video bg-gray-50">
-            <img src={heroFotoUrl} alt="Hero" className="w-full h-full object-cover" />
+          <div className="relative group rounded-xl overflow-hidden border border-gray-200 bg-gray-50 mx-auto" style={{ aspectRatio: '9/16', maxWidth: '220px' }}>
+            <img src={heroFotoUrl} alt="Hero" className="w-full h-full object-cover object-top" />
             <button
               type="button"
               onClick={() => setValue('heroFotoUrl', undefined)}
@@ -86,7 +86,7 @@ export default function StepHero() {
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center gap-2 cursor-pointer border-2 border-dashed border-gray-200 rounded-xl aspect-video bg-gray-50 hover:bg-gray-100 transition-colors">
+          <label className="flex flex-col items-center justify-center gap-2 cursor-pointer border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors mx-auto" style={{ aspectRatio: '9/16', maxWidth: '220px' }}>
             {uploading
               ? <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
               : <ImageIcon className="w-6 h-6 text-gray-300" />
