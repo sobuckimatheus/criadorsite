@@ -28,7 +28,7 @@ Gere UMA headline e UMA subheadline para a seção hero do site com base nesses 
 
 REGRAS:
 - Headline: máx 8 palavras, foca no resultado ou dor transformada, impactante, sem clichês como "bem-vindo"
-- Subheadline: 1-2 frases curtas, complementa a headline, pode mencionar localização ou credencial, convida a agir
+- Subheadline: 1-2 frases curtas, complementa emocionalmente a headline, fala de benefício ou confiança de forma geral — NUNCA mencione cidade, estado, serviço específico ou nome do negócio
 
 Responda APENAS com JSON válido neste formato exato, sem nenhum texto extra:
 {"headline": "...", "subheadline": "..."}`,

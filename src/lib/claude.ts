@@ -155,12 +155,14 @@ ${data.logoUrl ? `- Logo: ${data.logoUrl}` : ''}
 ESTRUTURA OBRIGATÓRIA (nesta ordem):
 1. <header> — nome do negócio, menu âncora (Serviços, Sobre, Espaço, Contato)${data.logoUrl ? ', logo' : ''}
 2. <section id="hero"> — ${data.headline ? `use EXATAMENTE esta headline: "${data.headline}"` : 'headline impactante baseada na dor+resultado'}${data.subheadline ? ` e EXATAMENTE esta subheadline: "${data.subheadline}"` : ', subheadline'}, botão WhatsApp CTA grande
-3. <section id="servicos"> — cards dos serviços com ícone emoji, título e descrição
-4. <section id="sobre"> — números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}${data.fotoProfissionalUrl ? `, foto do profissional em destaque com object-fit:cover border-radius:12px` : ''}
-5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — galeria com as fotos do negócio em grid responsivo (use as URLs exatas fornecidas com object-fit:cover, aspect-ratio:4/3, border-radius:12px)` : '<!-- sem galeria de fotos -->'}
-6. ${depoimentosImagens.length > 0 ? `<section id="depoimentos"> — carrossel de imagens de depoimentos. Use as ${depoimentosImagens.length} URLs fornecidas como <img> com object-fit:contain, max-height:320px, border-radius:12px, background:#fff. Adicione setas de navegação prev/next e indicadores de pontos com JavaScript inline. Carrossel responsivo e touch-friendly.` : '<!-- sem depoimentos -->'}
-7. <section id="cta"> — seção CTA final com botão WhatsApp
+3. <section id="servicos"> — título e subtítulo da seção CENTRALIZADOS (text-align:center), cards dos serviços com ícone emoji, título e descrição, ícones dos cards também CENTRALIZADOS
+4. <section id="sobre"> — título e subtítulo CENTRALIZADOS, números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}${data.fotoProfissionalUrl ? `, foto do profissional em destaque com object-fit:cover border-radius:12px` : ''}
+5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — título e subtítulo CENTRALIZADOS, galeria com as fotos do negócio em grid responsivo (use as URLs exatas fornecidas com object-fit:cover, aspect-ratio:4/3, border-radius:12px)` : '<!-- sem galeria de fotos -->'}
+6. ${depoimentosImagens.length > 0 ? `<section id="depoimentos"> — título e subtítulo CENTRALIZADOS, carrossel de imagens de depoimentos. Use as ${depoimentosImagens.length} URLs fornecidas como <img> com object-fit:contain, max-height:320px, border-radius:12px, background:#fff. Adicione setas de navegação prev/next e indicadores de pontos com JavaScript inline. Carrossel responsivo e touch-friendly.` : '<!-- sem depoimentos -->'}
+7. <section id="cta"> — título e subtítulo CENTRALIZADOS, botão WhatsApp CTA CENTRALIZADO
 8. <footer> — dados de contato, horário, Instagram (se houver), copyright. IMPORTANTE: o footer deve ter padding-top mínimo de 48px para não ficar colado no botão da seção CTA acima
+
+REGRA GLOBAL DE LAYOUT: TODOS os títulos (h2, h3) e subtítulos de seção devem ter text-align:center. Exceção apenas para textos de parágrafos internos de cards ou listas.
 
 REQUISITOS TÉCNICOS:
 - Mobile-first responsivo (breakpoint principal: 768px)

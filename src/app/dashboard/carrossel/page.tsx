@@ -648,28 +648,36 @@ export default function CarrosselPage() {
                   <span className="text-2xl">🔥</span>
                 </div>
 
-                {/* Slide preview */}
-                <div ref={slideRef}>
-                  {renderSlide(carrossel.slides[slideAtivo], slideAtivo)}
+                {/* Slide preview com setas sobrepostas */}
+                <div className="relative">
+                  <div ref={slideRef}>
+                    {renderSlide(carrossel.slides[slideAtivo], slideAtivo)}
+                  </div>
+                  {/* Seta anterior */}
+                  <button
+                    onClick={() => setSlideAtivo(Math.max(0, slideAtivo - 1))}
+                    disabled={slideAtivo === 0}
+                    data-html2canvas-ignore="true"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-md text-gray-700 flex items-center justify-center hover:bg-white disabled:opacity-0 transition-all z-10 text-lg">
+                    ‹
+                  </button>
+                  {/* Seta próximo */}
+                  <button
+                    onClick={() => setSlideAtivo(Math.min(carrossel.slides.length - 1, slideAtivo + 1))}
+                    disabled={slideAtivo === carrossel.slides.length - 1}
+                    data-html2canvas-ignore="true"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-md text-gray-700 flex items-center justify-center hover:bg-white disabled:opacity-0 transition-all z-10 text-lg">
+                    ›
+                  </button>
                 </div>
 
-                {/* Controles de navegação */}
-                <div className="flex items-center justify-between">
-                  <button onClick={() => setSlideAtivo(Math.max(0, slideAtivo - 1))} disabled={slideAtivo === 0}
-                    className="px-4 py-2 rounded-lg text-sm text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-30 transition-colors">
-                    ← Anterior
-                  </button>
-                  <div className="flex gap-1.5">
-                    {(carrossel.slides ?? []).map((_, i) => (
-                      <button key={i} onClick={() => setSlideAtivo(i)}
-                        className="rounded-full transition-all"
-                        style={{ width: i === slideAtivo ? '20px' : '8px', height: '8px', background: i === slideAtivo ? 'linear-gradient(135deg,#a855f7,#ec4899)' : '#e5e7eb' }} />
-                    ))}
-                  </div>
-                  <button onClick={() => setSlideAtivo(Math.min(carrossel.slides.length - 1, slideAtivo + 1))} disabled={slideAtivo === carrossel.slides.length - 1}
-                    className="px-4 py-2 rounded-lg text-sm text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-30 transition-colors">
-                    Próximo →
-                  </button>
+                {/* Indicadores de pontos */}
+                <div className="flex justify-center gap-1.5">
+                  {(carrossel.slides ?? []).map((_, i) => (
+                    <button key={i} onClick={() => setSlideAtivo(i)}
+                      className="rounded-full transition-all"
+                      style={{ width: i === slideAtivo ? '20px' : '8px', height: '8px', background: i === slideAtivo ? 'linear-gradient(135deg,#a855f7,#ec4899)' : '#e5e7eb' }} />
+                  ))}
                 </div>
 
                 {/* Ações do slide */}
