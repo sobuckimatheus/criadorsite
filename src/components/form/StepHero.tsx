@@ -2,17 +2,36 @@
 
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-import { Wand2, Loader2 } from 'lucide-react'
+import { Wand2, Loader2, X, ImageIcon } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { type FormData } from '@/types'
 
+async function uploadFoto(file: File): Promise<string | null> {
+  const fd = new FormData()
+  fd.append('file', file)
+  const res = await fetch('/api/upload', { method: 'POST', body: fd })
+  const data = await res.json()
+  return data.url ?? null
+}
+
 export default function StepHero() {
   const { register, watch, setValue } = useFormContext<FormData>()
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
 
   const formData = watch()
+  const heroFotoUrl = watch('heroFotoUrl')
+
+  async function handleFoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const url = await uploadFoto(file)
+    if (url) setValue('heroFotoUrl', url)
+    setUploading(false)
+  }
 
   async function gerarSugestao() {
     setLoading(true)
@@ -47,10 +66,38 @@ export default function StepHero() {
       <div className="bg-violet-50 border border-violet-200 rounded-xl p-4">
         <p className="text-sm text-violet-700 font-medium mb-1">Headline e Subheadline do site</p>
         <p className="text-xs text-violet-600 leading-relaxed">
-          Clique em &quot;Gerar com IA&quot; para ver exatamente o que a IA colocaria no topo do seu site — e edite à vontade antes de gerar.
+          Adicione uma foto de destaque para aparecer acima da headline no topo do site, depois edite ou gere o texto com IA.
         </p>
       </div>
 
+      {/* Foto do hero */}
+      <div>
+        <Label>Foto de destaque do hero</Label>
+        <p className="text-xs text-gray-400 mb-2 mt-0.5">Aparecerá em primeiro, acima da headline. Use uma imagem impactante do negócio ou do profissional.</p>
+        {heroFotoUrl ? (
+          <div className="relative group rounded-xl overflow-hidden border border-gray-200 aspect-video bg-gray-50">
+            <img src={heroFotoUrl} alt="Hero" className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={() => setValue('heroFotoUrl', undefined)}
+              className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center justify-center gap-2 cursor-pointer border-2 border-dashed border-gray-200 rounded-xl aspect-video bg-gray-50 hover:bg-gray-100 transition-colors">
+            {uploading
+              ? <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+              : <ImageIcon className="w-6 h-6 text-gray-300" />
+            }
+            <span className="text-sm text-gray-400">{uploading ? 'Enviando...' : 'Clique para adicionar foto'}</span>
+            <input type="file" accept="image/*" className="hidden" onChange={handleFoto} disabled={uploading} />
+          </label>
+        )}
+      </div>
+
+      {/* Botão IA */}
       <button
         type="button"
         onClick={gerarSugestao}
@@ -83,7 +130,7 @@ export default function StepHero() {
           {...register('subheadline')}
           className="mt-1.5"
           rows={3}
-          placeholder="Ex: Atendimento especializado em São Paulo. Mais de 500 clientes recuperaram sua qualidade de vida."
+          placeholder="Ex: Sua autoconfiança de volta no espelho. Procedimentos feitos com técnica e cuidado para quem quer resultados reais."
         />
       </div>
     </div>

@@ -59,6 +59,7 @@ model Site {
   dorPrincipal String
 
   // Hero
+  heroFotoUrl String?
   headline    String?
   subheadline String?
 
