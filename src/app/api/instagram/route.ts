@@ -15,7 +15,7 @@ async function safeFetch(url: string, options: RequestInit) {
     const res = await fetch(url, options)
     if (!res.ok) return null
     const data = await res.json()
-    if (data.status === false || data.error || data.message) return null
+    if (data.status === false || data.error === true) return null
     return data
   } catch {
     return null
@@ -50,12 +50,19 @@ export async function POST(req: NextRequest) {
 
   const user = profileData.data?.user ?? profileData.data ?? profileData.user ?? profileData
 
-  // Extract highlights
-  const rawHighlights: { title?: string; cover_media?: { thumbnail_src?: string }; media_count?: number }[] =
+  // Extract highlights — try every known response shape
+  type RawHighlight = { title?: string; cover_media?: { thumbnail_src?: string }; media_count?: number }
+  const rawHighlights: RawHighlight[] =
     highlightsData?.data?.highlights ??
     highlightsData?.highlights ??
-    highlightsData?.data ??
+    highlightsData?.data?.user?.edge_highlight_reels?.edges?.map((e: { node: RawHighlight }) => e.node) ??
+    highlightsData?.data?.edge_highlight_reels?.edges?.map((e: { node: RawHighlight }) => e.node) ??
+    (Array.isArray(highlightsData?.data) ? highlightsData.data : null) ??
+    (Array.isArray(highlightsData?.response) ? highlightsData.response : null) ??
     []
+
+  console.log('[instagram] highlightsData keys:', highlightsData ? Object.keys(highlightsData) : 'null')
+  console.log('[instagram] rawHighlights count:', rawHighlights.length)
 
   const highlights = Array.isArray(rawHighlights)
     ? rawHighlights.map((h) => ({
