@@ -122,6 +122,7 @@ export default function CarrosselPage() {
   const dragRef = useRef<{ slideIdx: number; startX: number; startY: number; startPosX: number; startPosY: number; containerW: number; containerH: number } | null>(null)
   const [error, setError] = useState('')
   const slideRef = useRef<HTMLDivElement>(null)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     function onMove(e: MouseEvent) {
@@ -371,6 +372,24 @@ export default function CarrosselPage() {
     setTimeout(() => setCopiado(false), 2000)
   }
 
+  function handleUploadImagem(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const url = ev.target?.result as string
+      if (!url) return
+      setCarrossel(prev => {
+        if (!prev) return prev
+        const slides = [...prev.slides]
+        slides[slideAtivo] = { ...slides[slideAtivo], imageUrl: url, imageType: 'pexels', imagePosition: { x: 50, y: 50 } }
+        return { ...prev, slides }
+      })
+    }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
   function renderSlide(slide: Slide, idx: number) {
     const t = THEMES[estilo]
     const isThread = estilo === 'thread'
@@ -432,7 +451,10 @@ export default function CarrosselPage() {
                   pointerEvents: 'none',
                 }}
               />
-              <button data-html2canvas-ignore="true" onMouseDown={e => e.stopPropagation()} onClick={procurarImagem} style={{ position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>✏️</button>
+              <div data-html2canvas-ignore="true" onMouseDown={e => e.stopPropagation()} style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4, zIndex: 5 }}>
+                <button onClick={() => uploadInputRef.current?.click()} style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📤</button>
+                <button onClick={procurarImagem} style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🔍</button>
+              </div>
             </div>
           )}
         </div>
@@ -507,9 +529,13 @@ export default function CarrosselPage() {
             </div>
           </div>
 
-          {/* Botão trocar imagem */}
-          <button data-html2canvas-ignore="true" onMouseDown={e => e.stopPropagation()} onClick={procurarImagem}
-            style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>🖼️</button>
+          {/* Botões topo-direito: buscar + upload */}
+          <div data-html2canvas-ignore="true" style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 6, zIndex: 10 }} onMouseDown={e => e.stopPropagation()}>
+            <button onClick={() => uploadInputRef.current?.click()}
+              style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📤</button>
+            <button onClick={procurarImagem}
+              style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🔍</button>
+          </div>
         </div>
       )
     }
@@ -741,14 +767,19 @@ export default function CarrosselPage() {
 
                 {/* Ações do slide */}
                 <>
-                    <div className="grid grid-cols-2 gap-2">
+                    <input ref={uploadInputRef} type="file" accept="image/*" className="hidden" onChange={handleUploadImagem} />
+                    <div className="grid grid-cols-3 gap-2">
                       <button onClick={procurarImagem} disabled={gerandoImagem || gerandoTodas}
                         className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                        {gerandoImagem ? '⏳ Buscando...' : '🔍 Procurar Imagem'}
+                        {gerandoImagem ? '⏳' : '🔍'} {gerandoImagem ? 'Buscando...' : 'Buscar foto'}
+                      </button>
+                      <button onClick={() => uploadInputRef.current?.click()}
+                        className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 transition-all flex items-center justify-center gap-2">
+                        📤 Subir foto
                       </button>
                       <button onClick={exportarSlide} disabled={exportando}
                         className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                        {exportando ? '⏳ Exportando...' : '⬇️ Baixar PNG'}
+                        {exportando ? '⏳' : '⬇️'} {exportando ? 'Exportando...' : 'Baixar PNG'}
                       </button>
                     </div>
                     <button onClick={gerarTodasImagensIA} disabled={gerandoTodas || gerandoImagem}
