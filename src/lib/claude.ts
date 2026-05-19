@@ -174,7 +174,7 @@ ESTRUTURA OBRIGATÓRIA (nesta ordem):
 8. <footer> — dados de contato, horário, Instagram (se houver), copyright. IMPORTANTE: o footer deve ter padding-top mínimo de 48px para não ficar colado no botão da seção CTA acima
 
 REGRA GLOBAL DE LAYOUT: TODOS os títulos (h2, h3) e subtítulos de seção devem ter text-align:center. Exceção apenas para textos de parágrafos internos de cards ou listas.
-REGRA GLOBAL DE BOTÕES: NUNCA coloque emojis dentro de botões CTA (hero, seções, footer). Os botões devem conter apenas texto limpo, ex: "Quero Agendar Minha Avaliação" — sem 💬, sem ✅, sem nenhum emoji.
+REGRA GLOBAL DE BOTÕES: NUNCA coloque emojis dentro de botões CTA (hero, seções, footer). Os botões devem conter apenas texto limpo, ex: "Quero Agendar Minha Avaliação" — sem 💬, sem ✅, sem nenhum emoji. Todos os botões CTA devem estar CENTRALIZADOS em todas as telas: use display:block; margin:0 auto; text-align:center ou coloque em container com display:flex; justify-content:center.
 
 REQUISITOS TÉCNICOS:
 - Mobile-first responsivo (breakpoint principal: 768px)
