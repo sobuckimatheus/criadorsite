@@ -439,7 +439,7 @@ export default function CarrosselPage() {
       )
     }
 
-    // ── VIRAL (copy acima, imagem abaixo com overlay escuro) ────────────
+    // ── VIRAL (foto fundo completo + texto sobreposto na metade inferior) ──
     if (estilo === 'viral') {
       const ACCENT = '#00CFFF'
       const imgSrc = slide.imageUrl
@@ -452,56 +452,64 @@ export default function CarrosselPage() {
       const tL2 = palavras.slice(corte).join(' ')
 
       return (
-        <div style={{
-          background: '#0d0d0d', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
-          display: 'flex', flexDirection: 'column', overflow: 'hidden',
-          fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.8)',
-        }}>
-          {/* Seção de texto (topo) */}
-          <div style={{ position: 'relative', flex: '0 0 58%', display: 'flex', flexDirection: 'column', padding: '20px 24px 16px', background: '#0d0d0d' }}>
-            <div style={{ color: '#ffffff', fontSize: 50, fontWeight: 900, lineHeight: 1, flexShrink: 0, opacity: 0.92 }}>
-              {idx + 1}
+        <div
+          onMouseDown={e => handleImgMouseDown(e, idx)}
+          style={{
+            position: 'relative', borderRadius: '16px', width: '100%', aspectRatio: '4/5',
+            overflow: 'hidden', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.8)',
+            background: '#111', cursor: isDragging ? 'grabbing' : 'grab',
+          }}>
+
+          {/* Foto de fundo cobrindo tudo */}
+          {imgSrc ? (
+            <img src={imgSrc} alt="" crossOrigin="anonymous" style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: `${slide.imagePosition?.x ?? 50}% ${slide.imagePosition?.y ?? 50}%`,
+              display: 'block', pointerEvents: 'none',
+            }} />
+          ) : (
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)' }} />
+          )}
+
+          {/* Gradiente: topo escuro para número, baixo escuro para texto */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.05) 35%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.82) 75%, rgba(0,0,0,0.95) 100%)',
+          }} />
+
+          {/* Número no topo */}
+          <div style={{ position: 'absolute', top: 20, left: 24, color: '#fff', fontSize: 44, fontWeight: 900, lineHeight: 1, opacity: 0.9, pointerEvents: 'none' }}>
+            {idx + 1}
+          </div>
+
+          {/* Texto na metade inferior */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 24px 20px', zIndex: 2, pointerEvents: 'none' }}>
+            <div style={{ marginBottom: 10 }}>
+              {tL1 && <span style={{ display: 'block', color: '#ffffff', fontSize: slide.headlineSize ?? 24, fontWeight: 900, lineHeight: 1.15, letterSpacing: '0.02em' }}>{tL1}</span>}
+              {tL2 && <span style={{ display: 'block', color: ACCENT, fontSize: slide.headlineSize ?? 24, fontWeight: 900, lineHeight: 1.15, letterSpacing: '0.02em' }}>{tL2}</span>}
             </div>
-            <div style={{ flex: 1 }} />
-            <div style={{ marginBottom: 14, flexShrink: 0 }}>
-              {tL1 && <span style={{ display: 'block', color: '#ffffff', fontSize: slide.headlineSize ?? 26, fontWeight: 900, lineHeight: 1.15, letterSpacing: '0.02em' }}>{tL1}</span>}
-              {tL2 && <span style={{ display: 'block', color: ACCENT, fontSize: slide.headlineSize ?? 26, fontWeight: 900, lineHeight: 1.15, letterSpacing: '0.02em' }}>{tL2}</span>}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               {linhas.map((linha, i) => (
-                <p key={i} style={{ color: 'rgba(255,255,255,0.8)', fontSize: slide.fontSize ?? 13, lineHeight: 1.65, margin: 0, fontWeight: 400 }}
+                <p key={i} style={{ color: 'rgba(255,255,255,0.85)', fontSize: slide.fontSize ?? 12, lineHeight: 1.6, margin: 0, fontWeight: 400 }}
                   dangerouslySetInnerHTML={{ __html: linha.replace(/\*\*(.*?)\*\*/g, `<strong style="color:${ACCENT};font-weight:700">$1</strong>`) }}
                 />
               ))}
             </div>
-            {/* Lápis copy */}
-            <button data-html2canvas-ignore="true" onClick={startEdit} style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>✏️</button>
-          </div>
-
-          {/* Seção de imagem (baixo) */}
-          <div
-            onMouseDown={e => handleImgMouseDown(e, idx)}
-            style={{ position: 'relative', flex: '0 0 42%', overflow: 'hidden', cursor: isDragging ? 'grabbing' : 'grab' }}>
-            {imgSrc ? (
-              <img src={imgSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: `${slide.imagePosition?.x ?? 50}% ${slide.imagePosition?.y ?? 50}%`, display: 'block', pointerEvents: 'none' }} />
-            ) : (
-              <div style={{ position: 'absolute', inset: 0, background: '#1a1a1a' }} />
-            )}
-            {/* Overlay escuro */}
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(13,13,13,0.6) 0%,transparent 35%,rgba(0,0,0,0.3) 100%)', zIndex: 1, pointerEvents: 'none' }} />
             {/* Rodapé */}
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '10px 24px', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', pointerEvents: 'none' }}>
-              <span style={{ color: 'rgba(255,255,255,0.38)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{nome || nicho}</span>
+            <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{nome || nicho}</span>
               <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                 {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
-                  <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? ACCENT : 'rgba(255,255,255,0.2)' }} />
+                  <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? ACCENT : 'rgba(255,255,255,0.3)' }} />
                 ))}
               </div>
             </div>
-            {/* Lápis imagem */}
-            <button data-html2canvas-ignore="true" onMouseDown={e => e.stopPropagation()} onClick={procurarImagem} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>✏️</button>
           </div>
+
+          {/* Botão trocar imagem */}
+          <button data-html2canvas-ignore="true" onMouseDown={e => e.stopPropagation()} onClick={procurarImagem}
+            style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>🖼️</button>
         </div>
       )
     }
