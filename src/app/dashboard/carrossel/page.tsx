@@ -680,32 +680,23 @@ export default function CarrosselPage() {
                   ))}
                 </div>
 
-                {/* Ações do slide */}
-                <>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button onClick={procurarImagem} disabled={gerandoImagem || gerandoTodas}
-                        className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                        {gerandoImagem ? '⏳ Buscando...' : '🔍 Procurar Imagem'}
-                      </button>
-                      <button onClick={exportarSlide} disabled={exportando}
-                        className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                        {exportando ? '⏳ Exportando...' : '⬇️ Baixar PNG'}
-                      </button>
-                    </div>
-                    <button onClick={gerarTodasImagensIA} disabled={gerandoTodas || gerandoImagem}
-                      className="w-full py-3 rounded-xl text-sm font-semibold border-2 border-violet-400 text-violet-700 bg-violet-50 hover:bg-violet-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                      {gerandoTodas && progressoIA
-                        ? `⏳ Buscando imagens... ${progressoIA.atual} / ${progressoIA.total}`
-                        : `🔍 Buscar imagens para todos os slides${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} sem foto)` : ''}`}
-                    </button>
-                  </>
+                {/* Botão editar texto — sempre visível */}
+                {!editingSlide && (
+                  <button
+                    type="button"
+                    onClick={startEdit}
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold border-2 border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 transition-all flex items-center justify-center gap-2"
+                  >
+                    ✏️ Editar texto do slide {slideAtivo + 1}
+                  </button>
+                )}
 
-                {/* Painel de edição */}
+                {/* Painel de edição — aparece logo abaixo do slide */}
                 {editingSlide && (
                   <div className="bg-white border border-purple-200 rounded-xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Editar Slide {slideAtivo + 1}</p>
-                      <button onClick={() => setEditingSlide(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+                      <button type="button" onClick={() => setEditingSlide(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
                     </div>
                     {estilo === 'viral' && (
                       <div>
@@ -734,11 +725,31 @@ export default function CarrosselPage() {
                         className="w-full accent-purple-600" />
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={saveEdit} className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">Salvar</button>
-                      <button onClick={() => setEditingSlide(false)} className="px-4 py-2 rounded-lg text-sm text-gray-500 border border-gray-200 hover:bg-gray-50">Cancelar</button>
+                      <button type="button" onClick={saveEdit} className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">Salvar</button>
+                      <button type="button" onClick={() => setEditingSlide(false)} className="px-4 py-2 rounded-lg text-sm text-gray-500 border border-gray-200 hover:bg-gray-50">Cancelar</button>
                     </div>
                   </div>
                 )}
+
+                {/* Ações do slide */}
+                <>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button onClick={procurarImagem} disabled={gerandoImagem || gerandoTodas}
+                        className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                        {gerandoImagem ? '⏳ Buscando...' : '🔍 Procurar Imagem'}
+                      </button>
+                      <button onClick={exportarSlide} disabled={exportando}
+                        className="py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                        {exportando ? '⏳ Exportando...' : '⬇️ Baixar PNG'}
+                      </button>
+                    </div>
+                    <button onClick={gerarTodasImagensIA} disabled={gerandoTodas || gerandoImagem}
+                      className="w-full py-3 rounded-xl text-sm font-semibold border-2 border-violet-400 text-violet-700 bg-violet-50 hover:bg-violet-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                      {gerandoTodas && progressoIA
+                        ? `⏳ Buscando imagens... ${progressoIA.atual} / ${progressoIA.total}`
+                        : `🔍 Buscar imagens para todos os slides${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} sem foto)` : ''}`}
+                    </button>
+                  </>
 
                 {/* Lista de slides */}
                 <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
