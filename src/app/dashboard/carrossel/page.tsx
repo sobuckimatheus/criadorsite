@@ -500,11 +500,6 @@ export default function CarrosselPage() {
             background: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.05) 35%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.82) 75%, rgba(0,0,0,0.95) 100%)',
           }} />
 
-          {/* Número no topo */}
-          <div style={{ position: 'absolute', top: 20, left: 24, color: '#fff', fontSize: 44, fontWeight: 900, lineHeight: 1, opacity: 0.9, pointerEvents: 'none' }}>
-            {idx + 1}
-          </div>
-
           {/* Texto na metade inferior */}
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 24px 20px', zIndex: 2, pointerEvents: 'none' }}>
             <div style={{ marginBottom: 10 }}>
