@@ -161,7 +161,7 @@ export async function publishSite(siteId: string): Promise<Result<{ url: string 
 
   if (!site.htmlGerado) return { success: false, error: 'Gere o site antes de publicar' }
 
-  const baseSlug = slugify(site.nomeNegocio, { lower: true, strict: true }) + '-bethel'
+  const baseSlug = slugify(site.nomeNegocio, { lower: true, strict: true })
   const slug = site.slug ?? (await ensureUniqueSlug(baseSlug, siteId))
 
   try {
