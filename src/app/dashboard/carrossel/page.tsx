@@ -105,6 +105,7 @@ export default function CarrosselPage() {
   const [tom, setTom] = useState('narrativo')
   const [tema, setTema] = useState('')
   const [nome, setNome] = useState('')
+  const [instagram, setInstagram] = useState('')
   const [estilo, setEstilo] = useState<ThemeId>('thread')
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState('')
@@ -394,7 +395,7 @@ export default function CarrosselPage() {
     const t = THEMES[estilo]
     const isThread = estilo === 'thread'
     const linhas = slide.texto.split(/\n\n|\n/).filter(Boolean)
-    const handle = (nome || nicho).toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')
+    const handle = instagram.replace('@', '').trim() || (nome || nicho).toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')
     const initial = (nome || nicho)[0]?.toUpperCase() ?? '?'
     const fontFamily = isThread
       ? '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif'
@@ -515,7 +516,7 @@ export default function CarrosselPage() {
             </div>
             {/* Rodapé */}
             <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{nome || nicho}</span>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' }}>@{handle}</span>
               <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                 {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
                   <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? ACCENT : 'rgba(255,255,255,0.3)' }} />
@@ -556,11 +557,22 @@ export default function CarrosselPage() {
           {/* Painel esquerdo */}
           <div className="lg:col-span-2 space-y-4">
 
-            <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Seu nome ou negócio</label>
-              <input value={nome} onChange={e => setNome(e.target.value)}
-                placeholder="Ex: Dr. Carlos • Clínica Smile"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm" />
+            <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Seu nome ou negócio</label>
+                <input value={nome} onChange={e => setNome(e.target.value)}
+                  placeholder="Ex: Dr. Carlos • Clínica Smile"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Usuário do Instagram</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm select-none">@</span>
+                  <input value={instagram.replace('@', '')} onChange={e => setInstagram(e.target.value.replace('@', ''))}
+                    placeholder="seuusuario"
+                    className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm" />
+                </div>
+              </div>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
