@@ -106,6 +106,8 @@ export default function CarrosselPage() {
   const [tema, setTema] = useState('')
   const [nome, setNome] = useState('')
   const [instagram, setInstagram] = useState('')
+  const [fotoPerfil, setFotoPerfil] = useState('')
+  const fotoPerfilInputRef = useRef<HTMLInputElement>(null)
   const [estilo, setEstilo] = useState<ThemeId>('thread')
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState('')
@@ -373,6 +375,15 @@ export default function CarrosselPage() {
     setTimeout(() => setCopiado(false), 2000)
   }
 
+  function handleUploadFotoPerfil(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => { if (ev.target?.result) setFotoPerfil(ev.target.result as string) }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
   function handleUploadImagem(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -415,8 +426,10 @@ export default function CarrosselPage() {
         }}>
           {/* Header */}
           <div style={{ padding: '20px 20px 0', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-            <div style={{ ...t.avatarStyle, width: 38, height: 38, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0, fontFamily: 'system-ui' }}>
-              {initial}
+            <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', ...(fotoPerfil ? {} : { ...t.avatarStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, fontFamily: 'system-ui' }) }}>
+              {fotoPerfil
+                ? <img src={fotoPerfil} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : initial}
             </div>
             <div>
               <p style={{ color: '#0f1419', fontWeight: 800, fontSize: 14, margin: 0, lineHeight: 1.2, fontFamily: 'system-ui' }}>{nome || nicho}</p>
@@ -516,7 +529,17 @@ export default function CarrosselPage() {
             </div>
             {/* Rodapé */}
             <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' }}>@{handle}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 22, height: 22, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: fotoPerfil ? 'transparent' : 'rgba(0,207,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {fotoPerfil
+                    ? <img src={fotoPerfil} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ color: ACCENT, fontSize: 9, fontWeight: 700 }}>{initial}</span>}
+                </div>
+                <div>
+                  {nome && <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: 600, margin: 0, lineHeight: 1.2 }}>{nome}</p>}
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 8, margin: 0, lineHeight: 1.2 }}>@{handle}</p>
+                </div>
+              </div>
               <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                 {Array.from({ length: carrossel?.slides.length ?? 1 }, (_, i) => (
                   <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? ACCENT : 'rgba(255,255,255,0.3)' }} />
@@ -558,19 +581,33 @@ export default function CarrosselPage() {
           <div className="lg:col-span-2 space-y-4">
 
             <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Seu nome ou negócio</label>
-                <input value={nome} onChange={e => setNome(e.target.value)}
-                  placeholder="Ex: Dr. Carlos • Clínica Smile"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Usuário do Instagram</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm select-none">@</span>
-                  <input value={instagram.replace('@', '')} onChange={e => setInstagram(e.target.value.replace('@', ''))}
-                    placeholder="seuusuario"
-                    className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm" />
+              {/* Foto de perfil + nome + @ */}
+              <div className="flex items-center gap-3">
+                <input ref={fotoPerfilInputRef} type="file" accept="image/*" className="hidden" onChange={handleUploadFotoPerfil} />
+                <button
+                  type="button"
+                  onClick={() => fotoPerfilInputRef.current?.click()}
+                  className="w-14 h-14 rounded-full flex-shrink-0 overflow-hidden border-2 border-dashed border-gray-300 hover:border-purple-400 transition-colors flex items-center justify-center bg-gray-50 relative group"
+                >
+                  {fotoPerfil
+                    ? <img src={fotoPerfil} alt="" className="w-full h-full object-cover" />
+                    : <span className="text-gray-300 text-2xl leading-none">+</span>}
+                  {fotoPerfil && (
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white text-xs font-medium">Trocar</span>
+                    </div>
+                  )}
+                </button>
+                <div className="flex-1 space-y-2">
+                  <input value={nome} onChange={e => setNome(e.target.value)}
+                    placeholder="Seu nome ou negócio"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm" />
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm select-none">@</span>
+                    <input value={instagram.replace('@', '')} onChange={e => setInstagram(e.target.value.replace('@', ''))}
+                      placeholder="seuusuario"
+                      className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300 text-sm" />
+                  </div>
                 </div>
               </div>
             </div>
