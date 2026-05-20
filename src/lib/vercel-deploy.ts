@@ -82,10 +82,11 @@ export async function deployToVercel(
         body: JSON.stringify({ name: domainName }),
       }
     )
+    const domainData = await domainRes.json()
     if (domainRes.ok || domainRes.status === 409) {
       customDomain = `https://${domainName}`
     } else {
-      console.warn('Aviso: domínio customizado não configurado', await domainRes.json())
+      console.error(`[vercel-deploy] ERRO ao adicionar domínio ${domainName} — status ${domainRes.status}:`, JSON.stringify(domainData))
     }
   }
 
