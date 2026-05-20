@@ -14,6 +14,7 @@ export async function deployToVercel(
   const teamId = process.env.VERCEL_TEAM_ID || undefined
   const mentorDomain = process.env.MENTOR_DOMAIN
     || (process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : undefined)
+  console.log('[vercel-deploy] mentorDomain:', mentorDomain, '| NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL, '| MENTOR_DOMAIN:', process.env.MENTOR_DOMAIN)
 
   const sha = crypto.createHash('sha1').update(htmlContent).digest('hex')
   const size = Buffer.byteLength(htmlContent, 'utf8')
