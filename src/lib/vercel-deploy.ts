@@ -12,7 +12,8 @@ export async function deployToVercel(
 ): Promise<DeployResult> {
   const token = process.env.VERCEL_TOKEN!
   const teamId = process.env.VERCEL_TEAM_ID || undefined
-  const mentorDomain = process.env.MENTOR_DOMAIN || undefined
+  const mentorDomain = process.env.MENTOR_DOMAIN
+    || (process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : undefined)
 
   const sha = crypto.createHash('sha1').update(htmlContent).digest('hex')
   const size = Buffer.byteLength(htmlContent, 'utf8')
