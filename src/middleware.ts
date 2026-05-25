@@ -2,6 +2,18 @@ import { createServerClient, type SetAllCookies } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Serve client sites via subdomain (e.g. clinic.bethelapps.com)
+  const hostname = request.headers.get('host') ?? ''
+  const appDomain = process.env.MENTOR_DOMAIN
+    || (process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : null)
+
+  if (appDomain && hostname.endsWith(`.${appDomain}`)) {
+    const slug = hostname.slice(0, hostname.length - appDomain.length - 1)
+    if (slug && slug !== 'www') {
+      return NextResponse.rewrite(new URL(`/s/${slug}`, request.url))
+    }
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { generateSiteHTML } from '@/lib/claude'
-import { deployToVercel, deleteVercelProject } from '@/lib/vercel-deploy'
+import { deleteVercelProject } from '@/lib/vercel-deploy'
 import { formSchema } from '@/types'
 import slugify from 'slugify'
 
@@ -163,32 +163,24 @@ export async function publishSite(siteId: string): Promise<Result<{ url: string 
 
   const baseSlug = slugify(site.nomeNegocio, { lower: true, strict: true })
   const slug = site.slug ?? (await ensureUniqueSlug(baseSlug, siteId))
+  const appDomain = process.env.MENTOR_DOMAIN
+    || (process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : null)
+  const subdomain = appDomain ? `https://${slug}.${appDomain}` : null
 
-  try {
-    const result = await deployToVercel(site.htmlGerado, slug)
+  await prisma.site.update({
+    where: { id: siteId },
+    data: {
+      status: 'PUBLISHED',
+      slug,
+      subdomain,
+    },
+  })
 
-    await prisma.site.update({
-      where: { id: siteId },
-      data: {
-        status: 'PUBLISHED',
-        slug,
-        vercelProjectId: result.projectId,
-        vercelUrl: result.deploymentUrl,
-        subdomain: result.customDomain,
-      },
-    })
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/preview')
+  revalidatePath('/admin')
 
-    revalidatePath('/dashboard')
-    revalidatePath('/dashboard/preview')
-    revalidatePath('/admin')
-
-    const publicUrl = result.customDomain ?? result.deploymentUrl
-    return { success: true, data: { url: publicUrl } }
-  } catch (e) {
-    console.error('publishSite error:', e)
-    await prisma.site.update({ where: { id: siteId }, data: { status: 'ERROR' } })
-    return { success: false, error: 'Erro ao publicar no Vercel' }
-  }
+  return { success: true, data: { url: subdomain ?? `/${slug}` } }
 }
 
 export async function resetSiteForTesting(siteId: string): Promise<void> {
