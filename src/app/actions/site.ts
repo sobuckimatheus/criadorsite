@@ -231,3 +231,31 @@ export async function removeSite(siteId: string): Promise<Result> {
   revalidatePath('/admin')
   return { success: true, data: undefined }
 }
+
+export async function saveRastreamento(siteId: string, data: {
+  metaPixelId?: string
+  metaPixelToken?: string
+  gtmId?: string
+}): Promise<Result> {
+  const user = await getAuthUser()
+  if (!user) return { success: false, error: 'Não autorizado' }
+
+  const site = await prisma.site.findUnique({ where: { id: siteId } })
+  if (!site) return { success: false, error: 'Site não encontrado' }
+
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
+  const isAdmin = dbUser?.role === 'ADMIN'
+  if (!isAdmin && site.userId !== user.id) return { success: false, error: 'Acesso negado' }
+
+  await prisma.site.update({
+    where: { id: siteId },
+    data: {
+      metaPixelId: data.metaPixelId || null,
+      metaPixelToken: data.metaPixelToken || null,
+      gtmId: data.gtmId || null,
+    },
+  })
+
+  revalidatePath('/dashboard/rastreamento')
+  return { success: true, data: undefined }
+}

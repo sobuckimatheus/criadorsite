@@ -81,6 +81,11 @@ model Site {
   instagram          String?
   horarioAtendimento String
 
+  // Rastreamento
+  metaPixelId    String?
+  metaPixelToken String?
+  gtmId          String?
+
   // Site gerado
   slug            String?    @unique
   subdomain       String?    @unique

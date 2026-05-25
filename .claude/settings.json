@@ -4,7 +4,22 @@
       "Bash(DIRECT_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" npx prisma migrate deploy)",
       "Bash(DIRECT_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" npx prisma db push)",
       "Bash(DIRECT_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" npx prisma db push --accept-data-loss)",
-      "Bash(DIRECT_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script)"
+      "Bash(DIRECT_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" DATABASE_URL=\"postgresql://postgres:Bethel8420r@@@@db.xknatuofnzgexxruqtam.supabase.co:5432/postgres\" npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite status)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite diff)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite add src/lib/claude.ts src/app/dashboard/carrossel/page.tsx src/app/api/site/sugerir-headline/route.ts)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite commit -m ' *)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite add src/lib/claude.ts)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite add src/app/actions/site.ts)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite add src/app/api/instagram/route.ts)",
+      "Bash(xargs ls)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite add prisma/schema.prisma src/types/index.ts src/components/form/StepHero.tsx src/lib/claude.ts src/app/dashboard/criar/page.tsx)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite add src/components/form/StepHero.tsx)",
+      "Bash(git -C /Users/macbookpro/Downloads/criadorsite add src/app/dashboard/carrossel/page.tsx)",
+      "Bash(mkdir -p /Users/macbookpro/Downloads/criadorsite/src/app/s/\\\\[slug\\\\])"
+    ],
+    "additionalDirectories": [
+      "/Users/macbookpro/Downloads/criadorsite/src/app/s"
     ]
   }
 }
