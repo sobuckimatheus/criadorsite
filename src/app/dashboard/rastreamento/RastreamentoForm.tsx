@@ -8,14 +8,12 @@ interface Props {
   siteId: string
   initialData: {
     metaPixelId: string
-    metaPixelToken: string
     gtmId: string
   }
 }
 
 export function RastreamentoForm({ siteId, initialData }: Props) {
   const [metaPixelId, setMetaPixelId] = useState(initialData.metaPixelId)
-  const [metaPixelToken, setMetaPixelToken] = useState(initialData.metaPixelToken)
   const [gtmId, setGtmId] = useState(initialData.gtmId)
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -25,7 +23,7 @@ export function RastreamentoForm({ siteId, initialData }: Props) {
     setLoading(true)
     setError('')
     setSaved(false)
-    const result = await saveRastreamento(siteId, { metaPixelId, metaPixelToken, gtmId })
+    const result = await saveRastreamento(siteId, { metaPixelId, gtmId })
     if (result.success) {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
@@ -58,17 +56,6 @@ export function RastreamentoForm({ siteId, initialData }: Props) {
               value={metaPixelId}
               onChange={e => setMetaPixelId(e.target.value)}
               placeholder="Ex: 1234567890123456"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
-              Token de Acesso <span className="text-gray-400 font-normal normal-case">(opcional — para Conversions API)</span>
-            </label>
-            <input
-              value={metaPixelToken}
-              onChange={e => setMetaPixelToken(e.target.value)}
-              placeholder="EAAxxxxxxxxxxxxxxx..."
               className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>

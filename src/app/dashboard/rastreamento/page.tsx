@@ -22,7 +22,7 @@ export default async function RastreamentoPage({
   if (siteId) {
     const site = await prisma.site.findUnique({
       where: { id: siteId },
-      select: { id: true, nomeNegocio: true, subdomain: true, metaPixelId: true, metaPixelToken: true, gtmId: true, userId: true },
+      select: { id: true, nomeNegocio: true, subdomain: true, metaPixelId: true, gtmId: true, userId: true },
     })
 
     if (!site || (!isAdmin && site.userId !== user.id)) redirect('/dashboard/rastreamento')
@@ -53,7 +53,6 @@ export default async function RastreamentoPage({
             siteId={site.id}
             initialData={{
               metaPixelId: site.metaPixelId ?? '',
-              metaPixelToken: site.metaPixelToken ?? '',
               gtmId: site.gtmId ?? '',
             }}
           />
