@@ -155,7 +155,7 @@ IDENTIDADE VISUAL:
 ${data.logoUrl ? `- Logo: ${data.logoUrl}` : ''}
 
 ESTRUTURA OBRIGATÓRIA (nesta ordem):
-1. <header> — ${data.logoUrl ? 'APENAS a logo (sem texto do nome da empresa ao lado, a logo já representa a marca)' : 'nome do negócio'}, menu âncora (Serviços, Sobre, Espaço, Contato)
+1. <header> — ${data.logoUrl ? `SOMENTE a logo <img src="${data.logoUrl}" alt="${data.nomeNegocio}"> com height:48px. É TERMINANTEMENTE PROIBIDO colocar o nome "${data.nomeNegocio}" em texto ao lado ou perto da logo — a logo substitui completamente o nome. Não adicione nenhum <span>, <p> ou texto com o nome da empresa no header.` : `nome do negócio em texto`}, menu âncora (Serviços, Sobre, Espaço, Contato)
 2. <section id="hero"> — ${data.heroFotoUrl
   ? `LAYOUT COM FOTO — implemente com CSS responsivo:
   MOBILE (padrão, sem @media): section#hero { position:relative; min-height:100svh; overflow:hidden; padding:0; display:flex; align-items:flex-end }
