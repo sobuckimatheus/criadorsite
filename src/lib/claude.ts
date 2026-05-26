@@ -161,7 +161,18 @@ IDENTIDADE VISUAL:
 ${data.logoUrl ? `- Logo: ${data.logoUrl}` : ''}
 
 ESTRUTURA OBRIGATÓRIA (nesta ordem):
-1. <header> — ${data.logoUrl ? `SOMENTE a logo <img src="${data.logoUrl}" alt="${data.nomeNegocio}"> com height:48px. É TERMINANTEMENTE PROIBIDO colocar o nome "${data.nomeNegocio}" em texto ao lado ou perto da logo — a logo substitui completamente o nome. Não adicione nenhum <span>, <p> ou texto com o nome da empresa no header.` : `nome do negócio em texto`}, menu âncora (Serviços, Sobre, Espaço, Contato)
+1. <header> com esta estrutura EXATA:
+<header>
+  <div class="header-inner">
+    ${data.logoUrl
+      ? `<a href="#hero"><img src="${data.logoUrl}" alt="${data.nomeNegocio}" style="height:48px;width:auto;display:block"></a>`
+      : `<a href="#hero" class="brand-name">${data.nomeNegocio}</a>`
+    }
+    <nav><!-- links âncora: Serviços, Sobre, ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? 'Espaço, ' : ''}Contato --></nav>
+    <button class="menu-btn" aria-label="Menu">&#9776;</button>
+  </div>
+</header>
+O header deve conter EXATAMENTE os elementos acima — nenhum elemento a mais.
 2. <section id="hero"> — ${data.heroFotoUrl
   ? `LAYOUT COM FOTO — implemente com CSS responsivo:
   MOBILE (padrão, sem @media): section#hero { position:relative; min-height:100svh; overflow:hidden; padding:0; display:flex; align-items:flex-end }
@@ -173,7 +184,13 @@ ESTRUTURA OBRIGATÓRIA (nesta ordem):
   Headline e subheadline no .hero-content com cor adequada para cada breakpoint. URL da foto: ${data.heroFotoUrl}`
   : 'A headline deve ser o PRIMEIRO elemento visível da seção, sem nada acima dela. Todo o conteúdo do hero deve estar centralizado (text-align:center).'}
 
-  ${data.headline ? `Use EXATAMENTE esta headline: "${data.headline}"` : 'Headline impactante baseada na dor+resultado'}${data.subheadline ? `. Use EXATAMENTE esta subheadline: "${data.subheadline}"` : ', subheadline abaixo'}. Botão WhatsApp CTA grande com texto EXATO: "${data.ctaTexto || 'Entrar em contato agora'}" — use EXATAMENTE esse texto em TODOS os botões CTA do site (hero, seção CTA), sem alterar. O hero deve conter ABSOLUTAMENTE APENAS: headline, subheadline e botão CTA — NADA MAIS. É TERMINANTEMENTE PROIBIDO adicionar no hero qualquer badge, pill, chip, bullet point, ícone de credibilidade, tag de cidade, estatística (anos de experiência, número de clientes, localização) ou qualquer texto além da headline e subheadline. Esses elementos pertencem EXCLUSIVAMENTE à seção "sobre". PROIBIDO colocar qualquer texto, badge ou emoji acima da foto ou acima da headline.
+  O .hero-content deve conter EXATAMENTE esta estrutura HTML, sem adicionar nenhum outro elemento:
+  <div class="hero-content">
+    <h1>${data.headline || '[headline impactante baseada na dor+resultado do cliente]'}</h1>
+    <p class="hero-sub">${data.subheadline || '[subheadline complementar em 1-2 frases]'}</p>
+    <a href="${`https://wa.me/55${data.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(data.whatsappMensagem)}`}" class="btn-cta">${data.ctaTexto || 'Entrar em contato agora'}</a>
+  </div>
+  NENHUM outro elemento dentro de .hero-content além de h1, p.hero-sub e a.btn-cta.
 3. <section id="servicos"> — título e subtítulo da seção CENTRALIZADOS (text-align:center), cards dos serviços com ícone emoji, título e descrição, ícones dos cards também CENTRALIZADOS
 4. <section id="sobre"> — título CENTRALIZADO criativo e específico ao segmento (PROIBIDO usar frases genéricas como "Atendimento humanizado", "com resultados reais" ou similares — crie um título relevante ao nicho), números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}${data.fotoProfissionalUrl ? `, foto do profissional em destaque com object-fit:cover; object-position:top center; border-radius:12px` : ''}
 5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — título e subtítulo CENTRALIZADOS, galeria com as fotos do negócio. LAYOUT OBRIGATÓRIO: no mobile (padrão, sem @media) as fotos devem ficar em coluna única, cada uma ocupando 100% da largura (display:flex; flex-direction:column; gap:16px). No desktop (@media min-width:768px) pode usar grid de 2 ou 3 colunas. Cada foto: width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:12px. Use as URLs exatas fornecidas.` : '<!-- sem galeria de fotos -->'}
