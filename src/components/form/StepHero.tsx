@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Wand2, Loader2, X, ImageIcon } from 'lucide-react'
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { type FormData } from '@/types'
 
@@ -17,6 +18,7 @@ async function uploadFoto(file: File): Promise<string | null> {
 
 export default function StepHero() {
   const { register, watch, setValue } = useFormContext<FormData>()
+
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
@@ -132,6 +134,17 @@ export default function StepHero() {
           rows={3}
           placeholder="Ex: Sua autoconfiança de volta no espelho. Procedimentos feitos com técnica e cuidado para quem quer resultados reais."
         />
+      </div>
+
+      <div>
+        <Label htmlFor="ctaTexto">Texto do botão CTA</Label>
+        <Input
+          id="ctaTexto"
+          {...register('ctaTexto')}
+          className="mt-1.5"
+          placeholder="Ex: Entrar em contato agora"
+        />
+        <p className="text-xs text-gray-400 mt-1">Deixe em branco para usar "Entrar em contato agora"</p>
       </div>
     </div>
   )

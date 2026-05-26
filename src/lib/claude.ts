@@ -31,6 +31,7 @@ type SiteData = {
   heroFotoUrl?: string | null
   headline?: string | null
   subheadline?: string | null
+  ctaTexto?: string | null
   siteUrl?: string | null
 }
 
@@ -167,7 +168,7 @@ ESTRUTURA OBRIGATÓRIA (nesta ordem):
   Headline e subheadline no .hero-content com cor adequada para cada breakpoint. URL da foto: ${data.heroFotoUrl}`
   : 'A headline deve ser o PRIMEIRO elemento visível da seção, sem nada acima dela. Todo o conteúdo do hero deve estar centralizado (text-align:center).'}
 
-  ${data.headline ? `Use EXATAMENTE esta headline: "${data.headline}"` : 'Headline impactante baseada na dor+resultado'}${data.subheadline ? `. Use EXATAMENTE esta subheadline: "${data.subheadline}"` : ', subheadline abaixo'}. Botão WhatsApp CTA grande com texto FIXO: "Entrar em contato agora" — use EXATAMENTE esse texto em TODOS os botões CTA do hero, em qualquer segmento ou nicho. O hero deve conter ABSOLUTAMENTE APENAS: headline, subheadline e botão CTA — NADA MAIS. É TERMINANTEMENTE PROIBIDO adicionar no hero qualquer badge, pill, chip, bullet point, ícone de credibilidade, tag de cidade, estatística (anos de experiência, número de clientes, localização) ou qualquer texto além da headline e subheadline. Esses elementos pertencem EXCLUSIVAMENTE à seção "sobre". PROIBIDO colocar qualquer texto, badge ou emoji acima da foto ou acima da headline.
+  ${data.headline ? `Use EXATAMENTE esta headline: "${data.headline}"` : 'Headline impactante baseada na dor+resultado'}${data.subheadline ? `. Use EXATAMENTE esta subheadline: "${data.subheadline}"` : ', subheadline abaixo'}. Botão WhatsApp CTA grande com texto EXATO: "${data.ctaTexto || 'Entrar em contato agora'}" — use EXATAMENTE esse texto em TODOS os botões CTA do site (hero, seção CTA), sem alterar. O hero deve conter ABSOLUTAMENTE APENAS: headline, subheadline e botão CTA — NADA MAIS. É TERMINANTEMENTE PROIBIDO adicionar no hero qualquer badge, pill, chip, bullet point, ícone de credibilidade, tag de cidade, estatística (anos de experiência, número de clientes, localização) ou qualquer texto além da headline e subheadline. Esses elementos pertencem EXCLUSIVAMENTE à seção "sobre". PROIBIDO colocar qualquer texto, badge ou emoji acima da foto ou acima da headline.
 3. <section id="servicos"> — título e subtítulo da seção CENTRALIZADOS (text-align:center), cards dos serviços com ícone emoji, título e descrição, ícones dos cards também CENTRALIZADOS
 4. <section id="sobre"> — título CENTRALIZADO criativo e específico ao segmento (PROIBIDO usar frases genéricas como "Atendimento humanizado", "com resultados reais" ou similares — crie um título relevante ao nicho), números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}${data.fotoProfissionalUrl ? `, foto do profissional em destaque com object-fit:cover; object-position:top center; border-radius:12px` : ''}
 5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — título e subtítulo CENTRALIZADOS, galeria com as fotos do negócio. LAYOUT OBRIGATÓRIO: no mobile (padrão, sem @media) as fotos devem ficar em coluna única, cada uma ocupando 100% da largura (display:flex; flex-direction:column; gap:16px). No desktop (@media min-width:768px) pode usar grid de 2 ou 3 colunas. Cada foto: width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:12px. Use as URLs exatas fornecidas.` : '<!-- sem galeria de fotos -->'}
@@ -176,7 +177,7 @@ ESTRUTURA OBRIGATÓRIA (nesta ordem):
 8. <footer> — dados de contato, horário, Instagram (se houver), copyright. IMPORTANTE: o footer deve ter padding-top mínimo de 48px para não ficar colado no botão da seção CTA acima
 
 REGRA GLOBAL DE LAYOUT: TODOS os títulos (h2, h3) e subtítulos de seção devem ter text-align:center. Exceção apenas para textos de parágrafos internos de cards ou listas. Cada seção deve ter um container interno com max-width:1100px; margin:0 auto; padding:0 24px para garantir que o conteúdo fique centralizado no desktop e não esticado até as bordas da tela.
-REGRA GLOBAL DE BOTÕES: NUNCA coloque emojis dentro de botões CTA (hero, seções, footer). Os botões devem conter apenas texto limpo, ex: "Quero Agendar Minha Avaliação" — sem 💬, sem ✅, sem nenhum emoji. Todos os botões CTA devem estar CENTRALIZADOS em todas as telas: use display:block; margin:0 auto; text-align:center ou coloque em container com display:flex; justify-content:center.
+REGRA GLOBAL DE BOTÕES: NUNCA coloque emojis dentro de botões CTA (hero, seções, footer). Os botões devem conter apenas texto limpo: "${data.ctaTexto || 'Entrar em contato agora'}" — sem 💬, sem ✅, sem nenhum emoji. Todos os botões CTA devem estar CENTRALIZADOS em todas as telas: use display:block; margin:0 auto; text-align:center ou coloque em container com display:flex; justify-content:center.
 
 REQUISITOS TÉCNICOS:
 - Mobile-first responsivo (breakpoint principal: 768px)

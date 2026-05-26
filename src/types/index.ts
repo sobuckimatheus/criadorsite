@@ -45,6 +45,7 @@ export const step5Schema = z.object({
   heroFotoUrl: z.string().optional(),
   headline: z.string().optional(),
   subheadline: z.string().optional(),
+  ctaTexto: z.string().optional(),
 })
 
 export const step6Schema = z.object({

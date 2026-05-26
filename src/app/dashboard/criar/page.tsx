@@ -46,6 +46,7 @@ export default async function CriarPage({
         heroFotoUrl: site.heroFotoUrl ?? undefined,
         headline: site.headline ?? undefined,
         subheadline: site.subheadline ?? undefined,
+        ctaTexto: site.ctaTexto ?? undefined,
         anosNoMercado: site.anosNoMercado,
         totalClientes: site.totalClientes ?? undefined,
         certificados: site.certificados ?? undefined,

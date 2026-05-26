@@ -62,6 +62,7 @@ model Site {
   heroFotoUrl String?
   headline    String?
   subheadline String?
+  ctaTexto    String?
 
   // Credibilidade
   anosNoMercado  Int
