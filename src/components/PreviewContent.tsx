@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useTransition } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -42,17 +42,7 @@ export function PreviewContent({
   const [isPendingPublish, startPublishTransition] = useTransition()
   const [copied, setCopied] = useState(false)
   const [viewport, setViewport] = useState<'desktop' | 'mobile'>('desktop')
-  const autoTriggered = useRef(false)
-
   const isGenerating = isPendingGenerate || serverStatus === 'GENERATING'
-
-  // Auto-trigger generation when arriving from form (DRAFT status)
-  useEffect(() => {
-    if (serverStatus !== 'DRAFT' || autoTriggered.current) return
-    autoTriggered.current = true
-    handleGenerate()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverStatus])
 
   // Poll every 3s while GENERATING (handles page reload during generation)
   useEffect(() => {
@@ -229,8 +219,14 @@ export function PreviewContent({
             />
           </div>
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-            <p className="text-gray-500">Preparando geração...</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-center px-4">
+            <Globe className="w-10 h-10 text-gray-600 mb-4" />
+            <p className="text-white font-medium text-lg mb-1">Pronto para gerar</p>
+            <p className="text-gray-400 text-sm mb-6">Clique no botão abaixo para criar seu site com IA</p>
+            <Button onClick={handleGenerate} disabled={!canRegenerate}>
+              <Globe />
+              Gerar site agora
+            </Button>
           </div>
         )}
       </div>

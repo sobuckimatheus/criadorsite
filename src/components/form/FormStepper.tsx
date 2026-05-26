@@ -51,7 +51,7 @@ export function FormStepper({ initialData, siteId }: { initialData: Partial<Form
       return
     }
 
-    toast.success('Dados salvos! Gerando seu site...')
+    toast.success('Dados salvos! Agora gere o site.')
     router.push(`/dashboard/preview?siteId=${result.data.id}`)
   }
 
@@ -129,7 +129,7 @@ export function FormStepper({ initialData, siteId }: { initialData: Partial<Form
             ) : (
               <Button type="submit" disabled={saving}>
                 {saving && <Loader2 className="animate-spin" />}
-                {saving ? 'Salvando...' : 'Salvar e gerar site'}
+                {saving ? 'Salvando...' : 'Salvar informações'}
               </Button>
             )}
           </div>
