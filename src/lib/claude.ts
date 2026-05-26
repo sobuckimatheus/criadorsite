@@ -198,7 +198,10 @@ O header deve conter EXATAMENTE os elementos acima — nenhum elemento a mais.
 7. <section id="cta"> — todo o conteúdo CENTRALIZADO (text-align:center; display:flex; flex-direction:column; align-items:center). Título e subtítulo centralizados. Botão WhatsApp CTA centralizado com display:block; margin:0 auto ou dentro de flex container. PROIBIDO alinhar à esquerda qualquer elemento desta seção. Use fundo claro (cor light da paleta ou branco) com texto escuro para garantir contraste. Ícones e textos devem ser 100% visíveis — NUNCA use ícone com cor similar ao fundo
 8. <footer> — dados de contato, horário, Instagram (se houver), copyright. IMPORTANTE: o footer deve ter padding-top mínimo de 48px para não ficar colado no botão da seção CTA acima
 
-REGRA GLOBAL DE LAYOUT: TODOS os títulos (h2, h3) e subtítulos de seção devem ter text-align:center. Exceção apenas para textos de parágrafos internos de cards ou listas. Cada seção deve ter um container interno com max-width:1100px; margin:0 auto; padding:0 24px para garantir que o conteúdo fique centralizado no desktop e não esticado até as bordas da tela.
+REGRA GLOBAL DE LAYOUT: Todo o conteúdo do site deve estar centralizado. Adicione obrigatoriamente no CSS global:
+section { text-align: center }
+section h1, section h2, section h3, section p, section span, section .badge, section .tag, section .label { text-align: center }
+Cada seção deve ter um container interno com max-width:1100px; margin:0 auto; padding:0 24px. Qualquer badge, tag ou label de seção (ex: "O QUE OFERECEMOS") deve ter display:inline-block; margin:0 auto 16px; — nunca alinhado à esquerda.
 REGRA GLOBAL DE BOTÕES: NUNCA coloque emojis dentro de botões CTA (hero, seções, footer). Os botões devem conter apenas texto limpo: "${data.ctaTexto || 'Entrar em contato agora'}" — sem 💬, sem ✅, sem nenhum emoji. Todos os botões CTA devem estar CENTRALIZADOS em todas as telas: use display:block; margin:0 auto; text-align:center ou coloque em container com display:flex; justify-content:center.
 
 REQUISITOS TÉCNICOS:
