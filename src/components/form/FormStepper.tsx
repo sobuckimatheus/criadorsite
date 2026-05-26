@@ -105,7 +105,7 @@ export function FormStepper({ initialData, siteId }: { initialData: Partial<Form
       </div>
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleSubmit)}>
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className="px-6 py-6">
             <CurrentStep />
           </div>
@@ -127,7 +127,7 @@ export function FormStepper({ initialData, siteId }: { initialData: Partial<Form
                 <ChevronRight />
               </Button>
             ) : (
-              <Button type="submit" disabled={saving}>
+              <Button type="button" onClick={() => methods.handleSubmit(handleSubmit)()} disabled={saving}>
                 {saving && <Loader2 className="animate-spin" />}
                 {saving ? 'Salvando...' : 'Salvar informações'}
               </Button>
