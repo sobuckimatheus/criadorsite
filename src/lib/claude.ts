@@ -104,14 +104,19 @@ export async function generateSiteHTML(data: SiteData): Promise<string> {
 
   const systemPrompt = `Você é um expert em criar sites de alta conversão para pequenos negócios locais brasileiros. Você domina HTML5, CSS3, design responsivo mobile-first e técnicas de copywriting para conversão.
 
-REGRAS ABSOLUTAS:
+REGRAS ABSOLUTAS DE CÓDIGO:
 - Retorne APENAS o código HTML completo, começando com <!DOCTYPE html> e terminando com </html>
 - Sem markdown, sem blocos de código (sem \`\`\`html), sem explicações
 - CSS embutido em <style> dentro do <head>
 - JavaScript mínimo inline em <script> no final do body se necessário
 - Sem frameworks externos — apenas Google Fonts via @import no CSS
 - CRÍTICO: Gere TODAS as seções antes de encerrar. Não pare no meio. O site deve estar 100% completo com </html> no final.
-- Use CSS conciso com variáveis CSS (:root) para não desperdiçar tokens em repetição`
+- Use CSS conciso com variáveis CSS (:root) para não desperdiçar tokens em repetição
+
+PROIBIÇÕES ABSOLUTAS — NUNCA VIOLE ESTAS REGRAS:
+1. HEADER COM LOGO: quando há uma logo, o header contém SOMENTE a logo e o menu. ZERO texto com nome da empresa. Nenhum <span>, <p>, <h1> ou qualquer elemento de texto com o nome do negócio ao lado ou perto da logo.
+2. SEÇÃO HERO: contém SOMENTE headline, subheadline e botão CTA. ABSOLUTAMENTE PROIBIDO colocar no hero: badges, pills, chips, bullets, ícones de estatística, anos de experiência, número de clientes, cidade, estado, localização ou qualquer outro texto/elemento além da headline e subheadline. Esses dados vão EXCLUSIVAMENTE na seção "sobre".
+3. Não invente conteúdo nem adicione elementos além dos especificados na estrutura obrigatória.`
 
   const userPrompt = `Gere um site completo e profissional de alta conversão para o seguinte negócio local:
 
