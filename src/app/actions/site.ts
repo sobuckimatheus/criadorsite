@@ -250,9 +250,9 @@ export async function saveRastreamento(siteId: string, data: {
   await prisma.site.update({
     where: { id: siteId },
     data: {
-      metaPixelId: data.metaPixelId || null,
-      metaPixelToken: data.metaPixelToken || null,
-      gtmId: data.gtmId || null,
+      metaPixelId: data.metaPixelId?.trim() || null,
+      metaPixelToken: data.metaPixelToken?.trim() || null,
+      gtmId: data.gtmId?.trim() || null,
     },
   })
 
