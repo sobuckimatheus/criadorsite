@@ -94,7 +94,7 @@ export async function generateSiteHTML(data: SiteData): Promise<string> {
   const paleta = getPaleta(data.corPaleta)
 
   const services = data.servicos
-    .map((s) => `• ${s.nome}${s.descricao ? `: ${s.descricao}` : ''}`)
+    .map((s) => `• ${s.nome}${s.descricao ? ` — DESCRIÇÃO EXATA (copie verbatim): "${s.descricao}"` : ''}`)
     .join('\n')
 
   const depoimentosImagens = data.depoimentos.map(d => d.imagemUrl)
@@ -191,7 +191,7 @@ O header deve conter EXATAMENTE os elementos acima — nenhum elemento a mais.
     <a href="${`https://wa.me/55${data.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(data.whatsappMensagem)}`}" class="btn-cta">${data.ctaTexto || 'Entrar em contato agora'}</a>
   </div>
   NENHUM outro elemento dentro de .hero-content além de h1, p.hero-sub e a.btn-cta.
-3. <section id="servicos"> — título e subtítulo da seção CENTRALIZADOS (text-align:center), cards dos serviços com ícone emoji, título e descrição, ícones dos cards também CENTRALIZADOS
+3. <section id="servicos"> — título e subtítulo da seção CENTRALIZADOS (text-align:center), cards dos serviços com ícone emoji, título e descrição. OBRIGATÓRIO: quando um serviço tiver descrição fornecida, copie o texto EXATAMENTE como está — é terminantemente proibido parafrasear, resumir, reescrever ou alterar a descrição de qualquer serviço. Ícones dos cards também CENTRALIZADOS
 4. <section id="sobre"> — título CENTRALIZADO criativo e específico ao segmento (PROIBIDO usar frases genéricas como "Atendimento humanizado", "com resultados reais" ou similares — crie um título relevante ao nicho), números destacados (${data.anosNoMercado} anos, ${data.totalClientes ? data.totalClientes + '+ clientes' : 'experiência'})${data.certificados ? ', certificações' : ''}${data.fotoProfissionalUrl ? `, foto do profissional em destaque com object-fit:cover; object-position:top center; border-radius:12px` : ''}
 5. ${[data.foto1Url, data.foto2Url, data.foto3Url].filter(Boolean).length > 0 ? `<section id="espaco"> — título e subtítulo CENTRALIZADOS, galeria com as fotos do negócio. LAYOUT OBRIGATÓRIO: no mobile (padrão, sem @media) as fotos devem ficar em coluna única, cada uma ocupando 100% da largura (display:flex; flex-direction:column; gap:16px). No desktop (@media min-width:768px) pode usar grid de 2 ou 3 colunas. Cada foto: width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:12px. Use as URLs exatas fornecidas.` : '<!-- sem galeria de fotos -->'}
 6. ${depoimentosImagens.length > 0 ? `<section id="depoimentos"> — título e subtítulo CENTRALIZADOS, carrossel de imagens de depoimentos. Use as ${depoimentosImagens.length} URLs fornecidas como <img> com max-width:100%; height:auto; display:block; margin:0 auto; border-radius:12px. NÃO use height ou max-height fixo — deixe a imagem mostrar em sua proporção natural sem espaços em branco. O carrossel deve ter um wrapper externo com position:relative; max-width:700px; margin:0 auto; padding:0 48px (para reservar espaço lateral às setas). As setas prev/next devem ser position:absolute; top:50%; transform:translateY(-50%) FORA da imagem, posicionadas no padding lateral: left:0 e right:0 com width:40px; height:40px. A imagem fica dentro de um container interno sem padding. Assim as setas ficam ao lado das fotos, nunca sobre elas. Adicione indicadores de pontos abaixo. Carrossel responsivo e touch-friendly.` : '<!-- sem depoimentos -->'}
