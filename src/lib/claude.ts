@@ -24,6 +24,7 @@ type SiteData = {
   foto3Url?: string | null
   fotoProfissionalUrl?: string | null
   depoimentos: { imagemUrl: string }[]
+  registros: { tipo: string; numero: string }[]
   whatsapp: string
   whatsappMensagem: string
   instagram?: string | null
@@ -149,6 +150,7 @@ ${depoimentosImagens.map((url, i) => `• Depoimento ${i + 1}: ${url}`).join('\n
 
 CONTATO:
 - WhatsApp: ${data.whatsapp} | Link: ${whatsappLink}
+${data.registros.length > 0 ? `- Registros profissionais: ${data.registros.map((r) => `${r.tipo} ${r.numero}`).join(' | ')}` : ''}
 - Mensagem padrão: ${data.whatsappMensagem}
 ${data.instagram ? `- Instagram: @${data.instagram.replace('@', '')}` : ''}
 - Horário: ${data.horarioAtendimento}
@@ -199,7 +201,7 @@ O header deve conter EXATAMENTE os elementos acima — nenhum elemento a mais.
    PARTE 1 (centralizada): badge, título h2, subtítulo p, e botão CTA — todos com text-align:center e o botão com display:inline-block ou display:block; margin:0 auto
    PARTE 2 (lista de contato): div separado com text-align:left, contendo os itens de endereço, horário e instagram, cada item com display:flex; align-items:center; gap:12px; margin-bottom:12px
    Use fundo claro (cor light da paleta ou branco) com texto escuro para garantir contraste
-8. <footer> — dados de contato, horário, Instagram (se houver), copyright. IMPORTANTE: o footer deve ter padding-top mínimo de 48px para não ficar colado no botão da seção CTA acima
+8. <footer> — dados de contato, horário, Instagram (se houver)${data.registros.length > 0 ? `, registros profissionais (${data.registros.map((r) => `${r.tipo} ${r.numero}`).join(', ')})` : ''}, copyright. IMPORTANTE: o footer deve ter padding-top mínimo de 48px para não ficar colado no botão da seção CTA acima
 
 REGRA GLOBAL DE LAYOUT: Todo o conteúdo do site deve estar centralizado. Adicione obrigatoriamente no CSS global:
 section { text-align: center }

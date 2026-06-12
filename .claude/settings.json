@@ -16,7 +16,11 @@
       "Bash(git -C /Users/macbookpro/Downloads/criadorsite add prisma/schema.prisma src/types/index.ts src/components/form/StepHero.tsx src/lib/claude.ts src/app/dashboard/criar/page.tsx)",
       "Bash(git -C /Users/macbookpro/Downloads/criadorsite add src/components/form/StepHero.tsx)",
       "Bash(git -C /Users/macbookpro/Downloads/criadorsite add src/app/dashboard/carrossel/page.tsx)",
-      "Bash(mkdir -p /Users/macbookpro/Downloads/criadorsite/src/app/s/\\\\[slug\\\\])"
+      "Bash(mkdir -p /Users/macbookpro/Downloads/criadorsite/src/app/s/\\\\[slug\\\\])",
+      "Bash(sed -n '53,60p' /Users/macbookpro/Downloads/criadorsite/src/components/form/StepServicos.tsx)",
+      "Bash(sed -n '218,226p' /Users/macbookpro/Downloads/criadorsite/src/components/form/StepIdentidade.tsx)",
+      "Bash(sed -n '45,55p' /Users/macbookpro/Downloads/criadorsite/src/components/form/StepCredibilidade.tsx)",
+      "Bash(sed -n '193,202p' /Users/macbookpro/Downloads/criadorsite/src/components/form/StepCredibilidade.tsx)"
     ],
     "additionalDirectories": [
       "/Users/macbookpro/Downloads/criadorsite/src/app/s"

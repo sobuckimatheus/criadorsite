@@ -18,7 +18,7 @@ export default async function CriarPage({
 
   const { siteId } = await searchParams
 
-  const include = { depoimentos: true, servicos: { orderBy: { ordem: 'asc' as const } } }
+  const include = { depoimentos: true, servicos: { orderBy: { ordem: 'asc' as const } }, registros: true }
 
   // Admin editing a specific site, or regular user's own site
   const site = siteId
@@ -59,6 +59,7 @@ export default async function CriarPage({
         whatsappMensagem: site.whatsappMensagem,
         instagram: site.instagram ?? undefined,
         horarioAtendimento: site.horarioAtendimento,
+        registros: site.registros.map((r) => ({ tipo: r.tipo, numero: r.numero })),
       }
     : null
 

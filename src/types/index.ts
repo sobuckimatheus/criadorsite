@@ -53,6 +53,10 @@ export const step6Schema = z.object({
   whatsappMensagem: z.string().min(10, 'Mensagem obrigatória'),
   instagram: z.string().optional(),
   horarioAtendimento: z.string().min(5, 'Horário obrigatório'),
+  registros: z.array(z.object({
+    tipo: z.string().min(1, 'Tipo obrigatório'),
+    numero: z.string().min(1, 'Número obrigatório'),
+  })).default([]),
 })
 
 export const formSchema = step1Schema

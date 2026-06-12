@@ -77,10 +77,11 @@ model Site {
   fotoProfissionalUrl String?
 
   // Contato
-  whatsapp           String
-  whatsappMensagem   String
-  instagram          String?
-  horarioAtendimento String
+  whatsapp              String
+  whatsappMensagem      String
+  instagram             String?
+  horarioAtendimento    String
+  registros             RegistroProfissional[]
 
   // Rastreamento
   metaPixelId    String?
@@ -120,4 +121,14 @@ model Depoimento {
   imagemUrl String
 
   @@map("depoimentos")
+}
+
+model RegistroProfissional {
+  id     String @id @default(uuid())
+  siteId String
+  site   Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  tipo   String
+  numero String
+
+  @@map("registros_profissionais")
 }
