@@ -65,9 +65,10 @@ model Site {
   ctaTexto    String?
 
   // Credibilidade
-  anosNoMercado  Int
-  totalClientes  Int?
-  certificados   String?
+  anosNoMercado       Int
+  totalClientes       Int?
+  totalClientesLabel  String?
+  certificados        String?
   depoimentos    Depoimento[]
 
   // Fotos

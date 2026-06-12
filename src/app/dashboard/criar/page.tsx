@@ -49,6 +49,7 @@ export default async function CriarPage({
         ctaTexto: site.ctaTexto ?? undefined,
         anosNoMercado: site.anosNoMercado,
         totalClientes: site.totalClientes ?? undefined,
+        totalClientesLabel: site.totalClientesLabel ?? undefined,
         certificados: site.certificados ?? undefined,
         foto1Url: site.foto1Url ?? undefined,
         foto2Url: site.foto2Url ?? undefined,

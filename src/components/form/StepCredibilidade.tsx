@@ -125,9 +125,20 @@ export default function StepCredibilidade() {
           {errors.anosNoMercado && <p className="text-xs text-red-500 mt-1">{errors.anosNoMercado.message}</p>}
         </div>
         <div>
-          <Label htmlFor="clientes">Clientes atendidos (aprox.)</Label>
-          <Input id="clientes" {...register('totalClientes')} type="number" min="0" className="mt-1.5" placeholder="Ex: 500" />
+          <Label htmlFor="clientes">Quantidade (opcional)</Label>
+          <Input id="clientes" {...register('totalClientes')} type="number" min="0" className="mt-1.5" placeholder="Ex: 6000" />
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="clientesLabel">O que representa esse número</Label>
+        <Input
+          id="clientesLabel"
+          {...register('totalClientesLabel')}
+          className="mt-1.5"
+          placeholder="Ex: casos revisados, pacientes atendidos, alunos formados"
+        />
+        <p className="text-xs text-gray-400 mt-1">Deixe em branco para usar "clientes atendidos"</p>
       </div>
 
       <div>
