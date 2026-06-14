@@ -20,7 +20,8 @@
       "Bash(sed -n '53,60p' /Users/macbookpro/Downloads/criadorsite/src/components/form/StepServicos.tsx)",
       "Bash(sed -n '218,226p' /Users/macbookpro/Downloads/criadorsite/src/components/form/StepIdentidade.tsx)",
       "Bash(sed -n '45,55p' /Users/macbookpro/Downloads/criadorsite/src/components/form/StepCredibilidade.tsx)",
-      "Bash(sed -n '193,202p' /Users/macbookpro/Downloads/criadorsite/src/components/form/StepCredibilidade.tsx)"
+      "Bash(sed -n '193,202p' /Users/macbookpro/Downloads/criadorsite/src/components/form/StepCredibilidade.tsx)",
+      "Bash(git rm *)"
     ],
     "additionalDirectories": [
       "/Users/macbookpro/Downloads/criadorsite/src/app/s"
