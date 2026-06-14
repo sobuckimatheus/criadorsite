@@ -30,9 +30,55 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sites     Site[]
+  sites          Site[]
+  contentProfile ContentProfile?
+  contentPieces  ContentPiece[]
 
   @@map("users")
+}
+
+model ContentProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  negocio        String
+  nicho          String
+  publico        String  @db.Text // quem é o cliente ideal
+  idadePublico   String? // faixa etária
+  essencia       String? @db.Text // essência/diferencial do profissional
+  transformacao  String? @db.Text // antes → depois que o negócio entrega
+  tomVoz         String? // próximo, técnico, provocador...
+  crencas        String? @db.Text // opiniões/crenças fortes do mentorado
+  objecoes       String? @db.Text // objeções comuns dos clientes
+  provas         String? @db.Text // casos, números, depoimentos
+  servicos       String? @db.Text // serviços/produtos/procedimentos
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("content_profiles")
+}
+
+model ContentPiece {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  funil     String // topo | meio | fundo
+  categoria String // conexao | educacional | viral | venda
+  formato   String // reels | carrossel | imagem
+  tema      String @db.Text
+  servico   String?
+
+  titulo   String
+  conteudo Json // roteiro estruturado (gancho, estrutura, legenda, cta, hashtags...)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("content_pieces")
 }
 
 model Site {
