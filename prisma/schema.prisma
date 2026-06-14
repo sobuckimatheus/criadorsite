@@ -31,6 +31,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   sites     Site[]
+  carrosseis Carrossel[]
 
   @@map("users")
 }
@@ -102,6 +103,34 @@ model Site {
   updatedAt DateTime @updatedAt
 
   @@map("sites")
+}
+
+model Carrossel {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Configuração usada na geração
+  titulo String
+  nicho  String
+  tipo   String // id da narrativa: origem, caso_sucesso, educativo...
+  tom    String // id do tom: narrativo, direto, emocional...
+  tema   String @db.Text
+  estilo String // tema visual: thread | viral
+
+  // Perfil exibido nos slides
+  nome       String?
+  instagram  String?
+  fotoPerfil String? @db.Text // data URL ou URL
+
+  // Conteúdo completo (slides, legenda, hashtags) como JSON
+  conteudo Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("carrosseis")
 }
 
 model Servico {

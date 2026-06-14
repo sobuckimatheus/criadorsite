@@ -1,6 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import {
+  saveCarrossel,
+  listCarrosseis,
+  getCarrossel,
+  deleteCarrossel,
+  type CarrosselPayload,
+  type CarrosselListItem,
+} from '@/app/actions/carrossel'
 
 interface Slide {
   texto: string
@@ -127,6 +135,89 @@ export default function CarrosselPage() {
   const slideRef = useRef<HTMLDivElement>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
 
+  // Persistência / histórico
+  const [carrosselId, setCarrosselId] = useState<string | null>(null)
+  const [salvando, setSalvando] = useState(false)
+  const [salvoEm, setSalvoEm] = useState<number | null>(null)
+  const [showHistorico, setShowHistorico] = useState(false)
+  const [historico, setHistorico] = useState<CarrosselListItem[]>([])
+  const [carregandoHistorico, setCarregandoHistorico] = useState(false)
+  const carrosselRef = useRef<Carrossel | null>(null)
+  const carrosselIdRef = useRef<string | null>(null)
+
+  useEffect(() => { carrosselRef.current = carrossel }, [carrossel])
+
+  // Salva (cria ou atualiza) o carrossel atual no banco
+  async function persistCarrossel(silent = false) {
+    const c = carrosselRef.current
+    if (!c) return
+    if (!silent) setSalvando(true)
+    try {
+      const payload: CarrosselPayload = {
+        id: carrosselIdRef.current ?? undefined,
+        titulo: c.titulo,
+        nicho, tipo, tom, tema, estilo,
+        nome, instagram, fotoPerfil,
+        conteudo: c as unknown as CarrosselPayload['conteudo'],
+      }
+      const res = await saveCarrossel(payload)
+      if (res.success) {
+        carrosselIdRef.current = res.data.id
+        setCarrosselId(res.data.id)
+        setSalvoEm(Date.now())
+      } else if (!silent) {
+        setError(res.error)
+      }
+    } finally {
+      if (!silent) setSalvando(false)
+    }
+  }
+
+  async function abrirHistorico() {
+    setShowHistorico(true)
+    setCarregandoHistorico(true)
+    try {
+      const res = await listCarrosseis()
+      if (res.success) setHistorico(res.data)
+    } finally {
+      setCarregandoHistorico(false)
+    }
+  }
+
+  async function carregarCarrossel(id: string) {
+    setCarregandoHistorico(true)
+    try {
+      const res = await getCarrossel(id)
+      if (!res.success) { alert(res.error); return }
+      const d = res.data as {
+        id: string; nicho: string; tipo: string; tom: string; tema: string
+        estilo: string; nome: string; instagram: string; fotoPerfil: string
+        conteudo: Carrossel
+      }
+      setNicho(d.nicho); setTipo(d.tipo); setTom(d.tom); setTema(d.tema)
+      setEstilo((d.estilo as ThemeId) || 'thread')
+      setNome(d.nome); setInstagram(d.instagram); setFotoPerfil(d.fotoPerfil)
+      setCarrossel(d.conteudo)
+      carrosselRef.current = d.conteudo
+      setCarrosselId(d.id)
+      carrosselIdRef.current = d.id
+      setSlideAtivo(0)
+      setShowHistorico(false)
+      setError('')
+    } finally {
+      setCarregandoHistorico(false)
+    }
+  }
+
+  async function excluirCarrossel(id: string, e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!confirm('Excluir este carrossel?')) return
+    const res = await deleteCarrossel(id)
+    if (!res.success) { alert(res.error); return }
+    setHistorico(prev => prev.filter(c => c.id !== id))
+    if (carrosselIdRef.current === id) { setCarrosselId(null); carrosselIdRef.current = null }
+  }
+
   useEffect(() => {
     function onMove(e: MouseEvent) {
       if (!dragRef.current) return
@@ -237,6 +328,7 @@ export default function CarrosselPage() {
 
     setGerandoTodas(false)
     setProgressoIA(null)
+    persistCarrossel(true)
   }
 
   // Gera automaticamente com Fal.ai Pro os slides do tema Viral que
@@ -283,6 +375,7 @@ export default function CarrosselPage() {
 
     setGerandoTodas(false)
     setProgressoIA(null)
+    persistCarrossel(true)
   }
 
   async function gerarCarrossel() {
@@ -291,6 +384,10 @@ export default function CarrosselPage() {
     setError('')
     setCarrossel(null)
     setSlideAtivo(0)
+    // Novo carrossel → novo registro (não sobrescreve o carregado do histórico)
+    setCarrosselId(null)
+    carrosselIdRef.current = null
+    setSalvoEm(null)
 
     const tipoObj = TIPOS_NARRATIVA.find(t => t.id === tipo)
     const tomObj = TONS.find(t => t.id === tom)
@@ -311,6 +408,9 @@ export default function CarrosselPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Erro ao gerar')
       setCarrossel(data.carrossel)
+      carrosselRef.current = data.carrossel
+      // Salva imediatamente para não perder o conteúdo gerado
+      persistCarrossel(true)
       if (estilo === 'viral') autoGerarViralImages(data.carrossel)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao gerar carrossel. Tente novamente.')
@@ -573,7 +673,45 @@ export default function CarrosselPage() {
             <h1 className="text-2xl font-bold text-gray-900">Criador de Carrossel Viral</h1>
             <p className="text-sm text-gray-500">Gere carrosséis que param o scroll — no estilo das maiores threads do Brasil</p>
           </div>
+          <button onClick={abrirHistorico}
+            className="ml-auto px-4 py-2 rounded-xl text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2">
+            📁 Meus carrosséis
+          </button>
         </div>
+
+        {/* Modal: histórico de carrosséis salvos */}
+        {showHistorico && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setShowHistorico(false)}>
+            <div className="bg-white rounded-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <p className="font-semibold text-gray-900">Meus carrosséis</p>
+                <button onClick={() => setShowHistorico(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+              </div>
+              <div className="p-3 overflow-y-auto">
+                {carregandoHistorico ? (
+                  <p className="text-center text-gray-400 text-sm py-8">Carregando...</p>
+                ) : historico.length === 0 ? (
+                  <p className="text-center text-gray-400 text-sm py-8">Nenhum carrossel salvo ainda.<br />Gere um e ele aparecerá aqui automaticamente.</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {historico.map(c => (
+                      <div key={c.id} onClick={() => carregarCarrossel(c.id)}
+                        className="w-full text-left px-3 py-2.5 rounded-lg border border-gray-100 hover:bg-purple-50 hover:border-purple-200 transition-colors cursor-pointer flex items-center gap-3 group">
+                        <span className="text-lg flex-shrink-0">{c.estilo === 'viral' ? '🔥' : '📄'}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-800 truncate">{c.titulo}</p>
+                          <p className="text-xs text-gray-400">{c.nicho} • {c.totalSlides} slides • {new Date(c.createdAt).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                        <button onClick={e => excluirCarrossel(c.id, e)}
+                          className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all flex-shrink-0 px-2 text-lg">🗑️</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
@@ -831,6 +969,14 @@ export default function CarrosselPage() {
                       {gerandoTodas && progressoIA
                         ? `⏳ Buscando imagens... ${progressoIA.atual} / ${progressoIA.total}`
                         : `🔍 Buscar imagens para todos os slides${carrossel ? ` (${carrossel.slides.filter(s => !s.imageUrl).length} sem foto)` : ''}`}
+                    </button>
+                    <button onClick={() => persistCarrossel(false)} disabled={salvando}
+                      className="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                      {salvando
+                        ? '⏳ Salvando...'
+                        : salvoEm
+                          ? '✅ Salvo — salvar alterações'
+                          : '💾 Salvar carrossel'}
                     </button>
                   </>
 
